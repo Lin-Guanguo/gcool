@@ -5,12 +5,15 @@ if(GCOOL_SOURCE_DIR STREQUAL GCOOL_BINARY_DIR)
 endif()
 
 project(GCOOL)
+add_compile_options("-Wall")
 
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Using LLVM version ${LLVM_VERSION}")
 
-set(CACHE GCOOL_INCLUDE_DIRS "${GCOOL_SOURCE_DIR}/include")
-set(CACHE GCOOL_INCLUDE_GEN_DIRS "${GCOOL_BINARY_DIR}/include")
+set(GCOOL_INCLUDE_DIR "${GCOOL_SOURCE_DIR}/include" 
+    CACHE FILEPATH "include dir")
+
+option(BUILD_SHARED_LIBS "Build shared libraries." OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${LLVM_CMAKE_DIR})
 list(APPEND CMAKE_MODULE_PATH "${GCOOL_SOURCE_DIR}/cmake/modules")
