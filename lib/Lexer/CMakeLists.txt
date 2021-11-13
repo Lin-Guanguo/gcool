@@ -4,6 +4,7 @@ add_gcool_library(Lexer
 
 target_include_directories(Lexer
     PUBLIC
+    ${GCOOL_INCLUDE_DIR}
     ${GCOOL_INCLUDE_DIR}/gcool/Lexer
     )
 
