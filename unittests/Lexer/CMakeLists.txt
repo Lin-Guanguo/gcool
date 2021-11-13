@@ -6,4 +6,5 @@ target_link_libraries(LexerTest
     PRIVATE
     GTestLib
     Lexer
+    Parser
     )
