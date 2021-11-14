@@ -35,13 +35,6 @@ target_link_libraries(GTestLib
     pthread
     )
 
-# LLVM Library, llvm target link to this target
-add_library(LLVMLib INTERFACE)
-target_include_directories(LLVMLib 
-    INTERFACE
-    ${LLVM_INCLUDE_DIRS}
-    )
-
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(unittests)
