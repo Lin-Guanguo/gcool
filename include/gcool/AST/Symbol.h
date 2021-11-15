@@ -26,11 +26,12 @@ private:
 public:
     SymbolTable() { }
     Symbol get(std::string_view literal);
-    Symbol get_Int() { return get("Int"); }
-    Symbol get_Float() { return get("Float"); }
-    Symbol get_Bool() { return get("Bool"); }
-    Symbol get_String() { return get("String"); }
-    Symbol get_Object() { return get("Object"); }
+    Symbol getInt() { return get("Int"); }
+    Symbol getFloat() { return get("Float"); }
+    Symbol getBool() { return get("Bool"); }
+    Symbol getString() { return get("String"); }
+    Symbol getObject() { return get("Object"); }
+    Symbol getHolder() { return get("Holder"); }
     ~SymbolTable();
 };
 

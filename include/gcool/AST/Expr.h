@@ -1,5 +1,4 @@
 #pragma once
-#include <optional>
 #include <string>
 #include <string_view>
 #include "llvm/Support/Casting.h"
@@ -9,21 +8,6 @@
 namespace gcool{
 namespace ast{
 
-struct CaseBranch;
-struct LetInit;
-using OptionalExpr = std::optional<Expr>;
-using CaseBranchList = std::vector<CaseBranch>;
-using LetInitList = std::vector<LetInit>;
-using ExprList = std::vector<Expr>;
-
-class ExprAllocator {
-private:
-    ExprList FreeList;
-public:
-    ExprAllocator() {}
-    Expr allocExpr(ExprBase* e);
-    ~ExprAllocator();
-};
 
 class ExprBase {
 public:
@@ -34,7 +18,7 @@ public:
 private:
     ExprKind __TheKind;
 protected:
-    ExprBase(ExprKind kind) : __TheKind(kind) { }
+    ExprBase(ExprKind kind) : __TheKind(kind) {}
 public:
     ExprKind getKind() const { return __TheKind; }
     bool operator==(const ExprBase& that) const;
@@ -43,7 +27,7 @@ public:
 template<typename T>
 class ExprFacility : public ExprBase {
 protected:
-    ExprFacility() : ExprBase(T::TheKind) { }
+    ExprFacility() : ExprBase(T::TheKind) {}
 public:
     static bool classof(const ExprBase* D) {
         return D->getKind() == T::TheKind;
@@ -58,7 +42,7 @@ public:
     static constexpr ExprKind TheKind = EK_INT;
     int Val;
 public:
-    ExprInt(int i) : Val(i) { }
+    ExprInt(int i) : Val(i) {}
     bool operator==(const ExprInt&) const = default;
 };
 
@@ -67,7 +51,7 @@ public:
     static constexpr ExprKind TheKind = EK_FLOAT;
     double Val;
 public:
-    ExprFloat(double f) : Val(f) { }
+    ExprFloat(double f) : Val(f) {}
     bool operator==(const ExprFloat&) const = default;
 };
 
@@ -76,7 +60,7 @@ public:
     static constexpr ExprKind TheKind = EK_BOOL;
     bool Val;
 public:
-    ExprBool(bool b) : Val(b) { }
+    ExprBool(bool b) : Val(b) {}
     bool operator==(const ExprBool&) const = default;
 };
 
@@ -85,7 +69,7 @@ public:
     static constexpr ExprKind TheKind = EK_STRING;
     std::string Val;
 public:
-    ExprString(std::string_view s) : Val(s) { }
+    ExprString(std::string_view s) : Val(s) {}
     bool operator==(const ExprString&) const = default;
 };
 
@@ -94,6 +78,7 @@ public:
     static constexpr ExprKind TheKind = EK_SYMBOL;
     Symbol TheSymbol;
 public:
+    ExprSymbol(Symbol s) : TheSymbol(s) {}
     bool operator==(const ExprSymbol&) const = default;
 };
 
@@ -103,6 +88,7 @@ public:
     Symbol Variable;
     Expr Value;
 public:
+    ExprAssign(Symbol variable, Expr value) : Variable(variable), Value(value) {}
     bool operator==(const ExprAssign&) const = default;
 };
 
@@ -113,6 +99,8 @@ public:
     Symbol Method;
     ExprList Args;
 public:
+    ExprDispatch(Expr callee, Symbol method, ExprList&& args) 
+        : Callee(callee), Method(method), Args(std::move(args)) {}
     bool operator==(const ExprDispatch&) const = default;
 };
 
@@ -120,10 +108,12 @@ class ExprStaticDispatch : public ExprFacility<ExprStaticDispatch> {
 public:
     static constexpr ExprKind TheKind = EK_STATIC_DISPATCH;
     Expr Callee;
-    Expr Type;
+    Symbol Type;
     Symbol Method;
     ExprList Args;
 public:
+    ExprStaticDispatch(Expr callee, Symbol type, Symbol method, ExprList&& args) 
+        : Callee(callee), Type(type), Method(method), Args(std::move(args)) {}
     bool operator==(const ExprStaticDispatch&) const = default;
 };
 
@@ -134,6 +124,8 @@ public:
     Expr ThenBranch;
     Expr ElseBranch;
 public:
+    ExprCond(Expr cond, Expr thenBranch, Expr elseBranch)
+        : Cond(cond), ThenBranch(thenBranch), ElseBranch(elseBranch) {}
     bool operator==(const ExprCond&) const = default;
 };
 
@@ -143,13 +135,18 @@ public:
     Expr Cond;
     Expr LoopBody;
 public:
+    ExprLoop(Expr cond, Expr loopBody)
+        : Cond(cond), LoopBody(loopBody) {}
     bool operator==(const ExprLoop&) const = default;
 };
 
 struct CaseBranch {
     Symbol Name;
     Symbol Type;
-    Expr e;
+    Expr Body;
+    CaseBranch(Symbol name, Symbol type, Expr body)
+        : Name(name), Type(type), Body(body) {}
+public:
     bool operator==(const CaseBranch&) const = default;
 };
 
@@ -159,6 +156,8 @@ public:
     Expr Cond;
     CaseBranchList Branchs;
 public:
+    ExprCase(Expr cond, CaseBranchList&& branchs)
+        : Cond(cond), Branchs(std::move(branchs)) {}
     bool operator==(const ExprCase&) const = default;
 };
 
@@ -167,6 +166,8 @@ public:
     static constexpr ExprKind TheKind = EK_BLOCK;
     ExprList Exprs;
 public:
+    ExprBlock(ExprList&& exprs)
+        : Exprs(std::move(exprs)) {}
     bool operator==(const ExprBlock&) const = default;
 };
 
@@ -174,6 +175,9 @@ struct LetInit {
     Symbol Name;
     Symbol Type;
     OptionalExpr InitVal;
+public:
+    LetInit(Symbol name, Symbol type, OptionalExpr initVal)
+        : Name(name), Type(type), InitVal(initVal) {}
     bool operator==(const LetInit&) const = default;
 };
 
@@ -183,6 +187,8 @@ public:
     LetInitList InitVariables;
     Expr LetBody;
 public:
+    ExprLet(LetInitList&& initVariables, Expr letBody)
+        : InitVariables(initVariables), LetBody(letBody) {}
     bool operator==(const ExprLet&) const = default;
 };
 
@@ -191,6 +197,7 @@ public:
     static constexpr ExprKind TheKind = EK_NEW;
     Symbol Type;
 public:
+    ExprNew(Symbol type) : Type(type) {}
     bool operator==(const ExprNew&) const = default;
 };
 
@@ -198,6 +205,7 @@ class ExprSelf : public ExprFacility<ExprSelf> {
 public:
     static constexpr ExprKind TheKind = EK_SELF;
 public:
+    ExprSelf() {}
     bool operator==(const ExprSelf&) const = default;
 };
 
@@ -214,6 +222,8 @@ public:
     Expr Right;
     Op Operator;
 public:
+    ExprArithB(Expr left, Expr right, Op op)
+        : Left(left), Right(right), Operator(op) {}
     bool operator==(const ExprArithB&) const = default;
 };
 
@@ -224,9 +234,11 @@ public:
         OP_NOT,
         OP_ISVOID,
     };
-    Expr Val;
+    Expr Operand;
     Op Operator;
 public:
+    ExprArithU(Expr operand, Op op)
+        : Operand(operand), Operator(op) {}
     bool operator==(const ExprArithU&) const = default;
 };
 

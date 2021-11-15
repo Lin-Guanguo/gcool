@@ -2,6 +2,7 @@ add_gcool_library(AST
     AST.cpp
     Expr.cpp
     Symbol.cpp
+    BisonHandler.cpp
 )
 
 target_include_directories(AST

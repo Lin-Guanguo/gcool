@@ -7,4 +7,6 @@ target_link_llvm(gcool support core)
 target_link_libraries(gcool
     PRIVATE
     AST
+    Parser
+    Lexer
     )

@@ -3,7 +3,7 @@
 #include "gcool/Parser/Parser.h"
 #include <vector>
 
-TEST(ParserTest, t1)
+TEST(LexerTest, t1)
 {
     auto in = R"(
         class  if  then  else  fi

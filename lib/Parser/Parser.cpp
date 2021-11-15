@@ -37,11 +37,12 @@
 
 
 // First part of user prologue.
-#line 22 "Parser.y"
+#line 34 "Parser.y"
 
+    #include "gcool/AST/Expr.h"
+    using namespace gcool::ast;
 
-
-#line 45 "Parser.cpp"
+#line 46 "Parser.cpp"
 
 
 #include "Parser.h"
@@ -120,17 +121,18 @@
 
 #line 5 "Parser.y"
 namespace gcool {
-#line 124 "Parser.cpp"
+#line 125 "Parser.cpp"
 
   /// Build a parser object.
-  Parser::Parser (yyscan_t scannner_yyarg)
+  Parser::Parser (yyscan_t scannner_yyarg, gcool::ast::ASTContext* context_yyarg)
 #if YYDEBUG
     : yydebug_ (false),
       yycdebug_ (&std::cerr),
 #else
     :
 #endif
-      scannner (scannner_yyarg)
+      scannner (scannner_yyarg),
+      context (context_yyarg)
   {}
 
   Parser::~Parser ()
@@ -151,6 +153,23 @@ namespace gcool {
   {
     switch (this->kind ())
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        value.copy< NoneInitHolder<gcool::ast::Class> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_expr: // expr
+        value.copy< NoneInitHolder<gcool::ast::Expr> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_formal: // formal
+        value.copy< NoneInitHolder<gcool::ast::FormalDecl> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        value.copy< NoneInitHolder<gcool::ast::Symbol> > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.copy< const char* > (YY_MOVE (that.value));
@@ -158,6 +177,23 @@ namespace gcool {
 
       case symbol_kind::S_FLOAT: // FLOAT
         value.copy< double > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        value.copy< gcool::ast::ClassList > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        value.copy< gcool::ast::FormalList > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        value.copy< gcool::ast::OptionalExpr > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        value.copy< gcool::ast::OptionalInherit > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_INT: // INT
@@ -199,6 +235,23 @@ namespace gcool {
     super_type::move (s);
     switch (this->kind ())
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        value.move< NoneInitHolder<gcool::ast::Class> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_expr: // expr
+        value.move< NoneInitHolder<gcool::ast::Expr> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_formal: // formal
+        value.move< NoneInitHolder<gcool::ast::FormalDecl> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        value.move< NoneInitHolder<gcool::ast::Symbol> > (YY_MOVE (s.value));
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.move< const char* > (YY_MOVE (s.value));
@@ -206,6 +259,23 @@ namespace gcool {
 
       case symbol_kind::S_FLOAT: // FLOAT
         value.move< double > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        value.move< gcool::ast::ClassList > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        value.move< gcool::ast::FormalList > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        value.move< gcool::ast::OptionalExpr > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        value.move< gcool::ast::OptionalInherit > (YY_MOVE (s.value));
         break;
 
       case symbol_kind::S_INT: // INT
@@ -316,6 +386,23 @@ namespace gcool {
   {
     switch (that.kind ())
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        value.YY_MOVE_OR_COPY< NoneInitHolder<gcool::ast::Class> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_expr: // expr
+        value.YY_MOVE_OR_COPY< NoneInitHolder<gcool::ast::Expr> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_formal: // formal
+        value.YY_MOVE_OR_COPY< NoneInitHolder<gcool::ast::FormalDecl> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        value.YY_MOVE_OR_COPY< NoneInitHolder<gcool::ast::Symbol> > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.YY_MOVE_OR_COPY< const char* > (YY_MOVE (that.value));
@@ -323,6 +410,23 @@ namespace gcool {
 
       case symbol_kind::S_FLOAT: // FLOAT
         value.YY_MOVE_OR_COPY< double > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        value.YY_MOVE_OR_COPY< gcool::ast::ClassList > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        value.YY_MOVE_OR_COPY< gcool::ast::FormalList > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        value.YY_MOVE_OR_COPY< gcool::ast::OptionalExpr > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        value.YY_MOVE_OR_COPY< gcool::ast::OptionalInherit > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_INT: // INT
@@ -348,6 +452,23 @@ namespace gcool {
   {
     switch (that.kind ())
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        value.move< NoneInitHolder<gcool::ast::Class> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_expr: // expr
+        value.move< NoneInitHolder<gcool::ast::Expr> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_formal: // formal
+        value.move< NoneInitHolder<gcool::ast::FormalDecl> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        value.move< NoneInitHolder<gcool::ast::Symbol> > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.move< const char* > (YY_MOVE (that.value));
@@ -355,6 +476,23 @@ namespace gcool {
 
       case symbol_kind::S_FLOAT: // FLOAT
         value.move< double > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        value.move< gcool::ast::ClassList > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        value.move< gcool::ast::FormalList > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        value.move< gcool::ast::OptionalExpr > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        value.move< gcool::ast::OptionalInherit > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_INT: // INT
@@ -380,6 +518,23 @@ namespace gcool {
     state = that.state;
     switch (that.kind ())
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        value.copy< NoneInitHolder<gcool::ast::Class> > (that.value);
+        break;
+
+      case symbol_kind::S_expr: // expr
+        value.copy< NoneInitHolder<gcool::ast::Expr> > (that.value);
+        break;
+
+      case symbol_kind::S_formal: // formal
+        value.copy< NoneInitHolder<gcool::ast::FormalDecl> > (that.value);
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        value.copy< NoneInitHolder<gcool::ast::Symbol> > (that.value);
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.copy< const char* > (that.value);
@@ -387,6 +542,23 @@ namespace gcool {
 
       case symbol_kind::S_FLOAT: // FLOAT
         value.copy< double > (that.value);
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        value.copy< gcool::ast::ClassList > (that.value);
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        value.copy< gcool::ast::FormalList > (that.value);
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        value.copy< gcool::ast::OptionalExpr > (that.value);
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        value.copy< gcool::ast::OptionalInherit > (that.value);
         break;
 
       case symbol_kind::S_INT: // INT
@@ -410,6 +582,23 @@ namespace gcool {
     state = that.state;
     switch (that.kind ())
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        value.move< NoneInitHolder<gcool::ast::Class> > (that.value);
+        break;
+
+      case symbol_kind::S_expr: // expr
+        value.move< NoneInitHolder<gcool::ast::Expr> > (that.value);
+        break;
+
+      case symbol_kind::S_formal: // formal
+        value.move< NoneInitHolder<gcool::ast::FormalDecl> > (that.value);
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        value.move< NoneInitHolder<gcool::ast::Symbol> > (that.value);
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.move< const char* > (that.value);
@@ -417,6 +606,23 @@ namespace gcool {
 
       case symbol_kind::S_FLOAT: // FLOAT
         value.move< double > (that.value);
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        value.move< gcool::ast::ClassList > (that.value);
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        value.move< gcool::ast::FormalList > (that.value);
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        value.move< gcool::ast::OptionalExpr > (that.value);
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        value.move< gcool::ast::OptionalInherit > (that.value);
         break;
 
       case symbol_kind::S_INT: // INT
@@ -680,6 +886,23 @@ namespace gcool {
          when using variants.  */
       switch (yyr1_[yyn])
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        yylhs.value.emplace< NoneInitHolder<gcool::ast::Class> > ();
+        break;
+
+      case symbol_kind::S_expr: // expr
+        yylhs.value.emplace< NoneInitHolder<gcool::ast::Expr> > ();
+        break;
+
+      case symbol_kind::S_formal: // formal
+        yylhs.value.emplace< NoneInitHolder<gcool::ast::FormalDecl> > ();
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        yylhs.value.emplace< NoneInitHolder<gcool::ast::Symbol> > ();
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         yylhs.value.emplace< const char* > ();
@@ -687,6 +910,23 @@ namespace gcool {
 
       case symbol_kind::S_FLOAT: // FLOAT
         yylhs.value.emplace< double > ();
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        yylhs.value.emplace< gcool::ast::ClassList > ();
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        yylhs.value.emplace< gcool::ast::FormalList > ();
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        yylhs.value.emplace< gcool::ast::OptionalExpr > ();
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        yylhs.value.emplace< gcool::ast::OptionalInherit > ();
         break;
 
       case symbol_kind::S_INT: // INT
@@ -711,8 +951,146 @@ namespace gcool {
         {
           switch (yyn)
             {
+  case 2: // program: class_seq
+#line 70 "Parser.y"
+                                    { context->Classes = std::move(yystack_[0].value.as < gcool::ast::ClassList > ()); }
+#line 958 "Parser.cpp"
+    break;
 
-#line 716 "Parser.cpp"
+  case 3: // class_seq: %empty
+#line 73 "Parser.y"
+                                    { yylhs.value.as < gcool::ast::ClassList > () = ClassList{}; }
+#line 964 "Parser.cpp"
+    break;
+
+  case 4: // class_seq: class_seq class SEMICOLON
+#line 74 "Parser.y"
+                                    { yylhs.value.as < gcool::ast::ClassList > () = std::move(yystack_[2].value.as < gcool::ast::ClassList > ()); yylhs.value.as < gcool::ast::ClassList > ().push_back(std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Class> > ())); }
+#line 970 "Parser.cpp"
+    break;
+
+  case 5: // class: CLASS symbol inherits LB features RB
+#line 77 "Parser.y"
+                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Inheirt = yystack_[3].value.as < gcool::ast::OptionalInherit > (); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Name = yystack_[4].value.as < NoneInitHolder<gcool::ast::Symbol> > (); }
+#line 976 "Parser.cpp"
+    break;
+
+  case 6: // inherits: %empty
+#line 80 "Parser.y"
+                        { yylhs.value.as < gcool::ast::OptionalInherit > () = OptionalInherit{}; }
+#line 982 "Parser.cpp"
+    break;
+
+  case 7: // inherits: INHERITS symbol
+#line 81 "Parser.y"
+                        { yylhs.value.as < gcool::ast::OptionalInherit > () = yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > (); }
+#line 988 "Parser.cpp"
+    break;
+
+  case 8: // symbol: SYMBOL
+#line 84 "Parser.y"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Symbol> > () = context->Symtbl.get(yystack_[0].value.as < const char* > ()); }
+#line 994 "Parser.cpp"
+    break;
+
+  case 9: // formal: symbol COLON symbol
+#line 87 "Parser.y"
+                            { yylhs.value.as < NoneInitHolder<gcool::ast::FormalDecl> > () = FormalDecl{yystack_[2].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}; }
+#line 1000 "Parser.cpp"
+    break;
+
+  case 10: // features: %empty
+#line 90 "Parser.y"
+            { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = Class{context->Symtbl.getHolder()}; }
+#line 1006 "Parser.cpp"
+    break;
+
+  case 11: // features: features formal optional_assign SEMICOLON
+#line 91 "Parser.y"
+                                                 { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[3].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Attrs.push_back(AttrFeature{yystack_[2].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[1].value.as < gcool::ast::OptionalExpr > ()}); }
+#line 1012 "Parser.cpp"
+    break;
+
+  case 12: // features: features symbol LP params RP COLON symbol LB expr RB SEMICOLON
+#line 92 "Parser.y"
+                                                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[10].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Methods.push_back(MethodFeature{yystack_[9].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[4].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[7].value.as < gcool::ast::FormalList > ()), yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+#line 1018 "Parser.cpp"
+    break;
+
+  case 13: // optional_assign: %empty
+#line 95 "Parser.y"
+                   { yylhs.value.as < gcool::ast::OptionalExpr > () = OptionalExpr{}; }
+#line 1024 "Parser.cpp"
+    break;
+
+  case 14: // optional_assign: ASSIGN expr
+#line 96 "Parser.y"
+                   { yylhs.value.as < gcool::ast::OptionalExpr > () = yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (); }
+#line 1030 "Parser.cpp"
+    break;
+
+  case 15: // params: %empty
+#line 99 "Parser.y"
+                { yylhs.value.as < gcool::ast::FormalList > () = FormalList{}; }
+#line 1036 "Parser.cpp"
+    break;
+
+  case 16: // params: params_
+#line 100 "Parser.y"
+                { yylhs.value.as < gcool::ast::FormalList > () = std::move(yystack_[0].value.as < gcool::ast::FormalList > ()); }
+#line 1042 "Parser.cpp"
+    break;
+
+  case 17: // params_: formal
+#line 103 "Parser.y"
+                            { yylhs.value.as < gcool::ast::FormalList > () = FormalList{}; yylhs.value.as < gcool::ast::FormalList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::FormalDecl> > ()); }
+#line 1048 "Parser.cpp"
+    break;
+
+  case 18: // params_: params_ COMMA formal
+#line 104 "Parser.y"
+                            { yylhs.value.as < gcool::ast::FormalList > () = std::move(yystack_[2].value.as < gcool::ast::FormalList > ()); yylhs.value.as < gcool::ast::FormalList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::FormalDecl> > ()); }
+#line 1054 "Parser.cpp"
+    break;
+
+  case 19: // expr: symbol
+#line 107 "Parser.y"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->TheExprAllocator.allocExpr(new ExprSymbol(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
+#line 1060 "Parser.cpp"
+    break;
+
+  case 20: // expr: TRUE
+#line 108 "Parser.y"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->TheExprAllocator.allocExpr(new ExprBool(true)); }
+#line 1066 "Parser.cpp"
+    break;
+
+  case 21: // expr: FALSE
+#line 109 "Parser.y"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->TheExprAllocator.allocExpr(new ExprBool(false)); }
+#line 1072 "Parser.cpp"
+    break;
+
+  case 22: // expr: INT
+#line 110 "Parser.y"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->TheExprAllocator.allocExpr(new ExprInt(yystack_[0].value.as < int > ())); }
+#line 1078 "Parser.cpp"
+    break;
+
+  case 23: // expr: FLOAT
+#line 111 "Parser.y"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->TheExprAllocator.allocExpr(new ExprFloat(yystack_[0].value.as < double > ())); }
+#line 1084 "Parser.cpp"
+    break;
+
+  case 24: // expr: STR
+#line 112 "Parser.y"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->TheExprAllocator.allocExpr(new ExprString(yystack_[0].value.as < std::string > ())); }
+#line 1090 "Parser.cpp"
+    break;
+
+
+#line 1094 "Parser.cpp"
 
             default:
               break;
@@ -901,195 +1279,88 @@ namespace gcool {
 
 
 
-  const signed char Parser::yypact_ninf_ = -103;
+  const signed char Parser::yypact_ninf_ = -37;
 
   const signed char Parser::yytable_ninf_ = -1;
 
-  const short
+  const signed char
   Parser::yypact_[] =
   {
-       5,   -32,    15,     5,   -17,  -103,    17,  -103,     1,  -103,
-     -32,     6,  -103,  -103,  -103,   -26,  -103,   -28,    19,   -32,
-     -32,   140,     7,     8,  -103,    20,    18,  -103,   140,  -103,
-    -103,   140,   140,   -32,   140,   -32,   140,   140,   140,  -103,
-    -103,  -103,     9,   380,  -103,    14,   -32,   166,   220,   380,
-      19,   -12,   257,  -103,   380,   346,   274,   101,   140,   140,
-     -32,   -32,   140,   140,   140,   140,   140,   140,   140,   140,
-     140,   -32,  -103,   140,   140,  -103,   140,   -32,   -32,  -103,
-    -103,  -103,   292,   380,   380,    26,    23,    34,    43,    13,
-      13,   -11,   -11,    -2,    -2,    -2,    -2,    -2,    35,   184,
-     238,   380,    19,    41,   -13,  -103,  -103,   140,   140,   -32,
-     140,   140,  -103,  -103,   140,  -103,    44,   380,    37,    42,
-     363,   201,   310,   140,  -103,   140,    32,  -103,  -103,   328,
-      56,  -103,  -103,  -103
+     -37,     5,     6,   -37,   -36,   -31,   -37,    -4,   -37,   -36,
+     -21,   -37,   -37,   -29,   -37,   -27,    -9,   -36,   -36,    -8,
+     -22,   -23,   -37,   -12,   -17,   -37,   -37,   -37,   -37,   -37,
+     -37,   -37,   -37,   -37,   -16,   -36,   -36,   -37,    -6,    -8,
+      -5,   -10,   -37
   };
 
   const signed char
   Parser::yydefact_[] =
   {
-       0,     0,     0,     2,     0,     8,     6,     1,     0,     3,
-       0,     0,     4,     7,    10,     0,     5,     0,    13,    43,
-       0,     0,     0,     0,    45,     0,    44,     9,     0,    16,
-      17,     0,     0,     0,     0,     0,     0,     0,     0,    20,
-      18,    19,    15,    14,    11,     0,     0,     0,     0,    31,
-      13,     0,     0,    30,    32,     0,     0,     0,     0,    47,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,    46,     0,     0,    53,     0,     0,     0,    42,
-      51,    27,     0,    21,    49,     0,    48,     0,     0,    33,
-      34,    35,    36,    37,    38,    40,    39,    41,     0,     0,
-       0,    28,    13,     0,     0,    52,    24,     0,    47,     0,
-       0,     0,    26,    54,     0,    29,     0,    50,     0,     0,
-       0,     0,     0,     0,    22,    47,     0,    25,    55,     0,
-       0,    12,    56,    23
+       3,     0,     2,     1,     0,     0,     8,     6,     4,     0,
+       0,     7,    10,     0,     5,     0,    13,    15,     0,     0,
+       0,     0,    17,     0,    16,     9,    20,    21,    24,    22,
+      23,    19,    14,    11,     0,     0,     0,    18,     0,     0,
+       0,     0,    12
   };
 
   const signed char
   Parser::yypgoto_[] =
   {
-    -103,  -103,  -103,    72,  -103,    -1,   -16,  -103,   -46,    16,
-    -103,  -103,  -102,  -103,  -103,  -103,  -103
+     -37,   -37,   -37,   -37,   -37,     3,   -15,   -37,   -37,   -37,
+     -37,    -7
   };
 
   const signed char
   Parser::yydefgoto_[] =
   {
-       0,     2,     3,     4,    11,    42,    18,    15,    22,    84,
-      25,    26,    85,    86,    57,    51,   104
+       0,     1,     2,     5,    10,    21,    16,    13,    20,    23,
+      24,    32
   };
 
-  const unsigned char
+  const signed char
   Parser::yytable_[] =
   {
-       6,    76,    19,    24,    75,   115,   118,    16,     1,    13,
-       5,    60,    61,    20,    17,     7,     5,    50,    23,    27,
-      60,    61,     9,   130,    62,    63,    64,    65,    77,     5,
-      72,    10,    23,    58,    53,    60,    61,    43,    14,    59,
-      12,    64,    65,    21,    47,    23,    44,    48,    49,    20,
-      52,    45,    54,    55,    56,    71,   113,   106,    46,    87,
-      88,   102,   103,   107,   108,   109,   114,   110,   124,   123,
-      98,   131,   125,    82,    83,     8,    23,    23,    89,    90,
-      91,    92,    93,    94,    95,    96,    97,   133,   116,    99,
-     100,     0,   101,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    23,     0,    28,     0,     0,   119,    29,
-      30,    31,     0,     0,     0,     0,    32,    33,    34,     0,
-      35,     0,    36,   117,     0,     0,   120,   121,     0,     0,
-     122,    37,     0,    38,    81,     0,     0,     0,     0,   129,
-       0,     0,     0,     5,    28,    39,    40,    41,    29,    30,
-      31,     0,     0,     0,     0,    32,    33,    34,     0,    35,
-       0,    36,     0,     0,     0,     0,     0,     0,     0,     0,
-      37,    73,    38,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     5,     0,    39,    40,    41,     0,    60,    61,
-     111,     0,    62,    63,    64,    65,     0,     0,     0,     0,
-      66,    67,    68,    69,    70,     0,    60,    61,   127,     0,
-      62,    63,    64,    65,     0,     0,     0,     0,    66,    67,
-      68,    69,    70,    60,    61,     0,     0,    62,    63,    64,
-      65,    74,     0,     0,     0,    66,    67,    68,    69,    70,
-       0,     0,    60,    61,     0,     0,    62,    63,    64,    65,
-     112,     0,     0,     0,    66,    67,    68,    69,    70,     0,
-      60,    61,     0,     0,    62,    63,    64,    65,     0,     0,
-       0,     0,    66,    67,    68,    69,    70,    78,     0,    60,
-      61,     0,     0,    62,    63,    64,    65,     0,     0,     0,
-       0,    66,    67,    68,    69,    70,    60,    61,     0,     0,
-      62,    63,    64,    65,     0,     0,     0,     0,    66,    67,
-      68,    69,    70,    80,    60,    61,     0,     0,    62,    63,
-      64,    65,     0,     0,     0,     0,    66,    67,    68,    69,
-      70,   105,    60,    61,     0,     0,    62,    63,    64,    65,
-       0,     0,     0,     0,    66,    67,    68,    69,    70,   128,
-      60,    61,     0,     0,    62,    63,    64,    65,     0,     0,
-       0,     0,    66,    67,    68,    69,    70,   132,    60,    61,
-       0,     0,    62,    63,    64,    65,     0,    79,     0,     0,
-      66,    67,    68,    69,    70,    60,    61,     0,     0,    62,
-      63,    64,    65,     0,     0,     0,   126,    66,    67,    68,
-      69,    70,    60,    61,     0,     0,    62,    63,    64,    65,
-       0,     0,     0,     0,    66,    67,    68,    69,    70
+      26,    27,    22,    17,    14,     3,     6,     7,     8,     4,
+       9,    12,    11,     6,    18,    19,    15,    33,    18,    34,
+      37,    25,    31,    35,     0,    36,    39,     0,    41,    42,
+       0,     0,    40,     0,     6,     0,    28,    29,    30,    38,
+       0,     0,    31
   };
 
   const signed char
   Parser::yycheck_[] =
   {
-       1,    13,    30,    19,    50,    18,   108,    33,     3,    10,
-      42,    22,    23,    41,    15,     0,    42,    33,    19,    20,
-      22,    23,    39,   125,    26,    27,    28,    29,    40,    42,
-      46,    14,    33,    24,    35,    22,    23,    21,    32,    30,
-      39,    28,    29,    24,    28,    46,    39,    31,    32,    41,
-      34,    31,    36,    37,    38,    41,   102,    31,    40,    60,
-      61,    77,    78,    40,    30,    22,    25,    32,    31,    25,
-      71,    39,    30,    57,    58,     3,    77,    78,    62,    63,
-      64,    65,    66,    67,    68,    69,    70,    31,   104,    73,
-      74,    -1,    76,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,   104,    -1,     4,    -1,    -1,   109,     8,
-       9,    10,    -1,    -1,    -1,    -1,    15,    16,    17,    -1,
-      19,    -1,    21,   107,    -1,    -1,   110,   111,    -1,    -1,
-     114,    30,    -1,    32,    33,    -1,    -1,    -1,    -1,   123,
-      -1,    -1,    -1,    42,     4,    44,    45,    46,     8,     9,
-      10,    -1,    -1,    -1,    -1,    15,    16,    17,    -1,    19,
-      -1,    21,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      30,     5,    32,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    42,    -1,    44,    45,    46,    -1,    22,    23,
-       6,    -1,    26,    27,    28,    29,    -1,    -1,    -1,    -1,
-      34,    35,    36,    37,    38,    -1,    22,    23,     7,    -1,
-      26,    27,    28,    29,    -1,    -1,    -1,    -1,    34,    35,
-      36,    37,    38,    22,    23,    -1,    -1,    26,    27,    28,
-      29,    11,    -1,    -1,    -1,    34,    35,    36,    37,    38,
-      -1,    -1,    22,    23,    -1,    -1,    26,    27,    28,    29,
-      12,    -1,    -1,    -1,    34,    35,    36,    37,    38,    -1,
-      22,    23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,
-      -1,    -1,    34,    35,    36,    37,    38,    20,    -1,    22,
-      23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,    -1,
-      -1,    34,    35,    36,    37,    38,    22,    23,    -1,    -1,
-      26,    27,    28,    29,    -1,    -1,    -1,    -1,    34,    35,
-      36,    37,    38,    39,    22,    23,    -1,    -1,    26,    27,
-      28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,    37,
-      38,    39,    22,    23,    -1,    -1,    26,    27,    28,    29,
-      -1,    -1,    -1,    -1,    34,    35,    36,    37,    38,    39,
-      22,    23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,
-      -1,    -1,    34,    35,    36,    37,    38,    39,    22,    23,
-      -1,    -1,    26,    27,    28,    29,    -1,    31,    -1,    -1,
-      34,    35,    36,    37,    38,    22,    23,    -1,    -1,    26,
-      27,    28,    29,    -1,    -1,    -1,    33,    34,    35,    36,
-      37,    38,    22,    23,    -1,    -1,    26,    27,    28,    29,
-      -1,    -1,    -1,    -1,    34,    35,    36,    37,    38
+       8,     9,    17,    30,    33,     0,    42,     4,    39,     3,
+      14,    32,     9,    42,    41,    24,    13,    39,    41,    31,
+      35,    18,    19,    40,    -1,    41,    32,    -1,    33,    39,
+      -1,    -1,    39,    -1,    42,    -1,    44,    45,    46,    36,
+      -1,    -1,    39
   };
 
   const signed char
   Parser::yystos_[] =
   {
-       0,     3,    48,    49,    50,    42,    52,     0,    50,    39,
-      14,    51,    39,    52,    32,    54,    33,    52,    53,    30,
-      41,    24,    55,    52,    53,    57,    58,    52,     4,     8,
-       9,    10,    15,    16,    17,    19,    21,    30,    32,    44,
-      45,    46,    52,    56,    39,    31,    40,    56,    56,    56,
-      53,    62,    56,    52,    56,    56,    56,    61,    24,    30,
-      22,    23,    26,    27,    28,    29,    34,    35,    36,    37,
-      38,    41,    53,     5,    11,    55,    13,    40,    20,    31,
-      39,    33,    56,    56,    56,    59,    60,    52,    52,    56,
-      56,    56,    56,    56,    56,    56,    56,    56,    52,    56,
-      56,    56,    53,    53,    63,    39,    31,    40,    30,    22,
-      32,     6,    12,    55,    25,    18,    53,    56,    59,    52,
-      56,    56,    56,    25,    31,    30,    33,     7,    39,    56,
-      59,    39,    39,    31
+       0,    48,    49,     0,     3,    50,    42,    52,    39,    14,
+      51,    52,    32,    54,    33,    52,    53,    30,    41,    24,
+      55,    52,    53,    56,    57,    52,     8,     9,    44,    45,
+      46,    52,    58,    39,    31,    40,    41,    53,    52,    32,
+      58,    33,    39
   };
 
   const signed char
   Parser::yyr1_[] =
   {
        0,    47,    48,    49,    49,    50,    51,    51,    52,    53,
-      54,    54,    54,    55,    55,    56,    56,    56,    56,    56,
-      56,    56,    56,    56,    56,    56,    56,    56,    56,    56,
-      56,    56,    56,    56,    56,    56,    56,    56,    56,    56,
-      56,    56,    56,    57,    57,    58,    58,    59,    59,    60,
-      60,    61,    61,    62,    62,    63,    63
+      54,    54,    54,    55,    55,    56,    56,    57,    57,    58,
+      58,    58,    58,    58,    58
   };
 
   const signed char
   Parser::yyr2_[] =
   {
-       0,     2,     1,     2,     3,     6,     0,     2,     1,     3,
-       0,     4,    11,     0,     2,     1,     1,     1,     1,     1,
-       1,     3,     6,     8,     4,     7,     5,     3,     4,     5,
-       2,     2,     2,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     0,     1,     1,     3,     0,     1,     1,
-       3,     2,     3,     2,     4,     4,     5
+       0,     2,     1,     0,     3,     6,     0,     2,     1,     3,
+       0,     4,    11,     0,     2,     0,     1,     1,     3,     1,
+       1,     1,     1,     1,     1
   };
 
 
@@ -1106,22 +1377,18 @@ namespace gcool {
   "EQ", "LE", "GE", "LT", "GT", "SEMICOLON", "COMMA", "COLON", "SYMBOL",
   "ERROR", "STR", "INT", "FLOAT", "$accept", "program", "class_seq",
   "class", "inherits", "symbol", "formal", "features", "optional_assign",
-  "expr", "params", "params_", "args", "args_", "block_exprs",
-  "let_init_exprs", "case_branchs", YY_NULLPTR
+  "params", "params_", "expr", YY_NULLPTR
   };
 #endif
 
 
 #if YYDEBUG
-  const unsigned char
+  const signed char
   Parser::yyrline_[] =
   {
-       0,    45,    45,    48,    49,    52,    55,    56,    59,    62,
-      65,    66,    67,    70,    71,    74,    75,    76,    77,    78,
-      79,    80,    81,    82,    83,    84,    85,    86,    87,    88,
-      89,    90,    91,    92,    93,    94,    95,    96,    97,    98,
-      99,   100,   101,   104,   105,   108,   109,   112,   113,   116,
-     117,   120,   121,   124,   125,   128,   129
+       0,    70,    70,    73,    74,    77,    80,    81,    84,    87,
+      90,    91,    92,    95,    96,    99,   100,   103,   104,   107,
+     108,   109,   110,   111,   112
   };
 
   void
@@ -1205,9 +1472,9 @@ namespace gcool {
 
 #line 5 "Parser.y"
 } // gcool
-#line 1209 "Parser.cpp"
+#line 1476 "Parser.cpp"
 
-#line 134 "Parser.y"
+#line 159 "Parser.y"
 
 
 void gcool::Parser::error(const std::string& s) {

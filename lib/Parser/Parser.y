@@ -10,17 +10,30 @@
 
 %code requires{
     #include <string>
+    #include <optional>
+    #include "gcool/AST/AST.h"
     typedef void* yyscan_t;
+
+    template<typename T>
+    class NoneInitHolder : public std::optional<T>{
+    public:
+        using std::optional<T>::optional;
+        using std::optional<T>::operator =;
+        operator T() {
+            return this->value();
+        }
+    };
 }
 %code provides{
     int yylex(gcool::Parser::value_type* parserData, yyscan_t scannner);
 }
-%parse-param    {yyscan_t scannner}
+%parse-param    {yyscan_t scannner} {gcool::ast::ASTContext* context}
 %lex-param      {yyscan_t scannner}
 
 
 %{
-
+    #include "gcool/AST/Expr.h"
+    using namespace gcool::ast;
 %}
 
 %token CLASS IF THEN ELSE FI TRUE FALSE WHILE LOOP POOL IN INHERITS ISVOID LET CASE ESAC NEW OF NOT
@@ -30,6 +43,18 @@
 %token<int> INT
 %token<double> FLOAT
 
+// Type Without default Constructor should wrap with NoneInitHolder
+%type<NoneInitHolder<gcool::ast::Symbol>> symbol 
+%type<NoneInitHolder<gcool::ast::FormalDecl>> formal
+%type<NoneInitHolder<gcool::ast::Expr>> expr
+%type<NoneInitHolder<gcool::ast::Class>> class features
+%type<gcool::ast::OptionalInherit> inherits 
+%type<gcool::ast::OptionalExpr> optional_assign
+%type<gcool::ast::ClassList> class_seq
+%type<gcool::ast::FormalList> params params_
+%type<gcool::ast::ExprList> args args_ block_exprs
+%type<gcool::ast::LetInitList> let_init_exprs
+%type<gcool::ast::CaseBranchList> case_branchs
 
 // Conflict resolution
 %nonassoc NOT ISVOID
@@ -42,91 +67,91 @@
 
 %%
 
-program: class_seq
+program: class_seq                  { context->Classes = std::move($1); }
     ;
 
-class_seq: class SEMICOLON
-    | class_seq class SEMICOLON
+class_seq:                          { $$ = ClassList{}; }
+    | class_seq class SEMICOLON     { $$ = std::move($1); $$.push_back(std::move($2)); }
     ;
 
-class: CLASS symbol inherits LB features RB
+class: CLASS symbol inherits LB features RB { $$ = std::move($5); $$->Inheirt = $3; $$->Name = $2; }
     ;
 
-inherits:
-    | INHERITS symbol
+inherits:               { $$ = OptionalInherit{}; }
+    | INHERITS symbol   { $$ = $2; }
     ;
 
-symbol: SYMBOL
+symbol: SYMBOL  { $$ = context->Symtbl.get($1); }
     ;
 
-formal: symbol COLON symbol
+formal: symbol COLON symbol { $$ = FormalDecl{$1, $3}; }
     ;
 
-features:
-    | features formal optional_assign SEMICOLON
-    | features symbol LP params RP COLON symbol LB expr RB SEMICOLON
+features:   { $$ = Class{context->Symtbl.getHolder()}; }
+    | features formal optional_assign SEMICOLON  { $$ = std::move($1); $$->Attrs.push_back(AttrFeature{$2, $3}); }
+    | features symbol LP params RP COLON symbol LB expr RB SEMICOLON    { $$ = std::move($1); $$->Methods.push_back(MethodFeature{$2, $7, std::move($4), $9}); }
     ;
 
-optional_assign:
-    | ASSIGN expr
+optional_assign:   { $$ = OptionalExpr{}; }
+    | ASSIGN expr  { $$ = $2; }
     ;
 
-expr: symbol
-    | TRUE
-    | FALSE
-    | INT
-    | FLOAT
-    | STR
-    | symbol ASSIGN expr
-    | expr DOT symbol LP args RP
-    | expr AT symbol DOT symbol LP args RP
-    | symbol LP args RP
-    | IF expr THEN expr ELSE expr FI
-    | WHILE expr LOOP expr POOL
-    | LB block_exprs RB
-    | LET let_init_exprs IN expr
-    | CASE expr OF case_branchs ESAC
-    | NEW symbol
-    | ISVOID expr
-    | NOT expr
-    | expr ADD expr
-    | expr SUB expr
-    | expr MUL expr
-    | expr DIV expr
-    | expr EQ expr
-    | expr LE expr
-    | expr LT expr
-    | expr GE expr
-    | expr GT expr
-    | LP expr RP
+params:         { $$ = FormalList{}; }
+    | params_   { $$ = std::move($1); }
     ;
 
-params:
-    | params_
+params_: formal             { $$ = FormalList{}; $$.push_back($1); }
+    | params_ COMMA formal  { $$ = std::move($1); $$.push_back($3); }
     ;
 
-params_: formal
-    | params_ COMMA formal
+expr: symbol    { $$ = context->TheExprAllocator.allocExpr(new ExprSymbol($1)); }
+    | TRUE      { $$ = context->TheExprAllocator.allocExpr(new ExprBool(true)); }
+    | FALSE     { $$ = context->TheExprAllocator.allocExpr(new ExprBool(false)); }
+    | INT       { $$ = context->TheExprAllocator.allocExpr(new ExprInt($1)); }
+    | FLOAT     { $$ = context->TheExprAllocator.allocExpr(new ExprFloat($1)); }
+    | STR       { $$ = context->TheExprAllocator.allocExpr(new ExprString($1)); }
+    // | symbol ASSIGN expr
+    // | expr DOT symbol LP args RP
+    // | expr AT symbol DOT symbol LP args RP
+    // | symbol LP args RP
+    // | IF expr THEN expr ELSE expr FI
+    // | WHILE expr LOOP expr POOL
+    // | LB block_exprs RB
+    // | LET let_init_exprs IN expr
+    // | CASE expr OF case_branchs ESAC
+    // | NEW symbol
+    // | ISVOID expr
+    // | NOT expr
+    // | expr ADD expr
+    // | expr SUB expr
+    // | expr MUL expr
+    // | expr DIV expr
+    // | expr EQ expr
+    // | expr LE expr
+    // | expr LT expr
+    // | expr GE expr
+    // | expr GT expr
+    // | LP expr RP
+    // ;
+
+args:           { $$ = ExprList{}; }
+    | args_     { $$ = std::move($1); }
     ;
 
-args:
-    | args_
+args_: expr             { $$ = ExprList{}; $$.push_back($1); }
+    | args_ COMMA expr  { $$ = std::move($1); $$.push_back($3); }
     ;
 
-args_: expr
-    | args_ COMMA expr
+block_exprs: expr SEMICOLON         { $$ = ExprList{}; $$.push_back($1); }
+    | block_exprs expr SEMICOLON    { $$ = std::move($1); $$.push_back($1); }
     ;
 
-block_exprs: expr SEMICOLON
-    | block_exprs expr SEMICOLON
+let_init_exprs: symbol COLON symbol optional_assign             { $$ = LetInitList{}; $$.push_back($1, $3, $4); }
+    | let_init_exprs COMMA symbol COLON symbol optional_assign  { $$ = std::move($1); $$.push_back($3, $5, $6); }
     ;
 
-let_init_exprs: formal optional_assign
-    | let_init_exprs COMMA formal optional_assign
-    ;
-
-case_branchs: formal ARROW expr SEMICOLON
-    | case_branchs formal ARROW expr SEMICOLON
+case_branchs: symbol COLON symbol ARROW expr SEMICOLON          { $$ = CaseBranchList{}; $$.push_back($1, $3, $5); }
+    | case_branchs symbol COLON symbol ARROW expr SEMICOLON     { $$ = std::move($1); $$.push_back($2, $4, $6); }
     ;
 
 

@@ -48,9 +48,21 @@
 #line 11 "Parser.y"
 
     #include <string>
+    #include <optional>
+    #include "gcool/AST/AST.h"
     typedef void* yyscan_t;
 
-#line 54 "Parser.h"
+    template<typename T>
+    class NoneInitHolder : public std::optional<T>{
+    public:
+        using std::optional<T>::optional;
+        using std::optional<T>::operator =;
+        operator T() {
+            return this->value();
+        }
+    };
+
+#line 66 "Parser.h"
 
 
 # include <cstdlib> // std::abort
@@ -186,7 +198,7 @@
 
 #line 5 "Parser.y"
 namespace gcool {
-#line 190 "Parser.h"
+#line 202 "Parser.h"
 
 
 
@@ -382,18 +394,44 @@ namespace gcool {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
+      // class
+      // features
+      char dummy1[sizeof (NoneInitHolder<gcool::ast::Class>)];
+
+      // expr
+      char dummy2[sizeof (NoneInitHolder<gcool::ast::Expr>)];
+
+      // formal
+      char dummy3[sizeof (NoneInitHolder<gcool::ast::FormalDecl>)];
+
+      // symbol
+      char dummy4[sizeof (NoneInitHolder<gcool::ast::Symbol>)];
+
       // SYMBOL
       // ERROR
-      char dummy1[sizeof (const char*)];
+      char dummy5[sizeof (const char*)];
 
       // FLOAT
-      char dummy2[sizeof (double)];
+      char dummy6[sizeof (double)];
+
+      // class_seq
+      char dummy7[sizeof (gcool::ast::ClassList)];
+
+      // params
+      // params_
+      char dummy8[sizeof (gcool::ast::FormalList)];
+
+      // optional_assign
+      char dummy9[sizeof (gcool::ast::OptionalExpr)];
+
+      // inherits
+      char dummy10[sizeof (gcool::ast::OptionalInherit)];
 
       // INT
-      char dummy3[sizeof (int)];
+      char dummy11[sizeof (int)];
 
       // STR
-      char dummy4[sizeof (std::string)];
+      char dummy12[sizeof (std::string)];
     };
 
     /// The size of the largest semantic type.
@@ -555,14 +593,9 @@ namespace gcool {
         S_formal = 53,                           // formal
         S_features = 54,                         // features
         S_optional_assign = 55,                  // optional_assign
-        S_expr = 56,                             // expr
-        S_params = 57,                           // params
-        S_params_ = 58,                          // params_
-        S_args = 59,                             // args
-        S_args_ = 60,                            // args_
-        S_block_exprs = 61,                      // block_exprs
-        S_let_init_exprs = 62,                   // let_init_exprs
-        S_case_branchs = 63                      // case_branchs
+        S_params = 56,                           // params
+        S_params_ = 57,                          // params_
+        S_expr = 58                              // expr
       };
     };
 
@@ -597,6 +630,23 @@ namespace gcool {
       {
         switch (this->kind ())
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        value.move< NoneInitHolder<gcool::ast::Class> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_expr: // expr
+        value.move< NoneInitHolder<gcool::ast::Expr> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_formal: // formal
+        value.move< NoneInitHolder<gcool::ast::FormalDecl> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        value.move< NoneInitHolder<gcool::ast::Symbol> > (std::move (that.value));
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.move< const char* > (std::move (that.value));
@@ -604,6 +654,23 @@ namespace gcool {
 
       case symbol_kind::S_FLOAT: // FLOAT
         value.move< double > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        value.move< gcool::ast::ClassList > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        value.move< gcool::ast::FormalList > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        value.move< gcool::ast::OptionalExpr > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        value.move< gcool::ast::OptionalInherit > (std::move (that.value));
         break;
 
       case symbol_kind::S_INT: // INT
@@ -636,6 +703,54 @@ namespace gcool {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, NoneInitHolder<gcool::ast::Class>&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const NoneInitHolder<gcool::ast::Class>& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, NoneInitHolder<gcool::ast::Expr>&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const NoneInitHolder<gcool::ast::Expr>& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, NoneInitHolder<gcool::ast::FormalDecl>&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const NoneInitHolder<gcool::ast::FormalDecl>& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, NoneInitHolder<gcool::ast::Symbol>&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const NoneInitHolder<gcool::ast::Symbol>& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, const char*&& v)
         : Base (t)
         , value (std::move (v))
@@ -654,6 +769,54 @@ namespace gcool {
       {}
 #else
       basic_symbol (typename Base::kind_type t, const double& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, gcool::ast::ClassList&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const gcool::ast::ClassList& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, gcool::ast::FormalList&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const gcool::ast::FormalList& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, gcool::ast::OptionalExpr&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const gcool::ast::OptionalExpr& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, gcool::ast::OptionalInherit&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const gcool::ast::OptionalInherit& v)
         : Base (t)
         , value (v)
       {}
@@ -707,6 +870,23 @@ namespace gcool {
         // Value type destructor.
 switch (yykind)
     {
+      case symbol_kind::S_class: // class
+      case symbol_kind::S_features: // features
+        value.template destroy< NoneInitHolder<gcool::ast::Class> > ();
+        break;
+
+      case symbol_kind::S_expr: // expr
+        value.template destroy< NoneInitHolder<gcool::ast::Expr> > ();
+        break;
+
+      case symbol_kind::S_formal: // formal
+        value.template destroy< NoneInitHolder<gcool::ast::FormalDecl> > ();
+        break;
+
+      case symbol_kind::S_symbol: // symbol
+        value.template destroy< NoneInitHolder<gcool::ast::Symbol> > ();
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.template destroy< const char* > ();
@@ -714,6 +894,23 @@ switch (yykind)
 
       case symbol_kind::S_FLOAT: // FLOAT
         value.template destroy< double > ();
+        break;
+
+      case symbol_kind::S_class_seq: // class_seq
+        value.template destroy< gcool::ast::ClassList > ();
+        break;
+
+      case symbol_kind::S_params: // params
+      case symbol_kind::S_params_: // params_
+        value.template destroy< gcool::ast::FormalList > ();
+        break;
+
+      case symbol_kind::S_optional_assign: // optional_assign
+        value.template destroy< gcool::ast::OptionalExpr > ();
+        break;
+
+      case symbol_kind::S_inherits: // inherits
+        value.template destroy< gcool::ast::OptionalInherit > ();
         break;
 
       case symbol_kind::S_INT: // INT
@@ -855,7 +1052,7 @@ switch (yykind)
     };
 
     /// Build a parser object.
-    Parser (yyscan_t scannner_yyarg);
+    Parser (yyscan_t scannner_yyarg, gcool::ast::ASTContext* context_yyarg);
     virtual ~Parser ();
 
 #if 201103L <= YY_CPLUSPLUS
@@ -1619,7 +1816,7 @@ switch (yykind)
 
 
     /// Stored state numbers (used for stacks).
-    typedef unsigned char state_type;
+    typedef signed char state_type;
 
     /// Compute post-reduction state.
     /// \param yystate   the current state
@@ -1651,7 +1848,7 @@ switch (yykind)
     // Tables.
     // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
     // STATE-NUM.
-    static const short yypact_[];
+    static const signed char yypact_[];
 
     // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
     // Performed when YYTABLE does not specify something else to do.  Zero
@@ -1667,7 +1864,7 @@ switch (yykind)
     // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
     // positive, shift that token.  If negative, reduce the rule whose
     // number is the opposite.  If YYTABLE_NINF, syntax error.
-    static const unsigned char yytable_[];
+    static const signed char yytable_[];
 
     static const signed char yycheck_[];
 
@@ -1684,7 +1881,7 @@ switch (yykind)
 
 #if YYDEBUG
     // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-    static const unsigned char yyrline_[];
+    static const signed char yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r) const;
     /// Print the state stack on the debug stream.
@@ -1911,29 +2108,30 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 418,     ///< Last index in yytable_.
-      yynnts_ = 17,  ///< Number of nonterminal symbols.
-      yyfinal_ = 7 ///< Termination state number.
+      yylast_ = 42,     ///< Last index in yytable_.
+      yynnts_ = 12,  ///< Number of nonterminal symbols.
+      yyfinal_ = 3 ///< Termination state number.
     };
 
 
     // User arguments.
     yyscan_t scannner;
+    gcool::ast::ASTContext* context;
 
   };
 
 
 #line 5 "Parser.y"
 } // gcool
-#line 1929 "Parser.h"
+#line 2127 "Parser.h"
 
 
 // "%code provides" blocks.
-#line 15 "Parser.y"
+#line 27 "Parser.y"
 
     int yylex(gcool::Parser::value_type* parserData, yyscan_t scannner);
 
-#line 1937 "Parser.h"
+#line 2135 "Parser.h"
 
 
 #endif // !YY_YY_PARSER_H_INCLUDED
