@@ -11,33 +11,6 @@
 using namespace gcool;
 using namespace gcool::ast;
 
-void TestHelper(const char* input, ast::ASTContext& context, ast::ClassList& expect) {
-    yyscan_t scanner;
-    yylex_init(&scanner);
-    yy_scan_string(input, scanner);
-    Parser parser{scanner, &context};
-    parser.parse();
-    llvm::outs() << (expect == context.Classes);
-}
-
-void test() {
-    ast::ASTContext context;
-    const char* input = 
-    R"(
-        class Main
-        {
-
-        };
-        class help_class{ };
-    )";
-
-    ast::ClassList expect{
-        Class{ context.Symtbl.get("Main"), context.Symtbl.getObject() },
-        Class{ context.Symtbl.get("help_class"), context.Symtbl.getObject() }
-    };
-    TestHelper(input, context, expect);
-}
-
 int main(int argc, char** argv) 
 {
     llvm::LLVMContext TheContext;
@@ -50,6 +23,7 @@ int main(int argc, char** argv)
 
     auto intTy = llvm::Type::getInt32Ty(TheContext);
 
+    // function decl
     {
         auto FT1 = llvm::FunctionType::get(intTy, {}, false);
         llvm::Function::Create(FT1, llvm::Function::ExternalLinkage, "main", TheModule);
@@ -97,11 +71,7 @@ int main(int argc, char** argv)
         TheBuilder.CreateRet(phi);
         
     }
-    auto context = ASTContext{};
-
-    ExprList l1{context.ExprAlloc.allocExpr(new ExprInt{1})};
-    ExprList l2{context.ExprAlloc.allocExpr(new ExprInt{1})};
-    l2 = l1;
+    
     
 
     TheModule.print(llvm::outs(), nullptr);
