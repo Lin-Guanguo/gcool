@@ -1,42 +1,7 @@
-#include <iostream>
+// TODO
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/ADT/STLExtras.h"
-#include "gcool/AST/Expr.h"
-#include "gcool/AST/AST.h"
-#include "gcool/Parser/Parser.h"
-#include "gcool/Lexer/Lexer.h"
 
-using namespace gcool;
-using namespace gcool::ast;
-
-void TestHelper(const char* input, ast::ASTContext& context, ast::ClassList& expect) {
-    yyscan_t scanner;
-    yylex_init(&scanner);
-    yy_scan_string(input, scanner);
-    Parser parser{scanner, &context};
-    parser.parse();
-    llvm::outs() << (expect == context.Classes);
-}
-
-void test() {
-    ast::ASTContext context;
-    const char* input = 
-    R"(
-        class Main
-        {
-
-        };
-        class help_class{ };
-    )";
-
-    ast::ClassList expect{
-        Class{ context.Symtbl.get("Main"), context.Symtbl.getObject() },
-        Class{ context.Symtbl.get("help_class"), context.Symtbl.getObject() }
-    };
-    TestHelper(input, context, expect);
-}
 
 int main(int argc, char** argv) 
 {
@@ -97,12 +62,6 @@ int main(int argc, char** argv)
         TheBuilder.CreateRet(phi);
         
     }
-    auto context = ASTContext{};
-
-    ExprList l1{context.ExprAlloc.allocExpr(new ExprInt{1})};
-    ExprList l2{context.ExprAlloc.allocExpr(new ExprInt{1})};
-    l2 = l1;
-    
 
     TheModule.print(llvm::outs(), nullptr);
 }

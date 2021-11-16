@@ -8,6 +8,28 @@
 namespace gcool{
 namespace ast{
 
+struct LetInit {
+    Symbol Name;
+    Symbol Type;
+    OptionalExpr InitVal;
+public:
+    LetInit(Symbol name, Symbol type, OptionalExpr initVal)
+        : Name(name), Type(type), InitVal(initVal) {}
+    bool operator==(const LetInit&) const = default;
+};
+
+struct CaseBranch {
+    Symbol Name;
+    Symbol Type;
+    Expr Body;
+    CaseBranch(Symbol name, Symbol type, Expr body)
+        : Name(name), Type(type), Body(body) {}
+public:
+    bool operator==(const CaseBranch&) const = default;
+};
+
+using CaseBranchList = std::vector<CaseBranch>;
+using LetInitList = std::vector<LetInit>;
 
 class ExprBase {
 public:
@@ -140,16 +162,6 @@ public:
     bool operator==(const ExprLoop&) const = default;
 };
 
-struct CaseBranch {
-    Symbol Name;
-    Symbol Type;
-    Expr Body;
-    CaseBranch(Symbol name, Symbol type, Expr body)
-        : Name(name), Type(type), Body(body) {}
-public:
-    bool operator==(const CaseBranch&) const = default;
-};
-
 class ExprCase : public ExprFacility<ExprCase> {
 public:
     static constexpr ExprKind TheKind = EK_CASE;
@@ -169,16 +181,6 @@ public:
     ExprBlock(ExprList&& exprs)
         : Exprs(std::move(exprs)) {}
     bool operator==(const ExprBlock&) const = default;
-};
-
-struct LetInit {
-    Symbol Name;
-    Symbol Type;
-    OptionalExpr InitVal;
-public:
-    LetInit(Symbol name, Symbol type, OptionalExpr initVal)
-        : Name(name), Type(type), InitVal(initVal) {}
-    bool operator==(const LetInit&) const = default;
 };
 
 class ExprLet : public ExprFacility<ExprLet> {
@@ -217,6 +219,11 @@ public:
         OP_SUB,
         OP_MUL,
         OP_DIV,
+        OP_EQ,
+        OP_LE,
+        OP_LT,
+        OP_GE,
+        OP_GT,
     };
     Expr Left;
     Expr Right;

@@ -10,11 +10,7 @@ namespace ast{
 
 class ExprBase;
 class Expr;
-struct CaseBranch;
-struct LetInit;
 using OptionalExpr = std::optional<Expr>;
-using CaseBranchList = std::vector<CaseBranch>;
-using LetInitList = std::vector<LetInit>;
 using ExprList = std::vector<Expr>;
 
 class ExprAllocator {
@@ -39,8 +35,8 @@ public:
     bool operator==(Expr t) const;
     ExprBase& operator*();
     ExprBase* operator->();
+    void replace(Expr e) { TheExpr = e.TheExpr; }
 };
-
 
 }
 }

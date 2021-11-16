@@ -15,7 +15,6 @@ using ClassList = std::vector<Class>;
 using AttrList = std::vector<AttrFeature>;
 using MethodList = std::vector<MethodFeature>;
 using FormalList = std::vector<FormalDecl>;
-using OptionalInherit = std::optional<Symbol>;
 
 class FormalDecl {
 public:
@@ -54,10 +53,10 @@ public:
     Symbol Name;
     AttrList Attrs;
     MethodList Methods;
-    OptionalInherit Inheirt;
+    Symbol Inheirt;
 public:
-    Class(Symbol name) : Name(name) {}
-    Class(Symbol name, AttrList&& attrs, MethodList&& methods, OptionalInherit inheirt) 
+    Class(Symbol name, Symbol inheirt) : Name(name), Inheirt(inheirt) {}
+    Class(Symbol name, AttrList&& attrs, MethodList&& methods, Symbol inheirt) 
         : Name(name), Attrs(attrs), Methods(methods), Inheirt(inheirt) {}
     bool operator==(const Class&) const = default;
 };
@@ -66,7 +65,7 @@ class ASTContext {
 public:
     ClassList Classes;
     SymbolTable Symtbl;
-    ExprAllocator TheExprAllocator;
+    ExprAllocator ExprAlloc;
 public:
 
 };

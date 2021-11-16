@@ -12,6 +12,7 @@
     #include <string>
     #include <optional>
     #include "gcool/AST/AST.h"
+    #include "gcool/AST/Expr.h"
     typedef void* yyscan_t;
 
     template<typename T>
@@ -32,6 +33,7 @@
 
 
 %{
+    #include "gcool/AST/AST.h"
     #include "gcool/AST/Expr.h"
     using namespace gcool::ast;
 %}
@@ -44,11 +46,10 @@
 %token<double> FLOAT
 
 // Type Without default Constructor should wrap with NoneInitHolder
-%type<NoneInitHolder<gcool::ast::Symbol>> symbol 
+%type<NoneInitHolder<gcool::ast::Symbol>> symbol inherits
 %type<NoneInitHolder<gcool::ast::FormalDecl>> formal
 %type<NoneInitHolder<gcool::ast::Expr>> expr
 %type<NoneInitHolder<gcool::ast::Class>> class features
-%type<gcool::ast::OptionalInherit> inherits 
 %type<gcool::ast::OptionalExpr> optional_assign
 %type<gcool::ast::ClassList> class_seq
 %type<gcool::ast::FormalList> params params_
@@ -77,7 +78,7 @@ class_seq:                          { $$ = ClassList{}; }
 class: CLASS symbol inherits LB features RB { $$ = std::move($5); $$->Inheirt = $3; $$->Name = $2; }
     ;
 
-inherits:               { $$ = OptionalInherit{}; }
+inherits:               { $$ = context->Symtbl.getObject(); }
     | INHERITS symbol   { $$ = $2; }
     ;
 
@@ -87,7 +88,7 @@ symbol: SYMBOL  { $$ = context->Symtbl.get($1); }
 formal: symbol COLON symbol { $$ = FormalDecl{$1, $3}; }
     ;
 
-features:   { $$ = Class{context->Symtbl.getHolder()}; }
+features:   { $$ = Class{context->Symtbl.getHolder(), context->Symtbl.getHolder()}; }
     | features formal optional_assign SEMICOLON  { $$ = std::move($1); $$->Attrs.push_back(AttrFeature{$2, $3}); }
     | features symbol LP params RP COLON symbol LB expr RB SEMICOLON    { $$ = std::move($1); $$->Methods.push_back(MethodFeature{$2, $7, std::move($4), $9}); }
     ;
@@ -104,35 +105,35 @@ params_: formal             { $$ = FormalList{}; $$.push_back($1); }
     | params_ COMMA formal  { $$ = std::move($1); $$.push_back($3); }
     ;
 
-expr: symbol    { $$ = context->TheExprAllocator.allocExpr(new ExprSymbol($1)); }
-    | TRUE      { $$ = context->TheExprAllocator.allocExpr(new ExprBool(true)); }
-    | FALSE     { $$ = context->TheExprAllocator.allocExpr(new ExprBool(false)); }
-    | INT       { $$ = context->TheExprAllocator.allocExpr(new ExprInt($1)); }
-    | FLOAT     { $$ = context->TheExprAllocator.allocExpr(new ExprFloat($1)); }
-    | STR       { $$ = context->TheExprAllocator.allocExpr(new ExprString($1)); }
-    // | symbol ASSIGN expr
-    // | expr DOT symbol LP args RP
-    // | expr AT symbol DOT symbol LP args RP
-    // | symbol LP args RP
-    // | IF expr THEN expr ELSE expr FI
-    // | WHILE expr LOOP expr POOL
-    // | LB block_exprs RB
-    // | LET let_init_exprs IN expr
-    // | CASE expr OF case_branchs ESAC
-    // | NEW symbol
-    // | ISVOID expr
-    // | NOT expr
-    // | expr ADD expr
-    // | expr SUB expr
-    // | expr MUL expr
-    // | expr DIV expr
-    // | expr EQ expr
-    // | expr LE expr
-    // | expr LT expr
-    // | expr GE expr
-    // | expr GT expr
-    // | LP expr RP
-    // ;
+expr: symbol    { $$ = context->ExprAlloc.allocExpr(new ExprSymbol($1)); }
+    | TRUE      { $$ = context->ExprAlloc.allocExpr(new ExprBool(true)); }
+    | FALSE     { $$ = context->ExprAlloc.allocExpr(new ExprBool(false)); }
+    | INT       { $$ = context->ExprAlloc.allocExpr(new ExprInt($1)); }
+    | FLOAT     { $$ = context->ExprAlloc.allocExpr(new ExprFloat($1)); }
+    | STR       { $$ = context->ExprAlloc.allocExpr(new ExprString($1)); }
+    | symbol ASSIGN expr            { $$ = context->ExprAlloc.allocExpr(new ExprAssign($1, $3)); }
+    | expr DOT symbol LP args RP    { $$ = context->ExprAlloc.allocExpr(new ExprDispatch($1, $3, std::move($5))); }
+    | expr AT symbol DOT symbol LP args RP  { $$ = context->ExprAlloc.allocExpr(new ExprStaticDispatch($1, $3, $5, std::move($7))); }
+    | symbol LP args RP                     { $$ = context->ExprAlloc.allocExpr(new ExprDispatch(context->ExprAlloc.allocExpr(new ExprSelf()), $1, std::move($3))); }
+    | IF expr THEN expr ELSE expr FI        { $$ = context->ExprAlloc.allocExpr(new ExprCond($2, $4, std::move($6))); }
+    | WHILE expr LOOP expr POOL         { $$ = context->ExprAlloc.allocExpr(new ExprLoop($2, $4)); }
+    | LB block_exprs RB                 { $$ = context->ExprAlloc.allocExpr(new ExprBlock(std::move($2))); }
+    | LET let_init_exprs IN expr        { $$ = context->ExprAlloc.allocExpr(new ExprLet(std::move($2), $4)); }
+    | CASE expr OF case_branchs ESAC    { $$ = context->ExprAlloc.allocExpr(new ExprCase($2, std::move($4))); }
+    | NEW symbol    { $$ = context->ExprAlloc.allocExpr(new ExprNew($2)); }
+    | ISVOID expr   { $$ = context->ExprAlloc.allocExpr(new ExprArithU($2, ExprArithU::OP_ISVOID)); }
+    | NOT expr      { $$ = context->ExprAlloc.allocExpr(new ExprArithU($2, ExprArithU::OP_NOT)); }
+    | expr ADD expr { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_ADD)); }
+    | expr SUB expr { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_SUB)); }
+    | expr MUL expr { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_MUL)); }
+    | expr DIV expr { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_DIV)); }
+    | expr EQ expr  { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_EQ)); }
+    | expr LE expr  { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_LE)); }
+    | expr LT expr  { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_LT)); }
+    | expr GE expr  { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_GE)); }
+    | expr GT expr  { $$ = context->ExprAlloc.allocExpr(new ExprArithB($1, $3, ExprArithB::OP_GT)); }
+    | LP expr RP    { $$ = $2; }
+    ;
 
 args:           { $$ = ExprList{}; }
     | args_     { $$ = std::move($1); }
@@ -143,15 +144,15 @@ args_: expr             { $$ = ExprList{}; $$.push_back($1); }
     ;
 
 block_exprs: expr SEMICOLON         { $$ = ExprList{}; $$.push_back($1); }
-    | block_exprs expr SEMICOLON    { $$ = std::move($1); $$.push_back($1); }
+    | block_exprs expr SEMICOLON    { $$ = std::move($1); $$.push_back($2); }
     ;
 
-let_init_exprs: symbol COLON symbol optional_assign             { $$ = LetInitList{}; $$.push_back($1, $3, $4); }
-    | let_init_exprs COMMA symbol COLON symbol optional_assign  { $$ = std::move($1); $$.push_back($3, $5, $6); }
+let_init_exprs: symbol COLON symbol optional_assign             { $$ = LetInitList{}; $$.push_back({$1, $3, $4}); }
+    | let_init_exprs COMMA symbol COLON symbol optional_assign  { $$ = std::move($1); $$.push_back({$3, $5, $6}); }
     ;
 
-case_branchs: symbol COLON symbol ARROW expr SEMICOLON          { $$ = CaseBranchList{}; $$.push_back($1, $3, $5); }
-    | case_branchs symbol COLON symbol ARROW expr SEMICOLON     { $$ = std::move($1); $$.push_back($2, $4, $6); }
+case_branchs: symbol COLON symbol ARROW expr SEMICOLON          { $$ = CaseBranchList{}; $$.push_back({$1, $3, $5}); }
+    | case_branchs symbol COLON symbol ARROW expr SEMICOLON     { $$ = std::move($1); $$.push_back({$2, $4, $6}); }
     ;
 
 
