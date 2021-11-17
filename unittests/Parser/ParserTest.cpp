@@ -578,15 +578,19 @@ TEST(ParserTest, ExprLetTest) {
                         ExprLet(
                             LetInitList{
                                 LetInit(
-                                    SYMTBL.get("s1"),
-                                    SYMTBL.getString(),
+                                    FormalDecl(
+                                        SYMTBL.get("s1"),
+                                        SYMTBL.getString()
+                                    ),
                                     ALLOC_EXPR(
                                         ExprString("hello")
                                     )
                                 ),
                                 LetInit(
-                                    SYMTBL.get("s2"),
-                                    SYMTBL.getString(),
+                                    FormalDecl(
+                                        SYMTBL.get("s2"),
+                                        SYMTBL.getString()
+                                    ),
                                     ALLOC_EXPR(
                                         ExprString("world")
                                     )

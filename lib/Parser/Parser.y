@@ -147,8 +147,8 @@ block_exprs: expr SEMICOLON         { $$ = ExprList{}; $$.push_back($1); }
     | block_exprs expr SEMICOLON    { $$ = std::move($1); $$.push_back($2); }
     ;
 
-let_init_exprs: symbol COLON symbol optional_assign             { $$ = LetInitList{}; $$.push_back({$1, $3, $4}); }
-    | let_init_exprs COMMA symbol COLON symbol optional_assign  { $$ = std::move($1); $$.push_back({$3, $5, $6}); }
+let_init_exprs: formal optional_assign             { $$ = LetInitList{}; $$.push_back({$1, $2}); }
+    | let_init_exprs COMMA formal optional_assign  { $$ = std::move($1); $$.push_back({$3, $4}); }
     ;
 
 case_branchs: symbol COLON symbol ARROW expr SEMICOLON          { $$ = CaseBranchList{}; $$.push_back({$1, $3, $5}); }

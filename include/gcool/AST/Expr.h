@@ -4,17 +4,17 @@
 #include "llvm/Support/Casting.h"
 #include "gcool/AST/Symbol.h"
 #include "gcool/AST/ExprFwd.h"
+#include "gcool/AST/AST.h"
 
 namespace gcool{
 namespace ast{
 
 struct LetInit {
-    Symbol Name;
-    Symbol Type;
-    OptionalExpr InitVal;
+    FormalDecl Formal;
+    OptionalExpr Init;
 public:
-    LetInit(Symbol name, Symbol type, OptionalExpr initVal)
-        : Name(name), Type(type), InitVal(initVal) {}
+    LetInit(FormalDecl formal, OptionalExpr initVal)
+        : Formal(formal), Init(initVal) {}
     bool operator==(const LetInit&) const = default;
 };
 
