@@ -88,7 +88,7 @@ symbol: SYMBOL  { $$ = context->Symtbl.get($1); }
 formal: symbol COLON symbol { $$ = FormalDecl{$1, $3}; }
     ;
 
-features:   { $$ = Class{context->Symtbl.getHolder(), context->Symtbl.getHolder()}; }
+features:   { $$ = Class{ Symbol::EmptySymbol, Symbol::EmptySymbol }; }
     | features formal optional_assign SEMICOLON  { $$ = std::move($1); $$->Attrs.push_back(AttrFeature{$2, $3}); }
     | features symbol LP params RP COLON symbol LB expr RB SEMICOLON    { $$ = std::move($1); $$->Methods.push_back(MethodFeature{$2, $7, std::move($4), $9}); }
     ;

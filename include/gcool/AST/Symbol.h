@@ -6,7 +6,6 @@
 namespace gcool{
 namespace ast{
 
-
 class Symbol {
 private:
     const char* s;
@@ -14,9 +13,12 @@ private:
     friend class SymbolTable;
 public:
     using SymbolID = std::intptr_t;
-    std::string_view get_name() const { return { s }; }
-    SymbolID get_id() const { return reinterpret_cast<SymbolID>(s); };
+    std::string_view getName() const { return { s }; }
+    SymbolID getID() const { return reinterpret_cast<SymbolID>(s); };
+    bool isEmpty() const { return s == nullptr; }
     bool operator==(const Symbol& t) const = default;
+    
+    static const Symbol EmptySymbol;
 };
 
 class SymbolTable {
@@ -31,9 +33,16 @@ public:
     Symbol getBool() { return get("Bool"); }
     Symbol getString() { return get("String"); }
     Symbol getObject() { return get("Object"); }
-    Symbol getHolder() { return get("Holder"); }
     ~SymbolTable();
 };
 
 }
+}
+
+namespace std {
+template<> struct hash<gcool::ast::Symbol> {
+    std::size_t operator()(const gcool::ast::Symbol& s) const noexcept {
+        return std::hash<void*>{}(reinterpret_cast<void*>(s.getID()));
+    }
+};
 }

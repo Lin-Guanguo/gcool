@@ -1,0 +1,9 @@
+#ifndef ERROR_KIND_DEF
+#define ERROR_KIND_DEF(ID, LEVEL, MESSAGE)
+#endif
+
+ERROR_KIND_DEF(Sema_RedefineClass, ERROR, "Redefine of Class: ")
+ERROR_KIND_DEF(Sema_LoopInherit, ERROR, "Loop Inherit Class: ")
+ERROR_KIND_DEF(Sema_ExprTypeError, ERROR, "Expr Type Error: ")
+
+#undef ERROR_KIND_DEF

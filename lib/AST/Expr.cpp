@@ -13,13 +13,25 @@ gcool::ast::ExprBase* gcool::ast::Expr::operator->() {
     return TheExpr; 
 }
 
+void gcool::ast::Expr::accept(ExprVisitor& visitor) {
+    switch (TheExpr->getKind()) {
+        #define EXPR_KIND_DEF(EK, CLASS)    \
+            case gcool::ast::ExprBase::EK:  \
+                visitor(*this, llvm::cast<CLASS>(*(this->TheExpr))); break;
+        #include "gcool/AST/ExprKindDef.def"
+        default:
+            assert(0 && "never reached case");
+    }
+}
+
 gcool::ast::Expr gcool::ast::ExprAllocator::allocExpr(ExprBase* e) {
+    FreeList.push_back(e);
     return Expr{e};
 }
 
 gcool::ast::ExprAllocator::~ExprAllocator() {
     for(auto i : this->FreeList){
-        delete i.TheExpr;
+        delete i;
     }
 }
 

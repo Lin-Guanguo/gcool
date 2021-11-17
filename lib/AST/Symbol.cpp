@@ -1,6 +1,8 @@
 #include <algorithm>
 #include "gcool/AST/Symbol.h"
 
+const gcool::ast::Symbol gcool::ast::Symbol::EmptySymbol = nullptr;
+
 gcool::ast::Symbol gcool::ast::SymbolTable::get(std::string_view literal)
 {
     auto p = Table.find(literal);

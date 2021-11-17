@@ -11,10 +11,11 @@ int main(int argc, char** argv)
 
     auto v1 = llvm::ConstantInt::get(TheContext, llvm::APInt(32, 10));
     auto v2 = llvm::ConstantInt::get(TheContext, llvm::APInt(32, 20));
-    auto add1 = TheBuilder.CreateAdd(v1, v2, "add");
+    // auto add1 = TheBuilder.CreateAdd(v1, v2, "add");
 
     auto intTy = llvm::Type::getInt32Ty(TheContext);
 
+    // function decl
     {
         auto FT1 = llvm::FunctionType::get(intTy, {}, false);
         llvm::Function::Create(FT1, llvm::Function::ExternalLinkage, "main", TheModule);
@@ -62,6 +63,8 @@ int main(int argc, char** argv)
         TheBuilder.CreateRet(phi);
         
     }
+    
+    
 
     TheModule.print(llvm::outs(), nullptr);
 }

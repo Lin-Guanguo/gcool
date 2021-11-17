@@ -10,4 +10,5 @@ target_include_directories(Sema
 target_link_libraries(Sema
     PUBLIC
     AST
+    Basic
 )

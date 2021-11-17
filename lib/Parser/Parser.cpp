@@ -1079,7 +1079,7 @@ namespace gcool {
 
   case 10: // features: %empty
 #line 91 "Parser.y"
-            { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = Class{context->Symtbl.getHolder(), context->Symtbl.getHolder()}; }
+            { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = Class{ Symbol::EmptySymbol, Symbol::EmptySymbol }; }
 #line 1084 "Parser.cpp"
     break;
 
