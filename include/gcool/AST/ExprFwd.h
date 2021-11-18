@@ -3,7 +3,6 @@
 #include <vector>
 
 namespace gcool {
-
 namespace sema {
     class ExprAnnotation;
 }

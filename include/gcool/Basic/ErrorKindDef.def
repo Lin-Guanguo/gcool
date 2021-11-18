@@ -4,6 +4,42 @@
 
 ERROR_KIND_DEF(Sema_RedefineClass, ERROR, "Redefine of Class: ")
 ERROR_KIND_DEF(Sema_LoopInherit, ERROR, "Loop Inherit Class: ")
-ERROR_KIND_DEF(Sema_ExprTypeError, ERROR, "Expr Type Error: ")
+
+ERROR_KIND_DEF(Sema_DeclUndefinedType, ERROR, "Undefine Type: ")
+ERROR_KIND_DEF(Sema_DeclInitExprError, ERROR, "declaration init vlaue expr error: ")
+
+ERROR_KIND_DEF(Sema_AttriMultiDefine, ERROR, "")
+ERROR_KIND_DEF(Sema_MethodMultiDefine, ERROR, "")
+
+ERROR_KIND_DEF(Sema_MethodUndefinedRetType, ERROR, "")
+ERROR_KIND_DEF(Sema_MethodUndefinedParamType, ERROR, "")
+ERROR_KIND_DEF(Sema_MethodBodyExprError, ERROR, "")
+
+
+ERROR_KIND_DEF(Sema_DeclTypeNotFound, ERROR, "")
+ERROR_KIND_DEF(Sema_DeclInitTypeIncompatible, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprSymbolNotDefine, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprSymbolTypeDefine, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprAssignVariableNotDecl, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprAssignVariableTypeError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprAssignExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprAssignTypeIncompatible, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprDispatchCalleeExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprDispatchMethodUnknow, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprDispatchArgsExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprDispatchArgsNumberError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprDispatchArgsTypeError, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprStaticDispatchTypeUnkonw, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprStaticDispatchInheritError, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprCondConditionError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprCondBranchError, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprLoopConditionError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprLoopBodyError, ERROR, "")
+
 
 #undef ERROR_KIND_DEF
