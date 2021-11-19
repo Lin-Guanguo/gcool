@@ -1133,163 +1133,163 @@ namespace gcool {
 
   case 19: // expr: symbol
 #line 108 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprSymbol(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprSymbol(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
 #line 1138 "Parser.cpp"
     break;
 
   case 20: // expr: TRUE
 #line 109 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprBool(true)); }
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBool(true)); }
 #line 1144 "Parser.cpp"
     break;
 
   case 21: // expr: FALSE
 #line 110 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprBool(false)); }
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBool(false)); }
 #line 1150 "Parser.cpp"
     break;
 
   case 22: // expr: INT
 #line 111 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprInt(yystack_[0].value.as < int > ())); }
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprInt(yystack_[0].value.as < int > ())); }
 #line 1156 "Parser.cpp"
     break;
 
   case 23: // expr: FLOAT
 #line 112 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprFloat(yystack_[0].value.as < double > ())); }
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprFloat(yystack_[0].value.as < double > ())); }
 #line 1162 "Parser.cpp"
     break;
 
   case 24: // expr: STR
 #line 113 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprString(yystack_[0].value.as < std::string > ())); }
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprString(yystack_[0].value.as < std::string > ())); }
 #line 1168 "Parser.cpp"
     break;
 
   case 25: // expr: symbol ASSIGN expr
 #line 114 "Parser.y"
-                                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprAssign(yystack_[2].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
+                                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprAssign(yystack_[2].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
 #line 1174 "Parser.cpp"
     break;
 
   case 26: // expr: expr DOT symbol LP args RP
 #line 115 "Parser.y"
-                                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprDispatch(yystack_[5].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
+                                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprDispatch(yystack_[5].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
 #line 1180 "Parser.cpp"
     break;
 
   case 27: // expr: expr AT symbol DOT symbol LP args RP
 #line 116 "Parser.y"
-                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprStaticDispatch(yystack_[7].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
+                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprStaticDispatch(yystack_[7].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
 #line 1186 "Parser.cpp"
     break;
 
   case 28: // expr: symbol LP args RP
 #line 117 "Parser.y"
-                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprDispatch(context->ExprAlloc.allocExpr(new ExprSelf()), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
+                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprDispatch(context->ExprAlloc.allocExpr(ExprSelf()), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
 #line 1192 "Parser.cpp"
     break;
 
   case 29: // expr: IF expr THEN expr ELSE expr FI
 #line 118 "Parser.y"
-                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprCond(yystack_[5].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()))); }
+                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprCond(yystack_[5].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()))); }
 #line 1198 "Parser.cpp"
     break;
 
   case 30: // expr: WHILE expr LOOP expr POOL
 #line 119 "Parser.y"
-                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprLoop(yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
+                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprLoop(yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
 #line 1204 "Parser.cpp"
     break;
 
   case 31: // expr: LB block_exprs RB
 #line 120 "Parser.y"
-                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprBlock(std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
+                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBlock(std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
 #line 1210 "Parser.cpp"
     break;
 
   case 32: // expr: LET let_init_exprs IN expr
 #line 121 "Parser.y"
-                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprLet(std::move(yystack_[2].value.as < gcool::ast::LetInitList > ()), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
+                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprLet(std::move(yystack_[2].value.as < gcool::ast::LetInitList > ()), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
 #line 1216 "Parser.cpp"
     break;
 
   case 33: // expr: CASE expr OF case_branchs ESAC
 #line 122 "Parser.y"
-                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprCase(yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), std::move(yystack_[1].value.as < gcool::ast::CaseBranchList > ()))); }
+                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprCase(yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), std::move(yystack_[1].value.as < gcool::ast::CaseBranchList > ()))); }
 #line 1222 "Parser.cpp"
     break;
 
   case 34: // expr: NEW symbol
 #line 123 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprNew(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprNew(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
 #line 1228 "Parser.cpp"
     break;
 
   case 35: // expr: ISVOID expr
 #line 124 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithU(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithU::OP_ISVOID)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithU(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithU::OP_ISVOID)); }
 #line 1234 "Parser.cpp"
     break;
 
   case 36: // expr: NOT expr
 #line 125 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithU(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithU::OP_NOT)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithU(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithU::OP_NOT)); }
 #line 1240 "Parser.cpp"
     break;
 
   case 37: // expr: expr ADD expr
 #line 126 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_ADD)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_ADD)); }
 #line 1246 "Parser.cpp"
     break;
 
   case 38: // expr: expr SUB expr
 #line 127 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_SUB)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_SUB)); }
 #line 1252 "Parser.cpp"
     break;
 
   case 39: // expr: expr MUL expr
 #line 128 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_MUL)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_MUL)); }
 #line 1258 "Parser.cpp"
     break;
 
   case 40: // expr: expr DIV expr
 #line 129 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_DIV)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_DIV)); }
 #line 1264 "Parser.cpp"
     break;
 
   case 41: // expr: expr EQ expr
 #line 130 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_EQ)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_EQ)); }
 #line 1270 "Parser.cpp"
     break;
 
   case 42: // expr: expr LE expr
 #line 131 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_LE)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_LE)); }
 #line 1276 "Parser.cpp"
     break;
 
   case 43: // expr: expr LT expr
 #line 132 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_LT)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_LT)); }
 #line 1282 "Parser.cpp"
     break;
 
   case 44: // expr: expr GE expr
 #line 133 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_GE)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_GE)); }
 #line 1288 "Parser.cpp"
     break;
 
   case 45: // expr: expr GT expr
 #line 134 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_GT)); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_GT)); }
 #line 1294 "Parser.cpp"
     break;
 
@@ -1301,7 +1301,7 @@ namespace gcool {
 
   case 47: // expr: SELF
 #line 136 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprSelf()); }
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprSelf()); }
 #line 1306 "Parser.cpp"
     break;
 

@@ -6,7 +6,7 @@
 
 using namespace gcool;
 using namespace gcool::ast;
-#define ALLOC_EXPR(Init) context.ExprAlloc.allocExpr(new Init)
+#define ALLOC_EXPR(Init) context.ExprAlloc.allocExpr(Init)
 #define SYMTBL context.Symtbl
 
 void TestHelper(const char* input, ast::ASTContext& context, ast::ClassList& expect) {

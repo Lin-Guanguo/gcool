@@ -24,11 +24,6 @@ void gcool::ast::Expr::accept(ExprVisitor& visitor) {
     }
 }
 
-gcool::ast::Expr gcool::ast::ExprAllocator::allocExpr(ExprBase* e) {
-    FreeList.push_back(e);
-    return Expr{e};
-}
-
 gcool::ast::ExprAllocator::~ExprAllocator() {
     for(auto i : this->FreeList){
         delete i;

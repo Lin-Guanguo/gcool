@@ -248,28 +248,28 @@ public:
     
 public:
     void operator()(Expr& ExprAnnot, ExprInt& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprIntAnnotation>();
         annot->hasError = false;
         annot->Type = GETCLASS(SYMTBL.getInt());
         ExprAnnot.Annotation = annot;
     }
 
     void operator()(Expr& ExprAnnot, ExprFloat& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprFloatAnnotation>();
         annot->Type = GETCLASS(SYMTBL.getFloat());
         annot->hasError = false;
         ExprAnnot.Annotation = annot;
     }
 
     void operator()(Expr& ExprAnnot, ExprBool& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprBoolAnnotation>();
         annot->hasError = false;
         annot->Type = GETCLASS(SYMTBL.getBool());
         ExprAnnot.Annotation = annot;
     }
 
     void operator()(Expr& ExprAnnot, ExprString& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprStringAnnotation>();
         annot->hasError = false;
         annot->Type = GETCLASS(SYMTBL.getString());
         ExprAnnot.Annotation = annot;
@@ -300,7 +300,7 @@ public:
     // check variable declaration, get Type
     // check ExprAnnot to assign
     void operator()(Expr& ExprAnnot, ExprAssign& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprAssignAnnotation>();
         annot->hasError = false;
         auto decl = TheScope->searchVariable(expr.Variable);
         if (!decl.Scope) {
@@ -401,7 +401,7 @@ public:
 
     // most copy from dispatch
     void operator()(Expr& ExprAnnot, ExprStaticDispatch& expr) {
-        auto annot = TheSema.allocAnnotation<ExprDidpatchAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprStaticDidpatchAnnotation>();
         expr.Callee.accept(*this);
         if (expr.Callee.Annotation->hasError) {
             annot->hasError = true;
@@ -473,7 +473,7 @@ public:
     }
 
     void operator()(Expr& ExprAnnot, ExprCond& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprCondAnnotation>();
         expr.Cond.accept(*this);
         expr.ThenBranch.accept(*this);
         expr.ElseBranch.accept(*this);
@@ -498,7 +498,7 @@ public:
     }
 
     void operator()(Expr& ExprAnnot, ExprLoop& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprLoopAnnotation>();
         expr.Cond.accept(*this);
         expr.LoopBody.accept(*this);
         if (expr.Cond.Annotation->hasError
@@ -517,8 +517,8 @@ public:
     }
 
     void operator()(Expr& ExprAnnot, ExprCase& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
-        
+        auto annot = TheSema.allocAnnotation<ExprCaseAnnotation>();
+
     }
 
     void operator()(Expr& ExprAnnot, ExprBlock& expr) {
@@ -530,7 +530,7 @@ public:
     }
 
     void operator()(Expr& ExprAnnot, ExprNew& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprNewAnnotation>();
         annot->hasError = false;
         annot->Type = GETCLASS(expr.Type);
         if (!annot->Type) {
@@ -542,7 +542,7 @@ public:
     }
 
     void operator()(Expr& ExprAnnot, ExprSelf& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAnnotation>();
+        auto annot = TheSema.allocAnnotation<ExprSelfAnnotation>();
         annot->Type = GETCLASS(SYMTBL.getSelfType());
         annot->hasError = false;
         ExprAnnot.Annotation = annot;

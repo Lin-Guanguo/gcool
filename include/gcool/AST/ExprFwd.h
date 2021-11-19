@@ -14,19 +14,12 @@ namespace ast {
 
 class ExprBase;
 class Expr;
+class ExprAllocator;
 class ExprVisitor;
 using OptionalExpr = std::optional<Expr>;
 using ExprList = std::vector<Expr>;
 using ExprBaseList = std::vector<ExprBase*>;
 
-class ExprAllocator {
-private:
-    ExprBaseList FreeList;
-public:
-    ExprAllocator() {}
-    Expr allocExpr(ExprBase* e);
-    ~ExprAllocator();
-};
 
 class Expr {
 private:
@@ -45,6 +38,20 @@ public:
     ExprBase* operator->();
     void replace(Expr e) { TheExpr = e.TheExpr; }
     void accept(ExprVisitor& visitor);
+};
+
+class ExprAllocator {
+private:
+    ExprBaseList FreeList;
+public:
+    ExprAllocator() {}
+    template<typename T>
+    Expr allocExpr(T&& e) {
+        auto p = new T(std::forward<T>(e));
+        FreeList.push_back(p);
+        return Expr(p);
+    }
+    ~ExprAllocator();
 };
 
 class ExprVisitor {

@@ -100,11 +100,40 @@ protected:
     friend class Sema;
 };
 
+
 class ExprAnnotation : public Annotation {
 public:
     ast::Class* Type = nullptr;
 protected:
     ExprAnnotation() {}
+    friend class Sema;
+};
+
+class ExprIntAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprIntAnnotation() {}
+    friend class Sema;
+};
+
+class ExprFloatAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprFloatAnnotation() {}
+    friend class Sema;
+};
+
+class ExprBoolAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprBoolAnnotation() {}
+    friend class Sema;
+};
+
+class ExprStringAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprStringAnnotation() {}
     friend class Sema;
 };
 
@@ -117,12 +146,88 @@ protected:
     friend class Sema;
 };
 
+class ExprAssignAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprAssignAnnotation() {}
+    friend class Sema;
+};
+
 class ExprDidpatchAnnotation : public ExprAnnotation {
 public:
     ast::Class* ClassRef = nullptr;
     ast::MethodFeature* MethodRef = nullptr;
 protected:
     ExprDidpatchAnnotation() {}
+    friend class Sema;
+};
+
+class ExprStaticDidpatchAnnotation : public ExprDidpatchAnnotation {
+protected:
+    ExprStaticDidpatchAnnotation() {}
+    friend class Sema;
+};
+
+class ExprCondAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprCondAnnotation() {}
+    friend class Sema;
+};
+
+class ExprLoopAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprLoopAnnotation() {}
+    friend class Sema;
+};
+
+class ExprCaseAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprCaseAnnotation() {}
+    friend class Sema;
+};
+
+class ExprBlockAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprBlockAnnotation() {}
+    friend class Sema;
+};
+
+class ExprLetAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprLetAnnotation() {}
+    friend class Sema;
+};
+
+class ExprNewAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprNewAnnotation() {}
+    friend class Sema;
+};
+
+class ExprSelfAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprSelfAnnotation() {}
+    friend class Sema;
+};
+
+class ExprArithBAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprArithBAnnotation() {}
+    friend class Sema;
+};
+
+class ExprArithUAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprArithUAnnotation() {}
     friend class Sema;
 };
 
