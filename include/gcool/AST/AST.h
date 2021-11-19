@@ -79,7 +79,6 @@ public:
     ExprAllocator ExprAlloc;
     sema::ASTAnnotation* Annotation = nullptr;
 public:
-    ASTContext();
 
 };
 

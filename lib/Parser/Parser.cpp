@@ -1299,68 +1299,74 @@ namespace gcool {
 #line 1300 "Parser.cpp"
     break;
 
-  case 47: // args: %empty
-#line 138 "Parser.y"
-                { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; }
+  case 47: // expr: SELF
+#line 136 "Parser.y"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(new ExprSelf()); }
 #line 1306 "Parser.cpp"
     break;
 
-  case 48: // args: args_
+  case 48: // args: %empty
 #line 139 "Parser.y"
-                { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[0].value.as < gcool::ast::ExprList > ()); }
+                { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; }
 #line 1312 "Parser.cpp"
     break;
 
-  case 49: // args_: expr
-#line 142 "Parser.y"
-                        { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
+  case 49: // args: args_
+#line 140 "Parser.y"
+                { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[0].value.as < gcool::ast::ExprList > ()); }
 #line 1318 "Parser.cpp"
     break;
 
-  case 50: // args_: args_ COMMA expr
+  case 50: // args_: expr
 #line 143 "Parser.y"
-                        { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[2].value.as < gcool::ast::ExprList > ()); yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
+                        { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
 #line 1324 "Parser.cpp"
     break;
 
-  case 51: // block_exprs: expr SEMICOLON
-#line 146 "Parser.y"
-                                    { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
+  case 51: // args_: args_ COMMA expr
+#line 144 "Parser.y"
+                        { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[2].value.as < gcool::ast::ExprList > ()); yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
 #line 1330 "Parser.cpp"
     break;
 
-  case 52: // block_exprs: block_exprs expr SEMICOLON
+  case 52: // block_exprs: expr SEMICOLON
 #line 147 "Parser.y"
-                                    { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[2].value.as < gcool::ast::ExprList > ()); yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
+                                    { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
 #line 1336 "Parser.cpp"
     break;
 
-  case 53: // let_init_exprs: formal optional_assign
-#line 150 "Parser.y"
-                                                   { yylhs.value.as < gcool::ast::LetInitList > () = LetInitList{}; yylhs.value.as < gcool::ast::LetInitList > ().push_back({yystack_[1].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[0].value.as < gcool::ast::OptionalExpr > ()}); }
+  case 53: // block_exprs: block_exprs expr SEMICOLON
+#line 148 "Parser.y"
+                                    { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[2].value.as < gcool::ast::ExprList > ()); yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
 #line 1342 "Parser.cpp"
     break;
 
-  case 54: // let_init_exprs: let_init_exprs COMMA formal optional_assign
+  case 54: // let_init_exprs: formal optional_assign
 #line 151 "Parser.y"
-                                                   { yylhs.value.as < gcool::ast::LetInitList > () = std::move(yystack_[3].value.as < gcool::ast::LetInitList > ()); yylhs.value.as < gcool::ast::LetInitList > ().push_back({yystack_[1].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[0].value.as < gcool::ast::OptionalExpr > ()}); }
+                                                   { yylhs.value.as < gcool::ast::LetInitList > () = LetInitList{}; yylhs.value.as < gcool::ast::LetInitList > ().push_back({yystack_[1].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[0].value.as < gcool::ast::OptionalExpr > ()}); }
 #line 1348 "Parser.cpp"
     break;
 
-  case 55: // case_branchs: symbol COLON symbol ARROW expr SEMICOLON
-#line 154 "Parser.y"
-                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = CaseBranchList{}; yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+  case 55: // let_init_exprs: let_init_exprs COMMA formal optional_assign
+#line 152 "Parser.y"
+                                                   { yylhs.value.as < gcool::ast::LetInitList > () = std::move(yystack_[3].value.as < gcool::ast::LetInitList > ()); yylhs.value.as < gcool::ast::LetInitList > ().push_back({yystack_[1].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[0].value.as < gcool::ast::OptionalExpr > ()}); }
 #line 1354 "Parser.cpp"
     break;
 
-  case 56: // case_branchs: case_branchs symbol COLON symbol ARROW expr SEMICOLON
+  case 56: // case_branchs: symbol COLON symbol ARROW expr SEMICOLON
 #line 155 "Parser.y"
-                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = std::move(yystack_[6].value.as < gcool::ast::CaseBranchList > ()); yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = CaseBranchList{}; yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
 #line 1360 "Parser.cpp"
     break;
 
+  case 57: // case_branchs: case_branchs symbol COLON symbol ARROW expr SEMICOLON
+#line 156 "Parser.y"
+                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = std::move(yystack_[6].value.as < gcool::ast::CaseBranchList > ()); yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+#line 1366 "Parser.cpp"
+    break;
 
-#line 1364 "Parser.cpp"
+
+#line 1370 "Parser.cpp"
 
             default:
               break;
@@ -1556,20 +1562,20 @@ namespace gcool {
   const short
   Parser::yypact_[] =
   {
-    -105,     8,     9,  -105,   -19,   -21,  -105,    10,  -105,   -19,
-      -7,  -105,  -105,   -22,  -105,   -24,     2,   -19,   -19,   154,
-      -6,    -5,  -105,     3,    -3,  -105,   154,  -105,  -105,   154,
-     154,   -19,   154,   -19,   154,   154,   154,  -105,  -105,  -105,
-     -14,   375,  -105,     0,   -19,    78,   215,   375,     2,   -10,
-     252,  -105,   375,   341,   269,   115,   154,   154,   -19,   -19,
-     154,   154,   154,   154,   154,   154,   154,   154,   154,   -19,
-    -105,   154,   154,  -105,   154,   -19,   -19,  -105,  -105,  -105,
-     287,   375,   375,     4,    -2,    14,    24,    66,    66,    -1,
-      -1,    35,    35,    35,    35,    35,    18,   179,   233,   375,
-       2,    11,   -11,  -105,  -105,   154,   154,   -19,   154,   154,
-    -105,  -105,   -19,  -105,    12,   375,    20,    30,   358,   196,
-      41,   -19,  -105,   154,    28,  -105,   154,    45,    51,  -105,
-     305,   154,  -105,  -105,   323,  -105
+    -105,     7,    12,  -105,   -33,   -20,  -105,    10,  -105,   -33,
+      -7,  -105,  -105,   -22,  -105,   -24,     2,   -33,   -33,   156,
+     -11,    -6,  -105,     3,    -3,  -105,   156,  -105,  -105,   156,
+     156,   -33,   156,   -33,   156,   156,   156,  -105,  -105,  -105,
+    -105,   -12,   379,  -105,    -5,   -33,    79,   219,   379,     2,
+      -9,   256,  -105,   379,   345,   273,   116,   156,   156,   -33,
+     -33,   156,   156,   156,   156,   156,   156,   156,   156,   156,
+     -33,  -105,   156,   156,  -105,   156,   -33,   -33,  -105,  -105,
+    -105,   291,   379,   379,     9,    -2,    14,    24,    67,    67,
+       0,     0,    36,    36,    36,    36,    36,    18,   183,   237,
+     379,     2,    11,   -10,  -105,  -105,   156,   156,   -33,   156,
+     156,  -105,  -105,   -33,  -105,    16,   379,    20,    30,   362,
+     200,    29,   -33,  -105,   156,    28,  -105,   156,    43,    40,
+    -105,   309,   156,  -105,  -105,   327,  -105
   };
 
   const signed char
@@ -1578,155 +1584,155 @@ namespace gcool {
        3,     0,     2,     1,     0,     0,     8,     6,     4,     0,
        0,     7,    10,     0,     5,     0,    13,    15,     0,     0,
        0,     0,    17,     0,    16,     9,     0,    20,    21,     0,
-       0,     0,     0,     0,     0,     0,     0,    24,    22,    23,
-      19,    14,    11,     0,     0,     0,     0,    35,    13,     0,
-       0,    34,    36,     0,     0,     0,     0,    47,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,    47,    24,    22,
+      23,    19,    14,    11,     0,     0,     0,     0,    35,    13,
+       0,     0,    34,    36,     0,     0,     0,     0,    48,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      18,     0,     0,    53,     0,     0,     0,    46,    51,    31,
-       0,    25,    49,     0,    48,     0,     0,    37,    38,    39,
-      40,    41,    42,    44,    43,    45,     0,     0,     0,    32,
-      13,     0,     0,    52,    28,     0,    47,     0,     0,     0,
-      30,    54,     0,    33,     0,    50,     0,     0,     0,     0,
-       0,     0,    26,    47,     0,    29,     0,     0,     0,    12,
-       0,     0,    27,    55,     0,    56
+       0,    18,     0,     0,    54,     0,     0,     0,    46,    52,
+      31,     0,    25,    50,     0,    49,     0,     0,    37,    38,
+      39,    40,    41,    42,    44,    43,    45,     0,     0,     0,
+      32,    13,     0,     0,    53,    28,     0,    48,     0,     0,
+       0,    30,    55,     0,    33,     0,    51,     0,     0,     0,
+       0,     0,     0,    26,    48,     0,    29,     0,     0,     0,
+      12,     0,     0,    27,    56,     0,    57
   };
 
   const signed char
   Parser::yypgoto_[] =
   {
-    -105,  -105,  -105,  -105,  -105,    -4,   -16,  -105,   -44,  -105,
+    -105,  -105,  -105,  -105,  -105,    -4,   -15,  -105,   -48,  -105,
     -105,    13,  -104,  -105,  -105,  -105,  -105
   };
 
   const signed char
   Parser::yydefgoto_[] =
   {
-       0,     1,     2,     5,    10,    40,    16,    13,    20,    23,
-      24,    82,    83,    84,    55,    49,   102
+       0,     1,     2,     5,    10,    41,    16,    13,    20,    23,
+      24,    83,    84,    85,    56,    50,   103
   };
 
   const unsigned char
   Parser::yytable_[] =
   {
-       7,    22,   116,    74,    73,    11,    17,   113,     3,    15,
-      56,    14,     4,    21,    25,    48,    57,    18,     8,   128,
-       6,    58,    59,     6,     9,    12,    19,    21,    70,    51,
-      75,     6,    41,    42,    43,   104,    18,    44,   105,    45,
-      21,    69,    46,    47,   106,    50,   107,    52,    53,    54,
-     108,   122,   112,   121,    85,    86,   111,    58,    59,   100,
-     123,    60,    61,    62,    63,    96,   126,   129,    80,    81,
-     131,    21,   101,    87,    88,    89,    90,    91,    92,    93,
-      94,    95,   132,    71,    97,    98,     0,    99,    58,    59,
-       0,     0,     0,     0,    62,    63,     0,     0,   114,     0,
-      58,    59,     0,   117,    60,    61,    62,    63,   120,     0,
-       0,     0,    64,    65,    66,    67,    68,   127,   115,    26,
-       0,   118,   119,    27,    28,    29,     0,     0,     0,     0,
-      30,    31,    32,     0,    33,     0,    34,     0,     0,   130,
-       0,     0,     0,     0,   134,    35,     0,    36,    79,     0,
-       0,     0,     0,     0,     0,     0,     0,     6,    26,    37,
-      38,    39,    27,    28,    29,     0,     0,     0,     0,    30,
-      31,    32,     0,    33,     0,    34,     0,     0,     0,     0,
-       0,     0,     0,     0,    35,   109,    36,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     6,     0,    37,    38,
-      39,    58,    59,   125,     0,    60,    61,    62,    63,     0,
-       0,     0,     0,    64,    65,    66,    67,    68,    58,    59,
-       0,     0,    60,    61,    62,    63,    72,     0,     0,     0,
-      64,    65,    66,    67,    68,     0,     0,    58,    59,     0,
-       0,    60,    61,    62,    63,   110,     0,     0,     0,    64,
-      65,    66,    67,    68,     0,    58,    59,     0,     0,    60,
-      61,    62,    63,     0,     0,     0,     0,    64,    65,    66,
-      67,    68,    76,     0,    58,    59,     0,     0,    60,    61,
-      62,    63,     0,     0,     0,     0,    64,    65,    66,    67,
-      68,    58,    59,     0,     0,    60,    61,    62,    63,     0,
-       0,     0,     0,    64,    65,    66,    67,    68,    78,    58,
-      59,     0,     0,    60,    61,    62,    63,     0,     0,     0,
-       0,    64,    65,    66,    67,    68,   103,    58,    59,     0,
-       0,    60,    61,    62,    63,     0,     0,     0,     0,    64,
-      65,    66,    67,    68,   133,    58,    59,     0,     0,    60,
-      61,    62,    63,     0,     0,     0,     0,    64,    65,    66,
-      67,    68,   135,    58,    59,     0,     0,    60,    61,    62,
-      63,     0,    77,     0,     0,    64,    65,    66,    67,    68,
-      58,    59,     0,     0,    60,    61,    62,    63,     0,     0,
-       0,   124,    64,    65,    66,    67,    68,    58,    59,     0,
-       0,    60,    61,    62,    63,     0,     0,     0,     0,    64,
-      65,    66,    67,    68
+       7,    74,    22,   117,    75,    11,    17,     3,   114,    15,
+       6,    14,    57,    21,    25,     4,    49,    18,    58,     8,
+     129,     6,    59,    60,     9,    12,    19,    21,    43,    52,
+      71,    76,    42,     6,    44,    18,    70,    45,   106,    46,
+     105,    21,    47,    48,   107,    51,   108,    53,    54,    55,
+     109,   123,   113,   112,   127,    86,    87,   122,    59,    60,
+     124,   101,    61,    62,    63,    64,    97,   130,   132,    81,
+      82,   133,    21,   102,    88,    89,    90,    91,    92,    93,
+      94,    95,    96,     0,    72,    98,    99,     0,   100,    59,
+      60,     0,     0,     0,     0,    63,    64,     0,     0,   115,
+       0,    59,    60,     0,   118,    61,    62,    63,    64,   121,
+       0,     0,     0,    65,    66,    67,    68,    69,   128,   116,
+      26,     0,   119,   120,    27,    28,    29,     0,     0,     0,
+       0,    30,    31,    32,     0,    33,     0,    34,     0,     0,
+     131,     0,     0,     0,     0,   135,    35,     0,    36,    80,
+       0,     0,     0,     0,     0,     0,     0,     0,    37,     6,
+      26,    38,    39,    40,    27,    28,    29,     0,     0,     0,
+       0,    30,    31,    32,     0,    33,     0,    34,     0,     0,
+       0,     0,     0,     0,     0,     0,    35,     0,    36,   110,
+       0,     0,     0,     0,     0,     0,     0,     0,    37,     6,
+       0,    38,    39,    40,     0,    59,    60,   126,     0,    61,
+      62,    63,    64,     0,     0,     0,     0,    65,    66,    67,
+      68,    69,    59,    60,     0,     0,    61,    62,    63,    64,
+      73,     0,     0,     0,    65,    66,    67,    68,    69,     0,
+       0,    59,    60,     0,     0,    61,    62,    63,    64,   111,
+       0,     0,     0,    65,    66,    67,    68,    69,     0,    59,
+      60,     0,     0,    61,    62,    63,    64,     0,     0,     0,
+       0,    65,    66,    67,    68,    69,    77,     0,    59,    60,
+       0,     0,    61,    62,    63,    64,     0,     0,     0,     0,
+      65,    66,    67,    68,    69,    59,    60,     0,     0,    61,
+      62,    63,    64,     0,     0,     0,     0,    65,    66,    67,
+      68,    69,    79,    59,    60,     0,     0,    61,    62,    63,
+      64,     0,     0,     0,     0,    65,    66,    67,    68,    69,
+     104,    59,    60,     0,     0,    61,    62,    63,    64,     0,
+       0,     0,     0,    65,    66,    67,    68,    69,   134,    59,
+      60,     0,     0,    61,    62,    63,    64,     0,     0,     0,
+       0,    65,    66,    67,    68,    69,   136,    59,    60,     0,
+       0,    61,    62,    63,    64,     0,    78,     0,     0,    65,
+      66,    67,    68,    69,    59,    60,     0,     0,    61,    62,
+      63,    64,     0,     0,     0,   125,    65,    66,    67,    68,
+      69,    59,    60,     0,     0,    61,    62,    63,    64,     0,
+       0,     0,     0,    65,    66,    67,    68,    69
   };
 
   const short
   Parser::yycheck_[] =
   {
-       4,    17,   106,    13,    48,     9,    30,    18,     0,    13,
-      24,    33,     3,    17,    18,    31,    30,    41,    39,   123,
-      42,    22,    23,    42,    14,    32,    24,    31,    44,    33,
-      40,    42,    19,    39,    31,    31,    41,    40,    40,    26,
-      44,    41,    29,    30,    30,    32,    22,    34,    35,    36,
-      32,    31,    41,    41,    58,    59,   100,    22,    23,    75,
-      30,    26,    27,    28,    29,    69,    25,    39,    55,    56,
-      25,    75,    76,    60,    61,    62,    63,    64,    65,    66,
-      67,    68,    31,     5,    71,    72,    -1,    74,    22,    23,
-      -1,    -1,    -1,    -1,    28,    29,    -1,    -1,   102,    -1,
-      22,    23,    -1,   107,    26,    27,    28,    29,   112,    -1,
-      -1,    -1,    34,    35,    36,    37,    38,   121,   105,     4,
-      -1,   108,   109,     8,     9,    10,    -1,    -1,    -1,    -1,
-      15,    16,    17,    -1,    19,    -1,    21,    -1,    -1,   126,
-      -1,    -1,    -1,    -1,   131,    30,    -1,    32,    33,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    42,     4,    44,
-      45,    46,     8,     9,    10,    -1,    -1,    -1,    -1,    15,
-      16,    17,    -1,    19,    -1,    21,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    30,     6,    32,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    42,    -1,    44,    45,
-      46,    22,    23,     7,    -1,    26,    27,    28,    29,    -1,
-      -1,    -1,    -1,    34,    35,    36,    37,    38,    22,    23,
-      -1,    -1,    26,    27,    28,    29,    11,    -1,    -1,    -1,
-      34,    35,    36,    37,    38,    -1,    -1,    22,    23,    -1,
-      -1,    26,    27,    28,    29,    12,    -1,    -1,    -1,    34,
-      35,    36,    37,    38,    -1,    22,    23,    -1,    -1,    26,
+       4,    49,    17,   107,    13,     9,    30,     0,    18,    13,
+      43,    33,    24,    17,    18,     3,    31,    41,    30,    39,
+     124,    43,    22,    23,    14,    32,    24,    31,    39,    33,
+      45,    40,    19,    43,    31,    41,    41,    40,    40,    26,
+      31,    45,    29,    30,    30,    32,    22,    34,    35,    36,
+      32,    31,    41,   101,    25,    59,    60,    41,    22,    23,
+      30,    76,    26,    27,    28,    29,    70,    39,    25,    56,
+      57,    31,    76,    77,    61,    62,    63,    64,    65,    66,
+      67,    68,    69,    -1,     5,    72,    73,    -1,    75,    22,
+      23,    -1,    -1,    -1,    -1,    28,    29,    -1,    -1,   103,
+      -1,    22,    23,    -1,   108,    26,    27,    28,    29,   113,
+      -1,    -1,    -1,    34,    35,    36,    37,    38,   122,   106,
+       4,    -1,   109,   110,     8,     9,    10,    -1,    -1,    -1,
+      -1,    15,    16,    17,    -1,    19,    -1,    21,    -1,    -1,
+     127,    -1,    -1,    -1,    -1,   132,    30,    -1,    32,    33,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    42,    43,
+       4,    45,    46,    47,     8,     9,    10,    -1,    -1,    -1,
+      -1,    15,    16,    17,    -1,    19,    -1,    21,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    30,    -1,    32,     6,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    42,    43,
+      -1,    45,    46,    47,    -1,    22,    23,     7,    -1,    26,
       27,    28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,
-      37,    38,    20,    -1,    22,    23,    -1,    -1,    26,    27,
-      28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,    37,
-      38,    22,    23,    -1,    -1,    26,    27,    28,    29,    -1,
+      37,    38,    22,    23,    -1,    -1,    26,    27,    28,    29,
+      11,    -1,    -1,    -1,    34,    35,    36,    37,    38,    -1,
+      -1,    22,    23,    -1,    -1,    26,    27,    28,    29,    12,
+      -1,    -1,    -1,    34,    35,    36,    37,    38,    -1,    22,
+      23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,    -1,
+      -1,    34,    35,    36,    37,    38,    20,    -1,    22,    23,
+      -1,    -1,    26,    27,    28,    29,    -1,    -1,    -1,    -1,
+      34,    35,    36,    37,    38,    22,    23,    -1,    -1,    26,
+      27,    28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,
+      37,    38,    39,    22,    23,    -1,    -1,    26,    27,    28,
+      29,    -1,    -1,    -1,    -1,    34,    35,    36,    37,    38,
+      39,    22,    23,    -1,    -1,    26,    27,    28,    29,    -1,
       -1,    -1,    -1,    34,    35,    36,    37,    38,    39,    22,
       23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,    -1,
       -1,    34,    35,    36,    37,    38,    39,    22,    23,    -1,
-      -1,    26,    27,    28,    29,    -1,    -1,    -1,    -1,    34,
-      35,    36,    37,    38,    39,    22,    23,    -1,    -1,    26,
-      27,    28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,
-      37,    38,    39,    22,    23,    -1,    -1,    26,    27,    28,
-      29,    -1,    31,    -1,    -1,    34,    35,    36,    37,    38,
-      22,    23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,
-      -1,    33,    34,    35,    36,    37,    38,    22,    23,    -1,
-      -1,    26,    27,    28,    29,    -1,    -1,    -1,    -1,    34,
-      35,    36,    37,    38
+      -1,    26,    27,    28,    29,    -1,    31,    -1,    -1,    34,
+      35,    36,    37,    38,    22,    23,    -1,    -1,    26,    27,
+      28,    29,    -1,    -1,    -1,    33,    34,    35,    36,    37,
+      38,    22,    23,    -1,    -1,    26,    27,    28,    29,    -1,
+      -1,    -1,    -1,    34,    35,    36,    37,    38
   };
 
   const signed char
   Parser::yystos_[] =
   {
-       0,    48,    49,     0,     3,    50,    42,    52,    39,    14,
-      51,    52,    32,    54,    33,    52,    53,    30,    41,    24,
-      55,    52,    53,    56,    57,    52,     4,     8,     9,    10,
-      15,    16,    17,    19,    21,    30,    32,    44,    45,    46,
-      52,    58,    39,    31,    40,    58,    58,    58,    53,    62,
-      58,    52,    58,    58,    58,    61,    24,    30,    22,    23,
-      26,    27,    28,    29,    34,    35,    36,    37,    38,    41,
-      53,     5,    11,    55,    13,    40,    20,    31,    39,    33,
-      58,    58,    58,    59,    60,    52,    52,    58,    58,    58,
-      58,    58,    58,    58,    58,    58,    52,    58,    58,    58,
-      53,    52,    63,    39,    31,    40,    30,    22,    32,     6,
-      12,    55,    41,    18,    52,    58,    59,    52,    58,    58,
-      52,    41,    31,    30,    33,     7,    25,    52,    59,    39,
-      58,    25,    31,    39,    58,    39
+       0,    49,    50,     0,     3,    51,    43,    53,    39,    14,
+      52,    53,    32,    55,    33,    53,    54,    30,    41,    24,
+      56,    53,    54,    57,    58,    53,     4,     8,     9,    10,
+      15,    16,    17,    19,    21,    30,    32,    42,    45,    46,
+      47,    53,    59,    39,    31,    40,    59,    59,    59,    54,
+      63,    59,    53,    59,    59,    59,    62,    24,    30,    22,
+      23,    26,    27,    28,    29,    34,    35,    36,    37,    38,
+      41,    54,     5,    11,    56,    13,    40,    20,    31,    39,
+      33,    59,    59,    59,    60,    61,    53,    53,    59,    59,
+      59,    59,    59,    59,    59,    59,    59,    53,    59,    59,
+      59,    54,    53,    64,    39,    31,    40,    30,    22,    32,
+       6,    12,    56,    41,    18,    53,    59,    60,    53,    59,
+      59,    53,    41,    31,    30,    33,     7,    25,    53,    60,
+      39,    59,    25,    31,    39,    59,    39
   };
 
   const signed char
   Parser::yyr1_[] =
   {
-       0,    47,    48,    49,    49,    50,    51,    51,    52,    53,
-      54,    54,    54,    55,    55,    56,    56,    57,    57,    58,
-      58,    58,    58,    58,    58,    58,    58,    58,    58,    58,
-      58,    58,    58,    58,    58,    58,    58,    58,    58,    58,
-      58,    58,    58,    58,    58,    58,    58,    59,    59,    60,
-      60,    61,    61,    62,    62,    63,    63
+       0,    48,    49,    50,    50,    51,    52,    52,    53,    54,
+      55,    55,    55,    56,    56,    57,    57,    58,    58,    59,
+      59,    59,    59,    59,    59,    59,    59,    59,    59,    59,
+      59,    59,    59,    59,    59,    59,    59,    59,    59,    59,
+      59,    59,    59,    59,    59,    59,    59,    59,    60,    60,
+      61,    61,    62,    62,    63,    63,    64,    64
   };
 
   const signed char
@@ -1736,8 +1742,8 @@ namespace gcool {
        0,     4,    11,     0,     2,     0,     1,     1,     3,     1,
        1,     1,     1,     1,     1,     3,     6,     8,     4,     7,
        5,     3,     4,     5,     2,     2,     2,     3,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     0,     1,     1,
-       3,     2,     3,     2,     4,     6,     7
+       3,     3,     3,     3,     3,     3,     3,     1,     0,     1,
+       1,     3,     2,     3,     2,     4,     6,     7
   };
 
 
@@ -1751,11 +1757,11 @@ namespace gcool {
   "ELSE", "FI", "TRUE", "FALSE", "WHILE", "LOOP", "POOL", "IN", "INHERITS",
   "ISVOID", "LET", "CASE", "ESAC", "NEW", "OF", "NOT", "DOT", "AT",
   "ASSIGN", "ARROW", "ADD", "SUB", "MUL", "DIV", "LP", "RP", "LB", "RB",
-  "EQ", "LE", "GE", "LT", "GT", "SEMICOLON", "COMMA", "COLON", "SYMBOL",
-  "ERROR", "STR", "INT", "FLOAT", "$accept", "program", "class_seq",
-  "class", "inherits", "symbol", "formal", "features", "optional_assign",
-  "params", "params_", "expr", "args", "args_", "block_exprs",
-  "let_init_exprs", "case_branchs", YY_NULLPTR
+  "EQ", "LE", "GE", "LT", "GT", "SEMICOLON", "COMMA", "COLON", "SELF",
+  "SYMBOL", "ERROR", "STR", "INT", "FLOAT", "$accept", "program",
+  "class_seq", "class", "inherits", "symbol", "formal", "features",
+  "optional_assign", "params", "params_", "expr", "args", "args_",
+  "block_exprs", "let_init_exprs", "case_branchs", YY_NULLPTR
   };
 #endif
 
@@ -1768,8 +1774,8 @@ namespace gcool {
       91,    92,    93,    96,    97,   100,   101,   104,   105,   108,
      109,   110,   111,   112,   113,   114,   115,   116,   117,   118,
      119,   120,   121,   122,   123,   124,   125,   126,   127,   128,
-     129,   130,   131,   132,   133,   134,   135,   138,   139,   142,
-     143,   146,   147,   150,   151,   154,   155
+     129,   130,   131,   132,   133,   134,   135,   136,   139,   140,
+     143,   144,   147,   148,   151,   152,   155,   156
   };
 
   void
@@ -1838,10 +1844,10 @@ namespace gcool {
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46
+      45,    46,    47
     };
     // Last valid token kind.
-    const int code_max = 301;
+    const int code_max = 302;
 
     if (t <= 0)
       return symbol_kind::S_YYEOF;
@@ -1853,9 +1859,9 @@ namespace gcool {
 
 #line 5 "Parser.y"
 } // gcool
-#line 1857 "Parser.cpp"
+#line 1863 "Parser.cpp"
 
-#line 160 "Parser.y"
+#line 161 "Parser.y"
 
 
 void gcool::Parser::error(const std::string& s) {

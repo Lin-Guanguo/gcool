@@ -524,11 +524,12 @@ namespace gcool {
     TK_SEMICOLON = 294,            // SEMICOLON
     TK_COMMA = 295,                // COMMA
     TK_COLON = 296,                // COLON
-    TK_SYMBOL = 297,               // SYMBOL
-    TK_ERROR = 298,                // ERROR
-    TK_STR = 299,                  // STR
-    TK_INT = 300,                  // INT
-    TK_FLOAT = 301                 // FLOAT
+    TK_SELF = 297,                 // SELF
+    TK_SYMBOL = 298,               // SYMBOL
+    TK_ERROR = 299,                // ERROR
+    TK_STR = 300,                  // STR
+    TK_INT = 301,                  // INT
+    TK_FLOAT = 302                 // FLOAT
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -545,7 +546,7 @@ namespace gcool {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 47, ///< Number of tokens.
+        YYNTOKENS = 48, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -589,28 +590,29 @@ namespace gcool {
         S_SEMICOLON = 39,                        // SEMICOLON
         S_COMMA = 40,                            // COMMA
         S_COLON = 41,                            // COLON
-        S_SYMBOL = 42,                           // SYMBOL
-        S_ERROR = 43,                            // ERROR
-        S_STR = 44,                              // STR
-        S_INT = 45,                              // INT
-        S_FLOAT = 46,                            // FLOAT
-        S_YYACCEPT = 47,                         // $accept
-        S_program = 48,                          // program
-        S_class_seq = 49,                        // class_seq
-        S_class = 50,                            // class
-        S_inherits = 51,                         // inherits
-        S_symbol = 52,                           // symbol
-        S_formal = 53,                           // formal
-        S_features = 54,                         // features
-        S_optional_assign = 55,                  // optional_assign
-        S_params = 56,                           // params
-        S_params_ = 57,                          // params_
-        S_expr = 58,                             // expr
-        S_args = 59,                             // args
-        S_args_ = 60,                            // args_
-        S_block_exprs = 61,                      // block_exprs
-        S_let_init_exprs = 62,                   // let_init_exprs
-        S_case_branchs = 63                      // case_branchs
+        S_SELF = 42,                             // SELF
+        S_SYMBOL = 43,                           // SYMBOL
+        S_ERROR = 44,                            // ERROR
+        S_STR = 45,                              // STR
+        S_INT = 46,                              // INT
+        S_FLOAT = 47,                            // FLOAT
+        S_YYACCEPT = 48,                         // $accept
+        S_program = 49,                          // program
+        S_class_seq = 50,                        // class_seq
+        S_class = 51,                            // class
+        S_inherits = 52,                         // inherits
+        S_symbol = 53,                           // symbol
+        S_formal = 54,                           // formal
+        S_features = 55,                         // features
+        S_optional_assign = 56,                  // optional_assign
+        S_params = 57,                           // params
+        S_params_ = 58,                          // params_
+        S_expr = 59,                             // expr
+        S_args = 60,                             // args
+        S_args_ = 61,                            // args_
+        S_block_exprs = 62,                      // block_exprs
+        S_let_init_exprs = 63,                   // let_init_exprs
+        S_case_branchs = 64                      // case_branchs
       };
     };
 
@@ -1793,6 +1795,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_SELF ()
+      {
+        return symbol_type (token::TK_SELF);
+      }
+#else
+      static
+      symbol_type
+      make_SELF ()
+      {
+        return symbol_type (token::TK_SELF);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_SYMBOL (const char* v)
       {
         return symbol_type (token::TK_SYMBOL, std::move (v));
@@ -2169,7 +2186,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 413,     ///< Last index in yytable_.
+      yylast_ = 417,     ///< Last index in yytable_.
       yynnts_ = 17,  ///< Number of nonterminal symbols.
       yyfinal_ = 3 ///< Termination state number.
     };
@@ -2184,7 +2201,7 @@ switch (yykind)
 
 #line 5 "Parser.y"
 } // gcool
-#line 2188 "Parser.h"
+#line 2205 "Parser.h"
 
 
 // "%code provides" blocks.
@@ -2192,7 +2209,7 @@ switch (yykind)
 
     int yylex(gcool::Parser::value_type* parserData, yyscan_t scannner);
 
-#line 2196 "Parser.h"
+#line 2213 "Parser.h"
 
 
 #endif // !YY_YY_PARSER_H_INCLUDED

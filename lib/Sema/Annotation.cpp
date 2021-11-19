@@ -19,6 +19,28 @@ void gcool::sema::SemaScope::addVariable(ast::FormalDecl& formal) {
     this->Variables.insert({formal.Name, &formal});
 }
 
+gcool::sema::MethodTable::MethodDecl gcool::sema::MethodTable::findMethod(ast::Symbol Name) {
+    auto p = this;
+    while (p != nullptr) {
+        auto m = p->ClassMethod.find(Name);
+        if (m != p->ClassMethod.end())
+            return {p->InClass, m->second};
+        p = p->SuperClassTable;
+    }
+    return {nullptr, nullptr};
+}
+
+gcool::sema::MethodTable::MethodDecl gcool::sema::MethodTable::findMethodInClass(ast::Symbol Name) {
+    auto m = ClassMethod.find(Name);
+    if (m != ClassMethod.end())
+        return {InClass, m->second};
+    return {nullptr, nullptr};
+}
+
+void gcool::sema::MethodTable::addMethod(ast::MethodFeature& method) {
+    this->ClassMethod.insert({method.Name, &method});
+}
+
 
 ast::Class* gcool::sema::ASTAnnotation::findClass(ast::Symbol Name) {
     auto p = this->ClassMap.find(Name);
@@ -26,18 +48,5 @@ ast::Class* gcool::sema::ASTAnnotation::findClass(ast::Symbol Name) {
         return nullptr;
     else
         return p->second;
-}
-
-ast::MethodFeature* gcool::sema::ClassAnnotation::findMethod(ast::Symbol Name) {
-    auto p = this->MethodMap.find(Name);
-    if (p == this->MethodMap.end())
-        return nullptr;
-    else
-        return p->second;
-}
-
-ast::FormalDecl* gcool::sema::ClassAnnotation::findAttr(ast::Symbol Name) {
-    auto p = Scope.searchVariable(Name);
-    return p.Decl;
 }
 

@@ -12,13 +12,12 @@ using MethodListMap = std::unordered_map<ast::Symbol, ast::MethodFeature*>;
 class SemaScope {
 public:
     SemaScope* OuterScope;
-    ast::Class* InClass;
     ScopeVariable Variables;
 public:
     SemaScope() 
-        : OuterScope (nullptr), InClass(nullptr) {}
+        : OuterScope (nullptr) {}
     SemaScope(SemaScope* outer) 
-        : OuterScope(outer), InClass(outer->InClass) {}
+        : OuterScope(outer) {}
 
     struct VariableDecl {
         SemaScope* Scope;
@@ -28,6 +27,30 @@ public:
     void addVariable(ast::FormalDecl& formal);
 
     static SemaScope EmptyScope;
+};
+
+class MethodTable {
+public:
+    MethodTable* SuperClassTable;
+    ast::Class* InClass;
+    MethodListMap ClassMethod;
+public:
+    struct MethodDecl {
+        ast::Class* InClass;
+        ast::MethodFeature* Decl;
+    };
+    MethodTable()
+        : SuperClassTable(nullptr), InClass(nullptr) {}
+
+    MethodTable(ast::Class* curClass)
+        : SuperClassTable(nullptr), InClass(curClass) {}
+
+    MethodTable(MethodTable* super, ast::Class* curClass)
+        : SuperClassTable(super), InClass(curClass) {}
+
+    MethodDecl findMethod(ast::Symbol Name);
+    MethodDecl findMethodInClass(ast::Symbol Name);
+    void addMethod(ast::MethodFeature& method);
 };
 
 class Annotation {
@@ -49,7 +72,7 @@ public:
 
 class ClassAnnotation : public Annotation {
 public:
-    MethodListMap MethodMap;
+    MethodTable MTable;
     SemaScope Scope;
     ast::Class* SuperClass;
     int InheritDepth;
@@ -57,8 +80,7 @@ protected:
     ClassAnnotation() : Scope() {}
     friend class Sema;
 public:
-    ast::MethodFeature* findMethod(ast::Symbol Name);
-    ast::FormalDecl* findAttr(ast::Symbol Name);
+
 };
 
 class AttrAnnotation : public Annotation {
@@ -95,7 +117,6 @@ protected:
     friend class Sema;
 };
 
-// TODO
 class ExprDidpatchAnnotation : public ExprAnnotation {
 public:
     ast::Class* ClassRef = nullptr;

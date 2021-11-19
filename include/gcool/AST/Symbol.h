@@ -33,6 +33,8 @@ public:
     Symbol getBool() { return get("Bool"); }
     Symbol getString() { return get("String"); }
     Symbol getObject() { return get("Object"); }
+    Symbol getSelf() { return get("self"); }
+    Symbol getSelfType() { return get("SelfType"); }
     ~SymbolTable();
 };
 

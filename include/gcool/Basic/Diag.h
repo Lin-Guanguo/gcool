@@ -18,6 +18,10 @@ public:
         #define ERROR_KIND_DEF(ID, LEVEL, MESSAGE) MESSAGE,
         #include "ErrorKindDef.def"
     };
+    static constexpr const char* DiagKindName[] = {
+        #define ERROR_KIND_DEF(ID, LEVEL, MESSAGE) #ID,
+        #include "ErrorKindDef.def"
+    };
     DiagKind TheDiagKind;
     std::string AdditionalMsg;
 public:

@@ -34,6 +34,9 @@ public:
     // return hasError
     bool checkAll();
 
+    // add builtinType
+    bool pass0();
+
     // alloc Annotation for AST, Class, Method, Attr
     // build Class Index Map
     // build Method Index Map, check multi defination
@@ -51,17 +54,17 @@ public:
     bool pass3();
 
     // pass3 help function
-    bool checkDecl(ast::FormalDecl& formal, ast::OptionalExpr& init, sema::SemaScope* Scope);
-    bool checkMethod(ast::MethodFeature& method, sema::SemaScope* Scope);
-    bool checkExpr(ast::Expr& e, sema::SemaScope* Scope);
+    bool checkDecl(ast::FormalDecl& formal, ast::OptionalExpr& init, sema::SemaScope* Scope, ast::Class* selfClass);
+    bool checkMethod(ast::MethodFeature& method, sema::SemaScope* Scope, ast::Class* selfClass);
+    bool checkExpr(ast::Expr& e, sema::SemaScope* Scope, ast::Class* selfClass);
 
     // return two type is Inherits or the same;
     // only after pass2
-    bool isSuper(ast::Class* super, ast::Class* sub);
+    bool isSuper(ast::Class* super, ast::Class* sub, ast::Class* selfClass);
 
     // return two type's common super;
     // only after pass2
-    ast::Class* getCommonSuper(ast::Class* sub1, ast::Class* sub2);
+    ast::Class* getCommonSuper(ast::Class* sub1, ast::Class* sub2, ast::Class* selfClass);
 
     void addError(basic::Diag&& error);
 };

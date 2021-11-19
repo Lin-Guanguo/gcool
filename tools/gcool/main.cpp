@@ -13,29 +13,48 @@
 
 using namespace gcool;
 using namespace gcool::ast;
+using namespace gcool::sema;
 
-int main(int argc, char** argv) 
-{
+using ErrorKindList = std::vector<gcool::basic::Diag::DiagKind>;
 
-    const char* input = 
-    R"(
-        class Main {};
-        class Main {};
-        class Main {};
-        class Loop1 inherits Loop2 {};
-        class Loop2 inherits Loop1 {};
-    )";
-
-    ASTContext context;
+void checkError(const char* input, const ErrorKindList& errorList, bool debugPrint) {
     yyscan_t scanner;
     yylex_init(&scanner);
     yy_scan_string(input, scanner);
+
+    ast::ASTContext context;
     Parser parser{scanner, &context};
     parser.parse();
 
-    sema::Sema theSema(&context);
-    theSema.checkAll();
-    for (auto& s : theSema.TheErrorList){
-        llvm::outs() << s << "\n";
+    Sema sema(&context);
+    sema.checkAll();
+
+    if (debugPrint) {
+        for(auto e : sema.TheErrorList) {
+            std::cerr << e.DiagKindName[e.TheDiagKind] << " : " << e.AdditionalMsg << "\n";
+        }
     }
+
+    // EXPECT_EQ(sema.TheErrorList.size(), errorList.size());
+    // for(int i = 0; i < errorList.size(); ++i) {
+    //     EXPECT_EQ(sema.TheErrorList[i].TheDiagKind, errorList[i]);
+    // }
+}
+
+int main(int argc, char** argv) 
+{
+    const char* input = 
+    R"(
+        class Main {
+            a : WrongClass;
+            b : Int <- true;
+            c : Bool <- false;
+            d : Float <- 10.2;
+            e : Int <- 10;
+        };
+    )";
+    ErrorKindList errorList = {
+
+    };
+    checkError(input, errorList, true);
 }

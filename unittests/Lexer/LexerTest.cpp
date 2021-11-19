@@ -16,7 +16,7 @@ TEST(LexerTest, t1)
         2.5  "string" "str\"str"
         (* a comment
             * just skip
-            *) 12
+            *) 12 self
     )";
     std::vector<int> tokens = {
         gcool::Parser::token::TK_CLASS,
@@ -67,7 +67,8 @@ TEST(LexerTest, t1)
         gcool::Parser::token::TK_FLOAT,
         gcool::Parser::token::TK_STR,
         gcool::Parser::token::TK_STR,
-        gcool::Parser::token::TK_INT
+        gcool::Parser::token::TK_INT,
+        gcool::Parser::token::TK_SELF
     };
     yyscan_t scanner;
     yylex_init(&scanner);

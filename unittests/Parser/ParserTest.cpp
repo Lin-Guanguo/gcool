@@ -664,3 +664,50 @@ TEST(ParserTest, ExprCaseTest) {
     };
     TestHelper(input, context, expect);
 }
+
+TEST(ParserTest, SelfTest) {
+    ast::ASTContext context;
+    const char* input = 
+    R"(
+        class Main
+        {
+            s : SelfType;
+            main() : SelfType {
+                s <- new SelfType
+            };
+            main2() : SelfType {
+                self
+            };
+        };
+    )";
+    ClassList expect{
+        Class{ SYMTBL.get("Main"), 
+            AttrList{
+                AttrFeature(
+                    FormalDecl(SYMTBL.get("s"), SYMTBL.getSelfType()), {}
+                )
+            },
+            MethodList{
+                MethodFeature{
+                    SYMTBL.get("main"),
+                    SYMTBL.getSelfType(),
+                    FormalList{},
+                    ALLOC_EXPR(ExprAssign(
+                        SYMTBL.get("s"),
+                        ALLOC_EXPR(
+                            ExprNew(SYMTBL.getSelfType())
+                        )
+                    ))
+                },
+                MethodFeature{
+                    SYMTBL.get("main2"),
+                    SYMTBL.getSelfType(),
+                    FormalList{},
+                    ALLOC_EXPR(ExprSelf())
+                }
+            },
+            SYMTBL.getObject()
+        }
+    };
+    TestHelper(input, context, expect);
+}

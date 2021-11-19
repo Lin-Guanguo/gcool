@@ -56,6 +56,7 @@
 "esac"      { return gcool::Parser::token::TK_ESAC; }
 "new"       { return gcool::Parser::token::TK_NEW; }
 "of"        { return gcool::Parser::token::TK_OF; }
+"self"      { return gcool::Parser::token::TK_SELF; }
 
 "not"       { return gcool::Parser::token::TK_NOT; }
 "isvoid"    { return gcool::Parser::token::TK_ISVOID; }
