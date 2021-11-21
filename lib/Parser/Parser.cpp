@@ -1355,13 +1355,13 @@ namespace gcool {
 
   case 56: // case_branchs: symbol COLON symbol ARROW expr SEMICOLON
 #line 155 "Parser.y"
-                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = CaseBranchList{}; yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = CaseBranchList{}; yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({FormalDecl{yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}, yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
 #line 1360 "Parser.cpp"
     break;
 
   case 57: // case_branchs: case_branchs symbol COLON symbol ARROW expr SEMICOLON
 #line 156 "Parser.y"
-                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = std::move(yystack_[6].value.as < gcool::ast::CaseBranchList > ()); yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = std::move(yystack_[6].value.as < gcool::ast::CaseBranchList > ()); yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({FormalDecl{yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}, yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
 #line 1366 "Parser.cpp"
     break;
 

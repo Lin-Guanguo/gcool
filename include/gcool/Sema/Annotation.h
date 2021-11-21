@@ -1,13 +1,16 @@
 #pragma once
 #include <unordered_map>
+#include <vector>
 #include "gcool/AST/AST.h"
 
 namespace gcool {
 namespace sema {
 
+class SemaScope;
 using ScopeVariable = std::unordered_map<ast::Symbol, ast::FormalDecl*>;
 using ClassListMap = std::unordered_map<ast::Symbol, ast::Class*>;
 using MethodListMap = std::unordered_map<ast::Symbol, ast::MethodFeature*>;
+using ScopeList = std::vector<SemaScope>;
 
 class SemaScope {
 public:
@@ -28,6 +31,7 @@ public:
 
     static SemaScope EmptyScope;
 };
+
 
 class MethodTable {
 public:
@@ -76,6 +80,8 @@ public:
     SemaScope Scope;
     ast::Class* SuperClass;
     int InheritDepth;
+    int AttrOffsetEnd;
+    int MethodOffsetEnd; 
 protected:
     ClassAnnotation() : Scope() {}
     friend class Sema;
@@ -85,7 +91,8 @@ public:
 
 class AttrAnnotation : public Annotation {
 public:
-
+    int AttrOffset;
+    ast::Class* DeclType = nullptr;
 protected:
     AttrAnnotation() {}
     friend class Sema;
@@ -95,6 +102,7 @@ class MethodAnnotation : public Annotation {
 public:
     SemaScope MethodScope;
     ast::Class* RetClass = nullptr;
+    int MethodOffset;
 protected:
     MethodAnnotation() {}
     friend class Sema;
@@ -153,18 +161,18 @@ protected:
     friend class Sema;
 };
 
-class ExprDidpatchAnnotation : public ExprAnnotation {
+class ExprDispatchAnnotation : public ExprAnnotation {
 public:
     ast::Class* ClassRef = nullptr;
     ast::MethodFeature* MethodRef = nullptr;
 protected:
-    ExprDidpatchAnnotation() {}
+    ExprDispatchAnnotation() {}
     friend class Sema;
 };
 
-class ExprStaticDidpatchAnnotation : public ExprDidpatchAnnotation {
+class ExprStaticDispatchAnnotation : public ExprDispatchAnnotation {
 protected:
-    ExprStaticDidpatchAnnotation() {}
+    ExprStaticDispatchAnnotation() {}
     friend class Sema;
 };
 
@@ -184,6 +192,7 @@ protected:
 
 class ExprCaseAnnotation : public ExprAnnotation {
 public:
+    ScopeList BranchScope;
 protected:
     ExprCaseAnnotation() {}
     friend class Sema;
@@ -198,6 +207,7 @@ protected:
 
 class ExprLetAnnotation : public ExprAnnotation {
 public:
+    SemaScope LocalScope;
 protected:
     ExprLetAnnotation() {}
     friend class Sema;
@@ -205,6 +215,7 @@ protected:
 
 class ExprNewAnnotation : public ExprAnnotation {
 public:
+    bool IsSelfType = false;
 protected:
     ExprNewAnnotation() {}
     friend class Sema;
@@ -219,16 +230,59 @@ protected:
 
 class ExprArithBAnnotation : public ExprAnnotation {
 public:
+    enum ArithBKind : int {
+        AK_Error,
+        AK_MethodOver,
+
+        AK_IntADD,
+        AK_IntSUB,
+        AK_IntMUL,
+        AK_IntDIV,
+        AK_IntEQ,
+        AK_IntGE,
+        AK_IntGT,
+        AK_IntLE,
+        AK_IntLT,
+        AK_FloatADD,
+        AK_FloatSUB,
+        AK_FloatMUL,
+        AK_FloatDIV,
+        AK_FloatEQ,
+        AK_FloatGE,
+        AK_FloatGT,
+        AK_FloatLE,
+        AK_FloatLT,
+        AK_BoolADD_OR,
+        AK_BoolMUL_AND
+    };
+    // for method Over type
+    ArithBKind ArithKind = AK_Error;
+    ast::Class* ClassRef = nullptr;
+    ast::MethodFeature* MethodRef = nullptr;
 protected:
     ExprArithBAnnotation() {}
     friend class Sema;
+public:
+    ArithBKind ArithBKindSet(ast::Class* left, ast::Class* right, int op);
 };
 
 class ExprArithUAnnotation : public ExprAnnotation {
 public:
+    enum ArithUKind : int {
+        AK_Error,
+        AK_MethodOver,
+
+        AK_BoolNOT,
+        AK_ObjectISVOID
+    };
+    ArithUKind ArithKind = AK_Error;
+    ast::Class* ClassRef = nullptr;
+    ast::MethodFeature* MethodRef = nullptr;
 protected:
     ExprArithUAnnotation() {}
     friend class Sema;
+public:
+    ArithUKind ArithUKindSet(ast::Class* operand, int op);
 };
 
 

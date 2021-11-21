@@ -9,14 +9,18 @@ ERROR_KIND_DEF(Sema_AttriMultiDefine, ERROR, "")
 ERROR_KIND_DEF(Sema_MethodMultiDefine, ERROR, "")
 
 ERROR_KIND_DEF(Sema_DeclInitExprError, ERROR, "declaration init vlaue expr error: ")
-ERROR_KIND_DEF(Sema_DeclTypeNotFound, ERROR, "")
-ERROR_KIND_DEF(Sema_DeclInitTypeIncompatible, ERROR, "")
+ERROR_KIND_DEF(Sema_DeclTypeError, ERROR, "")
+ERROR_KIND_DEF(Sema_DeclTypeIncompatible, ERROR, "")
 
-ERROR_KIND_DEF(Sema_MethodUndefinedRetType, ERROR, "")
-ERROR_KIND_DEF(Sema_MethodRetTypeIncompatible, ERROR, "")
-ERROR_KIND_DEF(Sema_MethodUndefinedParamType, ERROR, "")
+ERROR_KIND_DEF(Sema_MethodRetTypeError, ERROR, "")
+ERROR_KIND_DEF(Sema_MethodParamTypeError, ERROR, "")
 ERROR_KIND_DEF(Sema_MethodBodyExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_MethodBodyExprTypeIncompatible, ERROR, "")
 ERROR_KIND_DEF(Sema_MethodParamCantBeSelfType, ERROR, "")
+ERROR_KIND_DEF(Sema_MethodOverrideDeclError, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprTypeIncompatible, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprAssignToTypeError, ERROR, "")
 
 ERROR_KIND_DEF(Sema_ExprSymbolNotDefine, ERROR, "")
 ERROR_KIND_DEF(Sema_ExprSymbolTypeError, ERROR, "")
@@ -27,6 +31,7 @@ ERROR_KIND_DEF(Sema_ExprAssignTypeIncompatible, ERROR, "")
 
 ERROR_KIND_DEF(Sema_ExprDispatchCalleeExprError, ERROR, "")
 ERROR_KIND_DEF(Sema_ExprDispatchMethodUnknow, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprDispatchMethodDeclError, ERROR, "")
 ERROR_KIND_DEF(Sema_ExprDispatchArgsExprError, ERROR, "")
 ERROR_KIND_DEF(Sema_ExprDispatchArgsNumberError, ERROR, "")
 ERROR_KIND_DEF(Sema_ExprDispatchArgsTypeError, ERROR, "")
@@ -41,7 +46,26 @@ ERROR_KIND_DEF(Sema_ExprCondBranchError, ERROR, "")
 ERROR_KIND_DEF(Sema_ExprLoopConditionError, ERROR, "")
 ERROR_KIND_DEF(Sema_ExprLoopBodyError, ERROR, "")
 
+ERROR_KIND_DEF(Sema_ExprCaseCondExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprCaseBrachTypeUnkonw, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprCaseBrachExprError, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprBlockExprError, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprLetInitMultiDefine, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprLetInitDeclTypeError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprLetInitDeclExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprLetInitDeclExprIncompatible, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprLetBodyExprError, ERROR, "")
+
 ERROR_KIND_DEF(Sema_ExprNewTypeUndefine, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprArithBLeftExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithBRightExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithBTypeIncompatible, ERROR, "")
+
+ERROR_KIND_DEF(Sema_ExprArithUOperandExprError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithUTypeIncompatible, ERROR, "")
 
 
 #undef ERROR_KIND_DEF

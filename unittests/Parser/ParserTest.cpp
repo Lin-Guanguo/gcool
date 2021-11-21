@@ -639,18 +639,24 @@ TEST(ParserTest, ExprCaseTest) {
                             ),
                             CaseBranchList{
                                 CaseBranch(
-                                    SYMTBL.get("i"),
-                                    SYMTBL.getInt(),
+                                    FormalDecl{
+                                        SYMTBL.get("i"),
+                                        SYMTBL.getInt()
+                                    },
                                     ALLOC_EXPR(ExprInt(10))
                                 ),
                                 CaseBranch(
-                                    SYMTBL.get("f"),
-                                    SYMTBL.getFloat(),
+                                    FormalDecl{
+                                        SYMTBL.get("f"),
+                                        SYMTBL.getFloat()
+                                    },
                                     ALLOC_EXPR(ExprFloat(0.5))
                                 ),
                                 CaseBranch(
-                                    SYMTBL.get("s"),
-                                    SYMTBL.getString(),
+                                    FormalDecl{
+                                        SYMTBL.get("s"),
+                                        SYMTBL.getString()
+                                    },
                                     ALLOC_EXPR(ExprString("hello"))
                                 )
                             }

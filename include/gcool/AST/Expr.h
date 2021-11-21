@@ -19,11 +19,10 @@ public:
 };
 
 struct CaseBranch {
-    Symbol Name;
-    Symbol Type;
+    FormalDecl Formal;
     Expr Body;
-    CaseBranch(Symbol name, Symbol type, Expr body)
-        : Name(name), Type(type), Body(body) {}
+    CaseBranch(FormalDecl formal, Expr body)
+        : Formal(formal), Body(body) {}
 public:
     bool operator==(const CaseBranch&) const = default;
 };
@@ -214,7 +213,7 @@ public:
 class ExprArithB : public ExprFacility<ExprArithB> {
 public:
     static constexpr ExprKind TheKind = EK_ARITH_B;
-    enum Op {
+    enum Op : int {
         OP_ADD,
         OP_SUB,
         OP_MUL,
@@ -237,7 +236,7 @@ public:
 class ExprArithU : public ExprFacility<ExprArithU> {
 public:
     static constexpr ExprKind TheKind = EK_ARITH_U;
-    enum Op {
+    enum Op : int {
         OP_NOT,
         OP_ISVOID,
     };

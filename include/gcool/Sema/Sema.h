@@ -35,27 +35,28 @@ public:
     bool checkAll();
 
     // add builtinType
-    bool pass0();
+    bool pass1();
 
     // alloc Annotation for AST, Class, Method, Attr
     // build Class Index Map
     // build Method Index Map, check multi defination
     // build Attr Scope, check multi defination
-    bool pass1();
+    bool pass2();
 
     // check class multi defination
     // check class inherits, add Annotion Class* to super, InheritDepth
+    // add AttrOffset MethodOffset
     // if error, not continue check
-    bool pass2();
-
-    // check Attr Type, Attr Expr
-    // check Method RetType, Args Type, Body Expr 
-    // build Method Scope
     bool pass3();
 
+    // check expr
+    bool pass4();
+
+    bool pass5();
+
     // pass3 help function
-    bool checkDecl(ast::FormalDecl& formal, ast::OptionalExpr& init, sema::SemaScope* Scope, ast::Class* selfClass);
-    bool checkMethod(ast::MethodFeature& method, sema::SemaScope* Scope, ast::Class* selfClass);
+    bool annotAttrDecl(ast::Class* Class);
+    bool annotMethodDecl(ast::Class* Class);
     bool checkExpr(ast::Expr& e, sema::SemaScope* Scope, ast::Class* selfClass);
 
     // return two type is Inherits or the same;

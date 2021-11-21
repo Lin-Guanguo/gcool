@@ -49,8 +49,8 @@ TEST(SemaTest, InheritTest) {
         basic::Diag::Sema_RedefineClass,  
         basic::Diag::Sema_RedefineClass,  
         basic::Diag::Sema_LoopInherit,  
+        basic::Diag::Sema_LoopInherit,  
         basic::Diag::Sema_LoopInherit,
-        basic::Diag::Sema_LoopInherit
     };
     checkError(input, errorList, false);
 }
@@ -68,8 +68,8 @@ TEST(SemaTest, AttrMethodRedefineTest) {
             f() : Int {
                 20
             };
-            f() : Bool {
-                true
+            f() : Int {
+                30
             };
         };
     )";
@@ -92,8 +92,8 @@ TEST(SemaTest, DeclTest) {
         };
     )";
     ErrorKindList errorList = {
-        basic::Diag::Sema_DeclTypeNotFound,
-        basic::Diag::Sema_DeclInitTypeIncompatible
+        basic::Diag::Sema_DeclTypeError,
+        basic::Diag::Sema_DeclTypeIncompatible
     };
     checkError(input, errorList, false);
 }
@@ -124,233 +124,235 @@ TEST(SemaTest, MethodTest) {
         };
     )";
     ErrorKindList errorList = {
-        basic::Diag::Sema_MethodUndefinedRetType,
-        basic::Diag::Sema_MethodRetTypeIncompatible,
-        basic::Diag::Sema_MethodUndefinedParamType,
+        basic::Diag::Sema_MethodRetTypeError,
+        basic::Diag::Sema_MethodParamTypeError,
+        basic::Diag::Sema_ExprSymbolNotDefine,
+        basic::Diag::Sema_MethodBodyExprError,
+        basic::Diag::Sema_MethodBodyExprTypeIncompatible,
         basic::Diag::Sema_ExprSymbolNotDefine,
         basic::Diag::Sema_MethodBodyExprError
     };
     checkError(input, errorList, false);
 }
 
-TEST(SemaTest, SelfTest) {
-    const char* input = 
-    R"(
-        class Main {
-            attr1 : SelfType;
+// TEST(SemaTest, SelfTest) {
+//     const char* input = 
+//     R"(
+//         class Main {
+//             attr1 : SelfType;
 
-            correct1(i : Int) : SelfType {
-                self
-            };
+//             correct1(i : Int) : SelfType {
+//                 self
+//             };
 
-            correct2(i : Int) : SelfType {
-                attr1 <- new SelfType
-            };
+//             correct2(i : Int) : SelfType {
+//                 attr1 <- new SelfType
+//             };
 
-            correct3() : Main {
-                self
-            };
+//             correct3() : Main {
+//                 self
+//             };
 
-            error1() : SelfType {
-                attr1 <- new Main
-            };
+//             error1() : SelfType {
+//                 attr1 <- new Main
+//             };
 
-            error2(i : SelfType) : Int {
-                10
-            };
+//             error2(i : SelfType) : Int {
+//                 10
+//             };
 
-        };
-    )";
-    ErrorKindList errorList = {
-        basic::Diag::Sema_ExprAssignTypeIncompatible,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_MethodParamCantBeSelfType
-    };
-    checkError(input, errorList, false);
-}
+//         };
+//     )";
+//     ErrorKindList errorList = {
+//         basic::Diag::Sema_ExprAssignTypeIncompatible,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_MethodParamCantBeSelfType
+//     };
+//     checkError(input, errorList, false);
+// }
 
-TEST(SemaTest, SymbolExprTest) {
-    const char* input = 
-    R"(
-        class Main {
-            attr1 : SelfType;
-            i : Wrong;
+// TEST(SemaTest, SymbolExprTest) {
+//     const char* input = 
+//     R"(
+//         class Main {
+//             attr1 : SelfType;
+//             i : Wrong;
 
-            correct1(i : Int) : SelfType {
-                attr1
-            };
+//             correct1(i : Int) : SelfType {
+//                 attr1
+//             };
 
-            error1(i : Int) : SelfType {
-                at1
-            };
+//             error1(i : Int) : SelfType {
+//                 at1
+//             };
 
-            error2(d : Int) : SelfType {
-                i
-            };
+//             error2(d : Int) : SelfType {
+//                 i
+//             };
 
-        };
-    )";
-    ErrorKindList errorList = {
-        basic::Diag::Sema_DeclTypeNotFound,
-        basic::Diag::Sema_ExprSymbolNotDefine,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprSymbolTypeError,
-        basic::Diag::Sema_MethodBodyExprError
-    };
-    checkError(input, errorList, false);
-}
+//         };
+//     )";
+//     ErrorKindList errorList = {
+//         basic::Diag::Sema_DeclTypeError,
+//         basic::Diag::Sema_ExprSymbolNotDefine,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprSymbolTypeError,
+//         basic::Diag::Sema_MethodBodyExprError
+//     };
+//     checkError(input, errorList, false);
+// }
 
-TEST(SemaTest, AssignExprTest) {
-    const char* input = 
-    R"(
-        class Main {
-            attr1 : SelfType;
-            int : Int;
-            e : Wrong;
+// TEST(SemaTest, AssignExprTest) {
+//     const char* input = 
+//     R"(
+//         class Main {
+//             attr1 : SelfType;
+//             int : Int;
+//             e : Wrong;
 
-            correct1(i : Int) : SelfType {
-                attr1 <- self
-            };
+//             correct1(i : Int) : SelfType {
+//                 attr1 <- self
+//             };
 
-            error1(i : Int) : Int {
-                f <- i
-            };
+//             error1(i : Int) : Int {
+//                 f <- i
+//             };
 
-            error2(i : Int) : Int {
-                e <- f <- i
-            };
+//             error2(i : Int) : Int {
+//                 e <- f <- i
+//             };
 
-            error3(i : Bool) : Int {
-                int <- i
-            };
+//             error3(i : Bool) : Int {
+//                 int <- i
+//             };
 
-        };
-    )";
-    ErrorKindList errorList = {
-        basic::Diag::Sema_DeclTypeNotFound,
-        basic::Diag::Sema_ExprAssignVariableNotDecl,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprAssignVariableTypeError,
-        basic::Diag::Sema_ExprAssignVariableNotDecl,
-        basic::Diag::Sema_ExprAssignExprError,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprAssignTypeIncompatible,
-        basic::Diag::Sema_MethodBodyExprError
-    };
-    checkError(input, errorList, false);
-}
+//         };
+//     )";
+//     ErrorKindList errorList = {
+//         basic::Diag::Sema_DeclTypeError,
+//         basic::Diag::Sema_ExprAssignVariableNotDecl,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprAssignVariableTypeError,
+//         basic::Diag::Sema_ExprAssignVariableNotDecl,
+//         basic::Diag::Sema_ExprAssignExprError,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprAssignTypeIncompatible,
+//         basic::Diag::Sema_MethodBodyExprError
+//     };
+//     checkError(input, errorList, false);
+// }
 
-TEST(SemaTest, DispatchExprTest) {
-    const char* input = 
-    R"(
-        class Main {
-            attr1 : SelfType;
-            int : Int;
+// TEST(SemaTest, DispatchExprTest) {
+//     const char* input = 
+//     R"(
+//         class Main {
+//             attr1 : SelfType;
+//             int : Int;
 
-            hello(i : Int) : Int {
-                i
-            };
+//             hello(i : Int) : Int {
+//                 i
+//             };
 
-            correct1(i : Int) : Int {
-                hello(i)
-            };
+//             correct1(i : Int) : Int {
+//                 hello(i)
+//             };
 
-            correct2(i : Int) : Int {
-                attr1.correct1(i)
-            };
+//             correct2(i : Int) : Int {
+//                 attr1.correct1(i)
+//             };
 
-            error1() : Int {
-                nodefine.hello()
-            };
+//             error1() : Int {
+//                 nodefine.hello()
+//             };
 
-            error2() : Int {
-                world()
-            };
+//             error2() : Int {
+//                 world()
+//             };
 
-            error3() : Int {
-                hello(10, 20)
-            };
+//             error3() : Int {
+//                 hello(10, 20)
+//             };
 
-            error4() : Int {
-                hello(true)
-            };
+//             error4() : Int {
+//                 hello(true)
+//             };
 
-            error5() : Int {
-                hello(nodefine)
-            };
+//             error5() : Int {
+//                 hello(nodefine)
+//             };
 
-        };
-    )";
-    ErrorKindList errorList = {
-        basic::Diag::Sema_ExprSymbolNotDefine,
-        basic::Diag::Sema_ExprDispatchCalleeExprError,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprDispatchMethodUnknow,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprDispatchArgsNumberError,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprDispatchArgsTypeError,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprSymbolNotDefine,
-        basic::Diag::Sema_ExprDispatchArgsExprError,
-        basic::Diag::Sema_MethodBodyExprError
-    };
-    checkError(input, errorList, false);
-}
+//         };
+//     )";
+//     ErrorKindList errorList = {
+//         basic::Diag::Sema_ExprSymbolNotDefine,
+//         basic::Diag::Sema_ExprDispatchCalleeExprError,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprDispatchMethodUnknow,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprDispatchArgsNumberError,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprDispatchArgsTypeError,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprSymbolNotDefine,
+//         basic::Diag::Sema_ExprDispatchArgsExprError,
+//         basic::Diag::Sema_MethodBodyExprError
+//     };
+//     checkError(input, errorList, false);
+// }
 
-TEST(SemaTest, StaticDispatchExprTest) {
-    const char* input = 
-    R"(
-        class Base2 {
+// TEST(SemaTest, StaticDispatchExprTest) {
+//     const char* input = 
+//     R"(
+//         class Base2 {
 
-        };
+//         };
 
-        class Base {
-            hello() : Int {
-                10
-            };
-        };
+//         class Base {
+//             hello() : Int {
+//                 10
+//             };
+//         };
 
-        class Main inherits Base {
-            attr1 : SelfType;
-            int : Int;
+//         class Main inherits Base {
+//             attr1 : SelfType;
+//             int : Int;
 
-            hello() : Int {
-                20
-            };
+//             hello() : Int {
+//                 20
+//             };
 
-            correct1(i : Int) : Int {
-                hello()
-            };
+//             correct1(i : Int) : Int {
+//                 hello()
+//             };
 
-            correct2(i : Int) : Int {
-                self@Base.hello()
-            };
+//             correct2(i : Int) : Int {
+//                 self@Base.hello()
+//             };
 
-            error1(i : Int) : Int {
-                self@NoBase.hello()
-            };
+//             error1(i : Int) : Int {
+//                 self@NoBase.hello()
+//             };
 
-            error2(i : Int) : Int {
-                self@SelfType.hello()
-            };
+//             error2(i : Int) : Int {
+//                 self@SelfType.hello()
+//             };
 
-            error3(i : Int) : Int {
-                self@Base2.hello()
-            };
+//             error3(i : Int) : Int {
+//                 self@Base2.hello()
+//             };
 
-        };
-    )";
-    ErrorKindList errorList = {
-        basic::Diag::Sema_ExprStaticDispatchTypeUnkonw,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprStaticDispatchTypeCantBeSelfType,
-        basic::Diag::Sema_MethodBodyExprError,
-        basic::Diag::Sema_ExprStaticDispatchInheritError,
-        basic::Diag::Sema_MethodBodyExprError
-    };
-    checkError(input, errorList, false);
-}
+//         };
+//     )";
+//     ErrorKindList errorList = {
+//         basic::Diag::Sema_ExprStaticDispatchTypeUnkonw,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprStaticDispatchTypeCantBeSelfType,
+//         basic::Diag::Sema_MethodBodyExprError,
+//         basic::Diag::Sema_ExprStaticDispatchInheritError,
+//         basic::Diag::Sema_MethodBodyExprError
+//     };
+//     checkError(input, errorList, false);
+// }
 
 
 

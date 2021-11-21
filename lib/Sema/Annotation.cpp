@@ -50,3 +50,15 @@ ast::Class* gcool::sema::ASTAnnotation::findClass(ast::Symbol Name) {
         return p->second;
 }
 
+sema::ExprArithBAnnotation::ArithBKind sema::ExprArithBAnnotation::ArithBKindSet(
+    ast::Class* left, ast::Class* right, int op) {
+    // TODO
+    return AK_Error;
+}
+
+sema::ExprArithUAnnotation::ArithUKind sema::ExprArithUAnnotation::ArithUKindSet(
+    ast::Class* operand, int op) {
+    // TODO
+    return AK_Error;
+}
+
