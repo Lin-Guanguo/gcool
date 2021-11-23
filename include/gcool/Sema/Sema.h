@@ -40,18 +40,18 @@ public:
     // alloc Annotation for AST, Class, Method, Attr
     // build Class Index Map
     // build Method Index Map, check multi defination
-    // build Attr Scope, check multi defination
     bool pass2();
 
     // check class multi defination
     // check class inherits, add Annotion Class* to super, InheritDepth
-    // add AttrOffset MethodOffset
-    // if error, not continue check
+    // set error class annotation to error
     bool pass3();
 
-    // check expr
+    // annotAttrDecl annotMethodDecl
+    // add AttrOffset and MethodOffset
     bool pass4();
 
+    // check expr
     bool pass5();
 
     // pass3 help function
@@ -66,6 +66,10 @@ public:
     // return two type's common super;
     // only after pass2
     ast::Class* getCommonSuper(ast::Class* sub1, ast::Class* sub2, ast::Class* selfClass);
+
+    bool isBuiltinType(ast::Class* c);
+
+    void addBuiltinTypeAST();
 
     void addError(basic::Diag&& error);
 };

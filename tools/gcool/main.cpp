@@ -46,11 +46,7 @@ int main(int argc, char** argv)
     const char* input = 
     R"(
         class Main {
-            a : WrongClass;
-            b : Int <- true;
-            c : Bool <- false;
-            d : Float <- 10.2;
-            e : Int <- 10;
+            c : Int <- 10.opadd(20);
         };
     )";
     ErrorKindList errorList = {

@@ -1,6 +1,7 @@
 add_gcool_library(Sema
     Sema.cpp
     Annotation.cpp
+    ASTPrinter.cpp
 )
 
 target_include_directories(Sema

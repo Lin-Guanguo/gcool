@@ -14,22 +14,30 @@ using ScopeList = std::vector<SemaScope>;
 
 class SemaScope {
 public:
+    enum ScopeKind {
+        SK_Class,
+        SK_Method,
+        SK_Local
+    };
+
     SemaScope* OuterScope;
     ScopeVariable Variables;
+    ScopeKind TheScopeKind;
 public:
-    SemaScope() 
-        : OuterScope (nullptr) {}
-    SemaScope(SemaScope* outer) 
-        : OuterScope(outer) {}
+    SemaScope(ScopeKind scopeKind) 
+        : OuterScope (nullptr), TheScopeKind(scopeKind) {}
+    SemaScope(SemaScope* outer, ScopeKind scopeKind) 
+        : OuterScope(outer), TheScopeKind(scopeKind) {}
 
     struct VariableDecl {
         SemaScope* Scope;
         ast::FormalDecl* Decl;
     };
-    VariableDecl searchVariable(ast::Symbol name);
+    VariableDecl findVariable(ast::Symbol name);
     void addVariable(ast::FormalDecl& formal);
 
-    static SemaScope EmptyScope;
+    // not used
+    // static SemaScope EmptyScope;
 };
 
 
@@ -77,13 +85,13 @@ public:
 class ClassAnnotation : public Annotation {
 public:
     MethodTable MTable;
-    SemaScope Scope;
+    SemaScope Scope = SemaScope::SK_Class;
     ast::Class* SuperClass;
     int InheritDepth;
     int AttrOffsetEnd;
     int MethodOffsetEnd; 
 protected:
-    ClassAnnotation() : Scope() {}
+    ClassAnnotation() {}
     friend class Sema;
 public:
 
@@ -100,7 +108,7 @@ protected:
 
 class MethodAnnotation : public Annotation {
 public:
-    SemaScope MethodScope;
+    SemaScope MethodScope = SemaScope::SK_Method;
     ast::Class* RetClass = nullptr;
     int MethodOffset;
 protected:
@@ -156,6 +164,8 @@ protected:
 
 class ExprAssignAnnotation : public ExprAnnotation {
 public:
+    SemaScope* ScopeRef = nullptr;
+    ast::FormalDecl* DeclRef = nullptr;
 protected:
     ExprAssignAnnotation() {}
     friend class Sema;
@@ -207,7 +217,7 @@ protected:
 
 class ExprLetAnnotation : public ExprAnnotation {
 public:
-    SemaScope LocalScope;
+    SemaScope LocalScope = SemaScope::SK_Local;
 protected:
     ExprLetAnnotation() {}
     friend class Sema;
@@ -230,59 +240,20 @@ protected:
 
 class ExprArithBAnnotation : public ExprAnnotation {
 public:
-    enum ArithBKind : int {
-        AK_Error,
-        AK_MethodOver,
-
-        AK_IntADD,
-        AK_IntSUB,
-        AK_IntMUL,
-        AK_IntDIV,
-        AK_IntEQ,
-        AK_IntGE,
-        AK_IntGT,
-        AK_IntLE,
-        AK_IntLT,
-        AK_FloatADD,
-        AK_FloatSUB,
-        AK_FloatMUL,
-        AK_FloatDIV,
-        AK_FloatEQ,
-        AK_FloatGE,
-        AK_FloatGT,
-        AK_FloatLE,
-        AK_FloatLT,
-        AK_BoolADD_OR,
-        AK_BoolMUL_AND
-    };
-    // for method Over type
-    ArithBKind ArithKind = AK_Error;
     ast::Class* ClassRef = nullptr;
     ast::MethodFeature* MethodRef = nullptr;
 protected:
     ExprArithBAnnotation() {}
     friend class Sema;
-public:
-    ArithBKind ArithBKindSet(ast::Class* left, ast::Class* right, int op);
 };
 
 class ExprArithUAnnotation : public ExprAnnotation {
 public:
-    enum ArithUKind : int {
-        AK_Error,
-        AK_MethodOver,
-
-        AK_BoolNOT,
-        AK_ObjectISVOID
-    };
-    ArithUKind ArithKind = AK_Error;
     ast::Class* ClassRef = nullptr;
     ast::MethodFeature* MethodRef = nullptr;
 protected:
     ExprArithUAnnotation() {}
     friend class Sema;
-public:
-    ArithUKind ArithUKindSet(ast::Class* operand, int op);
 };
 
 

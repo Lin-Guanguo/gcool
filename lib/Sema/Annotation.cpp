@@ -2,9 +2,7 @@
 
 using namespace gcool;
 
-gcool::sema::SemaScope gcool::sema::SemaScope::EmptyScope{};
-
-gcool::sema::SemaScope::VariableDecl gcool::sema::SemaScope::searchVariable(ast::Symbol name) {
+gcool::sema::SemaScope::VariableDecl gcool::sema::SemaScope::findVariable(ast::Symbol name) {
     auto p = this;
     while (p != nullptr) {
         auto vp = p->Variables.find(name);
@@ -49,16 +47,3 @@ ast::Class* gcool::sema::ASTAnnotation::findClass(ast::Symbol Name) {
     else
         return p->second;
 }
-
-sema::ExprArithBAnnotation::ArithBKind sema::ExprArithBAnnotation::ArithBKindSet(
-    ast::Class* left, ast::Class* right, int op) {
-    // TODO
-    return AK_Error;
-}
-
-sema::ExprArithUAnnotation::ArithUKind sema::ExprArithUAnnotation::ArithUKindSet(
-    ast::Class* operand, int op) {
-    // TODO
-    return AK_Error;
-}
-

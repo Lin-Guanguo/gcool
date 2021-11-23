@@ -214,15 +214,8 @@ class ExprArithB : public ExprFacility<ExprArithB> {
 public:
     static constexpr ExprKind TheKind = EK_ARITH_B;
     enum Op : int {
-        OP_ADD,
-        OP_SUB,
-        OP_MUL,
-        OP_DIV,
-        OP_EQ,
-        OP_LE,
-        OP_LT,
-        OP_GE,
-        OP_GT,
+        #define BINARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) OperatorKind,
+        #include "gcool/AST/OperatorDef.def"
     };
     Expr Left;
     Expr Right;
@@ -237,8 +230,8 @@ class ExprArithU : public ExprFacility<ExprArithU> {
 public:
     static constexpr ExprKind TheKind = EK_ARITH_U;
     enum Op : int {
-        OP_NOT,
-        OP_ISVOID,
+        #define UNARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) OperatorKind,
+        #include "gcool/AST/OperatorDef.def"
     };
     Expr Operand;
     Op Operator;

@@ -62,10 +62,14 @@ ERROR_KIND_DEF(Sema_ExprNewTypeUndefine, ERROR, "")
 
 ERROR_KIND_DEF(Sema_ExprArithBLeftExprError, ERROR, "")
 ERROR_KIND_DEF(Sema_ExprArithBRightExprError, ERROR, "")
-ERROR_KIND_DEF(Sema_ExprArithBTypeIncompatible, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithBNoOverloadFunc, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithBOverloadFuncError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithBOverloadFuncArgsTypeIncompatible, ERROR, "")
 
 ERROR_KIND_DEF(Sema_ExprArithUOperandExprError, ERROR, "")
-ERROR_KIND_DEF(Sema_ExprArithUTypeIncompatible, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithUNoOverloadFunc, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithUOverloadFuncError, ERROR, "")
+ERROR_KIND_DEF(Sema_ExprArithUOverloadFuncArgsTypeeIncompatible, ERROR, "")
 
 
 #undef ERROR_KIND_DEF
