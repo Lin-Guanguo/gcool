@@ -38,3 +38,4 @@ target_link_libraries(GTestLib
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(unittests)
+add_subdirectory(example)

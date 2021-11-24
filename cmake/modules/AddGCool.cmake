@@ -10,11 +10,15 @@ endmacro()
 
 macro(add_gcool_executable name)
     add_executable(${name} ${ARGN} )
-endmacro()
+endmacro(add_gcool_executable)
 
 macro(add_gcool_tool name)
     add_gcool_executable(${name} ${ARGN})
-endmacro()
+endmacro(add_gcool_tool)
+
+macro(add_gcool_example name)
+    add_gcool_executable(${name} ${ARGN})  
+endmacro(add_gcool_example)
 
 macro(target_link_llvm name )
     llvm_map_components_to_libnames(llvm_libs ${ARGN})
