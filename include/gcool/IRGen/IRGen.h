@@ -5,7 +5,9 @@ namespace gcool {
 namespace ir {
 
 class IRGen {
+public:
 
+public:
 };
 
 }

@@ -7,4 +7,4 @@ target_include_directories(Basic
     ${GCOOL_INCLUDE_DIR}
 )
 
-target_link_llvm(Basic support core)
+target_link_llvm(Basic support)

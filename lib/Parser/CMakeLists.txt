@@ -11,4 +11,5 @@ target_include_directories(Parser
 target_link_libraries(Parser
     PUBLIC
     AST
+    Lexer
 )

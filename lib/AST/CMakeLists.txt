@@ -9,7 +9,7 @@ target_include_directories(AST
     ${GCOOL_INCLUDE_DIR}
 )
 
-target_link_llvm(AST support core)
+target_link_llvm(AST support)
 
 target_compile_features(AST
     PUBLIC

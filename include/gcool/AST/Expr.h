@@ -1,13 +1,12 @@
 #pragma once
 #include <string>
 #include <string_view>
-#include "llvm/Support/Casting.h"
 #include "gcool/AST/Symbol.h"
 #include "gcool/AST/ExprFwd.h"
 #include "gcool/AST/AST.h"
 
-namespace gcool{
-namespace ast{
+namespace gcool {
+namespace ast {
 
 struct LetInit {
     FormalDecl Formal;

@@ -2,6 +2,7 @@
 #include "gcool/AST/Expr.h"
 #include <unordered_map>
 #include <stack>
+#include <cassert>
 
 using namespace gcool;
 using namespace gcool::ast;

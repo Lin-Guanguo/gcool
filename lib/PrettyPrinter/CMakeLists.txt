@@ -7,6 +7,8 @@ target_include_directories(PrettyPrinter
     ${GCOOL_INCLUDE_DIR}
 )
 
+target_link_llvm(PrettyPrinter support)
+
 target_link_libraries(PrettyPrinter
     PUBLIC
     AST

@@ -1,4 +1,5 @@
 #include <cassert>
+#include "llvm/Support/Casting.h"
 #include "gcool/AST/Expr.h"
 
 bool gcool::ast::Expr::operator==(Expr t) const { 

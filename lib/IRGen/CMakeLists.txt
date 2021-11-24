@@ -7,6 +7,8 @@ target_include_directories(IRGen
     ${GCOOL_INCLUDE_DIR}
 )
 
+target_link_llvm(AST support)
+
 target_link_libraries(IRGen
     PUBLIC
     AST
