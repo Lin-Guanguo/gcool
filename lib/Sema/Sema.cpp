@@ -53,6 +53,11 @@ bool gcool::sema::Sema::pass2() {
         TheASTContext->Annotation->ClassMap.insert( {c.Name, &c} );
         c.Annotation = allocAnnotation<ClassAnnotation>();
         c.Annotation->MTable.InClass = &c;
+        if (isBuiltinType(&c))
+            c.Annotation->IsBuiltin = true;
+        else 
+            c.Annotation->IsBuiltin = false;
+
         nameSet.clear();
         for (auto& a : c.Attrs) {
             a.Annotation = allocAnnotation<AttrAnnotation>();
@@ -145,7 +150,8 @@ bool gcool::sema::Sema::pass5() {
         // class error are serious, stop sematic analysis
         if (c.Annotation->hasError) continue;
         // skip builtinType, their method body is empty
-        if (isBuiltinType(&c)) continue;
+        if (c.Annotation->IsBuiltin)
+            continue;
 
         for (auto& a : c.Attrs) {
             if (a.Init.has_value()){
@@ -175,7 +181,7 @@ bool gcool::sema::Sema::pass5() {
             }
             
             if (!m.Annotation->hasError
-                && !isSuper(m.Annotation->RetClass, m.Body.Annotation->Type, &c)) {
+                && !isSuper(m.Annotation->RetClassRef, m.Body.Annotation->Type, &c)) {
                 m.Annotation->hasError = hasError = true;
                 addError({basic::Diag::Sema_MethodBodyExprTypeIncompatible, 
                     std::string(m.RetType.getName()) + "<-" +
@@ -217,8 +223,8 @@ bool gcool::sema::Sema::annotMethodDecl(ast::Class* Class) {
 
     for (auto& m : Class->Methods) {
         // check method return type
-        m.Annotation->RetClass = TheASTContext->Annotation->findClass(m.RetType);
-        if (!m.Annotation->RetClass || m.Annotation->RetClass->Annotation->hasError) {
+        m.Annotation->RetClassRef = TheASTContext->Annotation->findClass(m.RetType);
+        if (!m.Annotation->RetClassRef || m.Annotation->RetClassRef->Annotation->hasError) {
             m.Annotation->hasError = true;
             addError({basic::Diag::Sema_MethodRetTypeError, std::string(m.RetType.getName())});
         }
@@ -283,477 +289,459 @@ public:
         : TheSema(theSema), TheScope(outerScope), SelfClass(selfClass) {}
     
 public:
-    void operator()(Expr& ExprAnnot, ExprInt& expr) {
-        auto annot = TheSema.allocAnnotation<ExprIntAnnotation>();
-        annot->hasError = false;
-        annot->Type = GETCLASS(SYMTBL.getInt());
-        ExprAnnot.Annotation = annot;
-    }
+void operator()(Expr& ExprAnnot, ExprInt& expr) {
+    auto annot = TheSema.allocAnnotation<ExprIntAnnotation>();
+    annot->hasError = false;
+    annot->Type = GETCLASS(SYMTBL.getInt());
+    ExprAnnot.Annotation = annot;
+}
 
-    void operator()(Expr& ExprAnnot, ExprFloat& expr) {
-        auto annot = TheSema.allocAnnotation<ExprFloatAnnotation>();
-        annot->Type = GETCLASS(SYMTBL.getFloat());
-        annot->hasError = false;
-        ExprAnnot.Annotation = annot;
-    }
+void operator()(Expr& ExprAnnot, ExprFloat& expr) {
+    auto annot = TheSema.allocAnnotation<ExprFloatAnnotation>();
+    annot->Type = GETCLASS(SYMTBL.getFloat());
+    annot->hasError = false;
+    ExprAnnot.Annotation = annot;
+}
 
-    void operator()(Expr& ExprAnnot, ExprBool& expr) {
-        auto annot = TheSema.allocAnnotation<ExprBoolAnnotation>();
-        annot->hasError = false;
-        annot->Type = GETCLASS(SYMTBL.getBool());
-        ExprAnnot.Annotation = annot;
-    }
+void operator()(Expr& ExprAnnot, ExprBool& expr) {
+    auto annot = TheSema.allocAnnotation<ExprBoolAnnotation>();
+    annot->hasError = false;
+    annot->Type = GETCLASS(SYMTBL.getBool());
+    ExprAnnot.Annotation = annot;
+}
 
-    void operator()(Expr& ExprAnnot, ExprString& expr) {
-        auto annot = TheSema.allocAnnotation<ExprStringAnnotation>();
-        annot->hasError = false;
-        annot->Type = GETCLASS(SYMTBL.getString());
-        ExprAnnot.Annotation = annot;
-    }
+void operator()(Expr& ExprAnnot, ExprString& expr) {
+    auto annot = TheSema.allocAnnotation<ExprStringAnnotation>();
+    annot->hasError = false;
+    annot->Type = GETCLASS(SYMTBL.getString());
+    ExprAnnot.Annotation = annot;
+}
 
-    // check variable declaration, get Type/DeclRef
-    void operator()(Expr& ExprAnnot, ExprSymbol& expr) {
-        auto annot = TheSema.allocAnnotation<ExprSymbolAnnotation>();
-        annot->hasError = false;
-        auto decl = TheScope->findVariable(expr.TheSymbol);
-        if (!decl.Scope) {
+// check variable declaration, get Type/DeclRef
+void operator()(Expr& ExprAnnot, ExprSymbol& expr) {
+    auto annot = TheSema.allocAnnotation<ExprSymbolAnnotation>();
+    annot->hasError = false;
+    auto decl = TheScope->findVariable(expr.TheSymbol);
+    if (!decl.Scope) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprSymbolNotDefine, 
+            std::string(expr.TheSymbol.getName())});
+    } else {
+        annot->DeclRef = decl.Decl;
+        annot->ScopeRef = decl.Scope;
+        annot->Type = GETCLASS(decl.Decl->Type);
+        if (!annot->Type || annot->Type->Annotation->hasError) {
             annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprSymbolNotDefine, 
-                std::string(expr.TheSymbol.getName())});
-        } else {
-            annot->DeclRef = decl.Decl;
-            annot->ScopeRef = decl.Scope;
-            annot->Type = GETCLASS(decl.Decl->Type);
-            if (!annot->Type || annot->Type->Annotation->hasError) {
-                annot->hasError = true;
-                TheSema.addError({basic::Diag::Sema_ExprSymbolTypeError, 
-                    std::string(decl.Decl->Type.getName())});
-            }
+            TheSema.addError({basic::Diag::Sema_ExprSymbolTypeError, 
+                std::string(decl.Decl->Type.getName())});
         }
-        ExprAnnot.Annotation = annot;
     }
+    ExprAnnot.Annotation = annot;
+}
 
-    // check variable declaration, get Type
-    // check ExprAnnot to assign
-    void operator()(Expr& ExprAnnot, ExprAssign& expr) {
-        auto annot = TheSema.allocAnnotation<ExprAssignAnnotation>();
-        annot->hasError = false;
-        auto decl = TheScope->findVariable(expr.Variable);
-        if (!decl.Decl) {
+// check variable declaration, get Type
+// check ExprAnnot to assign
+void operator()(Expr& ExprAnnot, ExprAssign& expr) {
+    auto annot = TheSema.allocAnnotation<ExprAssignAnnotation>();
+    annot->hasError = false;
+    auto decl = TheScope->findVariable(expr.Variable);
+    if (!decl.Decl) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprAssignVariableNotDecl, 
+            std::string(expr.Variable.getName())});
+    } else {
+        annot->Type = GETCLASS(decl.Decl->Type);
+        annot->ScopeRef = decl.Scope;
+        annot->DeclRef = decl.Decl;
+        if (!annot->Type || annot->Type->Annotation->hasError) {
             annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprAssignVariableNotDecl, 
+            TheSema.addError({basic::Diag::Sema_ExprAssignVariableTypeError, 
                 std::string(expr.Variable.getName())});
-        } else {
-            annot->Type = GETCLASS(decl.Decl->Type);
-            annot->ScopeRef = decl.Scope;
-            annot->DeclRef = decl.Decl;
-            if (!annot->Type || annot->Type->Annotation->hasError) {
-                annot->hasError = true;
-                TheSema.addError({basic::Diag::Sema_ExprAssignVariableTypeError, 
-                    std::string(expr.Variable.getName())});
-            }
-        }
-
-        expr.Value.accept(*this);
-        if (expr.Value.Annotation->hasError) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprAssignExprError, ""});
-        }
-
-        if (!annot->hasError
-            && !TheSema.isSuper(annot->Type, expr.Value.Annotation->Type, SelfClass)) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprAssignTypeIncompatible, 
-                std::string(annot->Type->Name.getName()) + "<-" +
-                std::string(expr.Value.Annotation->Type->Name.getName())});
-        }
-
-        ExprAnnot.Annotation = annot;
-    }
-
-    void checkCalleeAndArgs(ExprDispatchAnnotation* annot, Expr& Callee, ExprList& Args) {
-        Callee.accept(*this); 
-        if (Callee.Annotation->hasError) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprDispatchCalleeExprError, ""});
-        }
-        for( auto& e : Args ) {
-            e.accept(*this);
-            if (e.Annotation->hasError) {
-                annot->hasError = true;
-                TheSema.addError({basic::Diag::Sema_ExprDispatchArgsExprError, ""});
-            }
         }
     }
 
-    void findMethodAndCheckParam(ExprDispatchAnnotation* annot, Expr& Callee, ExprList& Args
-        , ast::Symbol Method, ast::Class* c) {
-        auto methodDecl = c->Annotation->MTable.findMethod(Method);
-        auto method = methodDecl.Decl;
-        if (!method) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprDispatchMethodUnknow, 
-                std::string(Method.getName())});
-            return;
-        }
-        annot->ClassRef = methodDecl.InClass;
-        annot->MethodRef = method;
-        if (method->RetType == SYMTBL.getSelfType())
-            annot->Type = Callee.Annotation->Type;
-        else
-            annot->Type = method->Annotation->RetClass;
-        
-        // error decl method
-        if (method->Annotation->hasError) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprDispatchMethodDeclError,
-                std::string(Method.getName())});
-            return;
-        }
+    expr.Value.accept(*this);
+    if (expr.Value.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprAssignExprError, ""});
+    }
 
-        // check params number
-        if(method->FormalParams.size() != Args.size()) {
+    if (!annot->hasError
+        && !TheSema.isSuper(annot->Type, expr.Value.Annotation->Type, SelfClass)) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprAssignTypeIncompatible, 
+            std::string(annot->Type->Name.getName()) + "<-" +
+            std::string(expr.Value.Annotation->Type->Name.getName())});
+    }
+
+    ExprAnnot.Annotation = annot;
+}
+
+void checkCalleeAndArgs(ExprDispatchAnnotation* annot, Expr& Callee, ExprList& Args) {
+    Callee.accept(*this); 
+    if (Callee.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprDispatchCalleeExprError, ""});
+    }
+    for( auto& e : Args ) {
+        e.accept(*this);
+        if (e.Annotation->hasError) {
             annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprDispatchArgsNumberError, 
-                std::string(Method.getName())});
-            return;
-        }
-        // check param and args
-        for(int i = 0; i < Args.size(); ++i) {
-            auto formalType = GETCLASS(method->FormalParams[i].Type);
-            auto actualType = Args[i].Annotation->Type;
-            assert(formalType && "alreay check in Sema_ExprDispatchMethodDeclError");
-            if (!TheSema.isSuper(formalType, actualType, SelfClass)) {
-                annot->hasError = true;
-                TheSema.addError({basic::Diag::Sema_ExprDispatchArgsTypeError, 
-                    std::string(formalType->Name.getName()) + "<-" +
-                    std::string(actualType->Name.getName())});
-            }
+            TheSema.addError({basic::Diag::Sema_ExprDispatchArgsExprError, ""});
         }
     }
+}
+
+void findMethodAndCheckParam(ExprDispatchAnnotation* annot, Expr& Callee, ExprList& Args
+    , ast::Symbol Method, ast::Class* c) {
+    auto methodDecl = c->Annotation->MTable.findMethod(Method);
+    auto method = methodDecl.Decl;
+    if (!method) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprDispatchMethodUnknow, 
+            std::string(Method.getName())});
+        return;
+    }
+    annot->ClassRef = methodDecl.InClass;
+    annot->MethodRef = method;
+    if (method->RetType == SYMTBL.getSelfType())
+        annot->Type = Callee.Annotation->Type;
+    else
+        annot->Type = method->Annotation->RetClassRef;
     
-    // check callee Expr
-    // check args Expr and args type
-    // check method define, get Type
-    void operator()(Expr& ExprAnnot, ExprDispatch& expr) {
-        auto annot = TheSema.allocAnnotation<ExprDispatchAnnotation>();
-        annot->hasError = false;
-        checkCalleeAndArgs(annot, expr.Callee, expr.Args);
-
-        if (!annot->hasError) {
-            auto c = expr.Callee.Annotation->Type;
-            if (c->Name == SYMTBL.getSelfType())
-                c = SelfClass;
-
-            findMethodAndCheckParam(annot, expr.Callee, expr.Args,
-                expr.Method, c);
-        }
-
-        ExprAnnot.Annotation = annot;
+    // error decl method
+    if (method->Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprDispatchMethodDeclError,
+            std::string(Method.getName())});
+        return;
     }
 
-    void operator()(Expr& ExprAnnot, ExprStaticDispatch& expr) {
-        auto annot = TheSema.allocAnnotation<ExprStaticDispatchAnnotation>();
-        annot->hasError = false;
-        checkCalleeAndArgs(annot, expr.Callee, expr.Args);
-        
-        // static part
-        auto c = GETCLASS(expr.Type);
+    // check params number
+    if(method->FormalParams.size() != Args.size()) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprDispatchArgsNumberError, 
+            std::string(Method.getName())});
+        return;
+    }
+    // check param and args
+    for(int i = 0; i < Args.size(); ++i) {
+        auto formalType = GETCLASS(method->FormalParams[i].Type);
+        auto actualType = Args[i].Annotation->Type;
+        assert(formalType && "alreay check in Sema_ExprDispatchMethodDeclError");
+        if (!TheSema.isSuper(formalType, actualType, SelfClass)) {
+            annot->hasError = true;
+            TheSema.addError({basic::Diag::Sema_ExprDispatchArgsTypeError, 
+                std::string(formalType->Name.getName()) + "<-" +
+                std::string(actualType->Name.getName())});
+        }
+    }
+}
+
+// check callee Expr
+// check args Expr and args type
+// check method define, get Type
+void operator()(Expr& ExprAnnot, ExprDispatch& expr) {
+    auto annot = TheSema.allocAnnotation<ExprDispatchAnnotation>();
+    annot->hasError = false;
+    checkCalleeAndArgs(annot, expr.Callee, expr.Args);
+
+    if (!annot->hasError) {
+        auto c = expr.Callee.Annotation->Type;
+        if (c->Name == SYMTBL.getSelfType())
+            c = SelfClass;
+
+        findMethodAndCheckParam(annot, expr.Callee, expr.Args,
+            expr.Method, c);
+    }
+
+    ExprAnnot.Annotation = annot;
+}
+
+void operator()(Expr& ExprAnnot, ExprStaticDispatch& expr) {
+    auto annot = TheSema.allocAnnotation<ExprStaticDispatchAnnotation>();
+    annot->hasError = false;
+    checkCalleeAndArgs(annot, expr.Callee, expr.Args);
+    
+    // static part
+    auto c = GETCLASS(expr.Type);
+    if (!c) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprStaticDispatchTypeUnkonw, 
+            std::string(expr.Type.getName())});
+    } else if (expr.Type == SYMTBL.getSelfType()) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprStaticDispatchTypeCantBeSelfType, 
+            std::string(expr.Type.getName())});
+    } else if (!TheSema.isSuper(c, expr.Callee.Annotation->Type, SelfClass)) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprStaticDispatchInheritError, 
+            std::string(expr.Type.getName())});
+    }
+
+    if (!annot->hasError) {
+        findMethodAndCheckParam(annot, expr.Callee, expr.Args,
+            expr.Method, c);
+    }
+
+    ExprAnnot.Annotation = annot;
+}
+
+void operator()(Expr& ExprAnnot, ExprCond& expr) {
+    auto annot = TheSema.allocAnnotation<ExprCondAnnotation>();
+    annot->hasError = false;
+    expr.Cond.accept(*this);
+    if (expr.Cond.Annotation->hasError
+        || expr.Cond.Annotation->Type->Name != SYMTBL.getBool()) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprCondConditionError, ""});
+    }
+    expr.ThenBranch.accept(*this);
+    expr.ElseBranch.accept(*this);
+    if (expr.ThenBranch.Annotation->hasError 
+        || expr.ElseBranch.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprCondBranchError, ""});
+    } else {
+        annot->Type = TheSema.getCommonSuper(
+            expr.ThenBranch.Annotation->Type,
+            expr.ElseBranch.Annotation->Type,
+            SelfClass
+            );
+    }
+    ExprAnnot.Annotation = annot;
+}
+
+void operator()(Expr& ExprAnnot, ExprLoop& expr) {
+    auto annot = TheSema.allocAnnotation<ExprLoopAnnotation>();
+    annot->hasError = false;
+    expr.Cond.accept(*this);
+    if (expr.Cond.Annotation->hasError
+        || expr.Cond.Annotation->Type->Name != SYMTBL.getBool()) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprLoopConditionError, ""});
+    }
+    expr.LoopBody.accept(*this);
+    if (expr.LoopBody.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprLoopBodyError, ""});
+    }
+    annot->Type = expr.LoopBody.Annotation->Type;
+    ExprAnnot.Annotation = annot;
+}
+
+void operator()(Expr& ExprAnnot, ExprCase& expr) {
+    auto annot = TheSema.allocAnnotation<ExprCaseAnnotation>();
+    annot->hasError = false;
+    expr.Cond.accept(*this);
+    if (expr.Cond.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprCaseCondExprError, ""});    
+    }
+    annot->Type = nullptr;
+    annot->BranchScope.resize(expr.Branchs.size(), {TheScope, SemaScope::SK_Local});
+    for (int i = 0; i < expr.Branchs.size(); ++i) {
+        auto&b = expr.Branchs[i];
+        auto&branchScope = annot->BranchScope[i];
+
+        auto c = GETCLASS(b.Formal.Name);
         if (!c) {
             annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprStaticDispatchTypeUnkonw, 
-                std::string(expr.Type.getName())});
-        } else if (expr.Type == SYMTBL.getSelfType()) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprStaticDispatchTypeCantBeSelfType, 
-                std::string(expr.Type.getName())});
-        } else if (!TheSema.isSuper(c, expr.Callee.Annotation->Type, SelfClass)) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprStaticDispatchInheritError, 
-                std::string(expr.Type.getName())});
-        }
-
-        if (!annot->hasError) {
-            findMethodAndCheckParam(annot, expr.Callee, expr.Args,
-                expr.Method, c);
-        }
-
-        ExprAnnot.Annotation = annot;
-    }
-
-    void operator()(Expr& ExprAnnot, ExprCond& expr) {
-        auto annot = TheSema.allocAnnotation<ExprCondAnnotation>();
-        annot->hasError = false;
-        expr.Cond.accept(*this);
-        if (expr.Cond.Annotation->hasError
-            || expr.Cond.Annotation->Type->Name != SYMTBL.getBool()) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprCondConditionError, ""});
-        }
-        expr.ThenBranch.accept(*this);
-        expr.ElseBranch.accept(*this);
-        if (expr.ThenBranch.Annotation->hasError 
-            || expr.ElseBranch.Annotation->hasError) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprCondBranchError, ""});
+            TheSema.addError({basic::Diag::Sema_ExprCaseBrachTypeUnkonw, 
+                std::string(b.Formal.Type.getName())});  
         } else {
-            annot->Type = TheSema.getCommonSuper(
-                expr.ThenBranch.Annotation->Type,
-                expr.ElseBranch.Annotation->Type,
-                SelfClass
-                );
-        }
-        ExprAnnot.Annotation = annot;
-    }
-
-    void operator()(Expr& ExprAnnot, ExprLoop& expr) {
-        auto annot = TheSema.allocAnnotation<ExprLoopAnnotation>();
-        annot->hasError = false;
-        expr.Cond.accept(*this);
-        if (expr.Cond.Annotation->hasError
-            || expr.Cond.Annotation->Type->Name != SYMTBL.getBool()) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprLoopConditionError, ""});
-        }
-        expr.LoopBody.accept(*this);
-        if (expr.LoopBody.Annotation->hasError) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprLoopBodyError, ""});
-        }
-        annot->Type = expr.LoopBody.Annotation->Type;
-        ExprAnnot.Annotation = annot;
-    }
-
-    void operator()(Expr& ExprAnnot, ExprCase& expr) {
-        auto annot = TheSema.allocAnnotation<ExprCaseAnnotation>();
-        annot->hasError = false;
-        expr.Cond.accept(*this);
-        if (expr.Cond.Annotation->hasError) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprCaseCondExprError, ""});    
-        }
-        annot->Type = nullptr;
-        annot->BranchScope.resize(expr.Branchs.size(), {TheScope, SemaScope::SK_Local});
-        for (int i = 0; i < expr.Branchs.size(); ++i) {
-            auto&b = expr.Branchs[i];
-            auto&branchScope = annot->BranchScope[i];
-
-            auto c = GETCLASS(b.Formal.Name);
-            if (!c) {
+            branchScope.addVariable(b.Formal);
+            auto outerScope = TheScope;
+            TheScope = &branchScope;
+            b.Body.accept(*this);
+            TheScope = outerScope;
+            if (b.Body.Annotation->hasError) {
                 annot->hasError = true;
-                TheSema.addError({basic::Diag::Sema_ExprCaseBrachTypeUnkonw, 
-                    std::string(b.Formal.Type.getName())});  
+                TheSema.addError({basic::Diag::Sema_ExprCaseBrachExprError, 
+                    std::string(b.Formal.Name.getName())});  
+            } else if (annot->Type == nullptr) {
+                annot->Type = b.Body.Annotation->Type;
             } else {
-                branchScope.addVariable(b.Formal);
-                auto outerScope = TheScope;
-                TheScope = &branchScope;
-                b.Body.accept(*this);
-                TheScope = outerScope;
-                if (b.Body.Annotation->hasError) {
-                    annot->hasError = true;
-                    TheSema.addError({basic::Diag::Sema_ExprCaseBrachExprError, 
-                        std::string(b.Formal.Name.getName())});  
-                } else if (annot->Type == nullptr) {
-                    annot->Type = b.Body.Annotation->Type;
-                } else {
-                    annot->Type = TheSema.getCommonSuper(
-                        annot->Type, b.Body.Annotation->Type, SelfClass);
-                }
+                annot->Type = TheSema.getCommonSuper(
+                    annot->Type, b.Body.Annotation->Type, SelfClass);
             }
         }
-        ExprAnnot.Annotation = annot;
     }
+    ExprAnnot.Annotation = annot;
+}
 
-    void operator()(Expr& ExprAnnot, ExprBlock& expr) {
-        auto annot = TheSema.allocAnnotation<ExprBlockAnnotation>();
-        annot->hasError = false;
-        annot->Type = nullptr;
-        int i = 0;
-        for (auto& e : expr.Exprs) {
-            e.accept(*this);
-            if (e.Annotation->hasError) {
-                annot->hasError = true;
-                TheSema.addError({basic::Diag::Sema_ExprBlockExprError, 
-                    "order=" + std::to_string(i)});  
-            } 
-            annot->Type = e.Annotation->Type;
-            ++i;
-        }
-        ExprAnnot.Annotation = annot;
+void operator()(Expr& ExprAnnot, ExprBlock& expr) {
+    auto annot = TheSema.allocAnnotation<ExprBlockAnnotation>();
+    annot->hasError = false;
+    annot->Type = nullptr;
+    int i = 0;
+    for (auto& e : expr.Exprs) {
+        e.accept(*this);
+        if (e.Annotation->hasError) {
+            annot->hasError = true;
+            TheSema.addError({basic::Diag::Sema_ExprBlockExprError, 
+                "order=" + std::to_string(i)});  
+        } 
+        annot->Type = e.Annotation->Type;
+        ++i;
     }
+    ExprAnnot.Annotation = annot;
+}
 
-    void operator()(Expr& ExprAnnot, ExprLet& expr) {
-        auto annot = TheSema.allocAnnotation<ExprLetAnnotation>();
-        annot->hasError = false;
-        std::unordered_set<ast::Symbol> nameset;
-        auto outerScope = TheScope;
-        TheScope = &annot->LocalScope;
-        for(auto& decl : expr.InitVariables) {
-            bool declError = false;
-            if (nameset.find(decl.Formal.Name) != nameset.end()) {
-                annot->hasError = true;
-                TheSema.addError({basic::Diag::Sema_ExprLetInitMultiDefine, 
+void operator()(Expr& ExprAnnot, ExprLet& expr) {
+    auto annot = TheSema.allocAnnotation<ExprLetAnnotation>();
+    annot->hasError = false;
+    std::unordered_set<ast::Symbol> nameset;
+    auto outerScope = TheScope;
+    TheScope = &annot->LocalScope;
+    for(auto& decl : expr.InitVariables) {
+        bool declError = false;
+        if (nameset.find(decl.Formal.Name) != nameset.end()) {
+            annot->hasError = true;
+            TheSema.addError({basic::Diag::Sema_ExprLetInitMultiDefine, 
+                std::string(decl.Formal.Name.getName())});  
+        } else {
+            nameset.insert(decl.Formal.Name);
+            auto c = GETCLASS(decl.Formal.Type);
+            if (!c || c->Annotation->hasError) {
+                annot->hasError = declError = true;
+                TheSema.addError({basic::Diag::Sema_ExprLetInitDeclTypeError, 
                     std::string(decl.Formal.Name.getName())});  
-            } else {
-                nameset.insert(decl.Formal.Name);
-                auto c = GETCLASS(decl.Formal.Type);
-                if (!c || c->Annotation->hasError) {
+            } 
+            
+            if (decl.Init.has_value()) {
+                auto& e = decl.Init.value();
+                e.accept(*this);
+                if (e.Annotation->hasError) {
                     annot->hasError = declError = true;
-                    TheSema.addError({basic::Diag::Sema_ExprLetInitDeclTypeError, 
-                        std::string(decl.Formal.Name.getName())});  
-                } 
-                
-                if (decl.Init.has_value()) {
-                    auto& e = decl.Init.value();
-                    e.accept(*this);
-                    if (e.Annotation->hasError) {
-                        annot->hasError = declError = true;
-                        TheSema.addError({basic::Diag::Sema_ExprLetInitDeclExprError, ""});  
-                    } else if (!declError 
-                        && !TheSema.isSuper(c, e.Annotation->Type, SelfClass)) {
-                        annot->hasError = declError = true;
-                        TheSema.addError({basic::Diag::Sema_ExprLetInitDeclExprIncompatible, 
-                            std::string(c->Name.getName()) + "<-" +
-                            std::string(e.Annotation->Type->Name.getName())});
-                    }
+                    TheSema.addError({basic::Diag::Sema_ExprLetInitDeclExprError, ""});  
+                } else if (!declError 
+                    && !TheSema.isSuper(c, e.Annotation->Type, SelfClass)) {
+                    annot->hasError = declError = true;
+                    TheSema.addError({basic::Diag::Sema_ExprLetInitDeclExprIncompatible, 
+                        std::string(c->Name.getName()) + "<-" +
+                        std::string(e.Annotation->Type->Name.getName())});
                 }
-                annot->LocalScope.addVariable(decl.Formal);
             }
+            annot->LocalScope.addVariable(decl.Formal);
         }
-
-        expr.LetBody.accept(*this);
-        TheScope = outerScope;
-
-        annot->Type = expr.LetBody.Annotation->Type;
-        if (expr.LetBody.Annotation->hasError) {
-            annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprLetBodyExprError, ""});  
-        }
-
-        ExprAnnot.Annotation = annot;
     }
 
-    void operator()(Expr& ExprAnnot, ExprNew& expr) {
-        auto annot = TheSema.allocAnnotation<ExprNewAnnotation>();
-        annot->hasError = false;
-        annot->Type = GETCLASS(expr.Type);
-        if (!annot->Type) {
+    expr.LetBody.accept(*this);
+    TheScope = outerScope;
+
+    annot->Type = expr.LetBody.Annotation->Type;
+    if (expr.LetBody.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprLetBodyExprError, ""});  
+    }
+
+    ExprAnnot.Annotation = annot;
+}
+
+void operator()(Expr& ExprAnnot, ExprNew& expr) {
+    auto annot = TheSema.allocAnnotation<ExprNewAnnotation>();
+    annot->hasError = false;
+    annot->Type = GETCLASS(expr.Type);
+    if (!annot->Type) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprNewTypeUndefine,
+            std::string(expr.Type.getName())});
+    } else if (annot->Type->Name == SYMTBL.getSelfType()) {
+        annot->IsSelfType = true;
+    } else {
+        annot->IsSelfType = false;
+    }
+    ExprAnnot.Annotation = annot;
+}
+
+void operator()(Expr& ExprAnnot, ExprSelf& expr) {
+    auto annot = TheSema.allocAnnotation<ExprSelfAnnotation>();
+    annot->hasError = false;
+    annot->Type = GETCLASS(SYMTBL.getSelfType());
+    ExprAnnot.Annotation = annot;
+}
+
+void operator()(Expr& ExprAnnot, ExprArithB& expr) {
+    auto annot = TheSema.allocAnnotation<ExprArithBAnnotation>();
+    annot->hasError = false;
+    expr.Left.accept(*this);
+    if (expr.Left.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprArithBLeftExprError, ""});
+    }
+    expr.Right.accept(*this);
+    if (expr.Right.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprArithBRightExprError, ""});
+    }
+
+    if (!annot->hasError) {
+        auto funcName = ast::ExprArithB::OverloadFuncName[expr.Operator];
+        auto overloadF = expr.Left.Annotation->Type->Annotation->MTable.findMethod(SYMTBL.get(funcName));
+        if (!overloadF.Decl) {
             annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprNewTypeUndefine,
-                std::string(expr.Type.getName())});
-        } else if (annot->Type->Name == SYMTBL.getSelfType()) {
-            annot->IsSelfType = true;
+            this->TheSema.addError({basic::Diag::Sema_ExprArithBNoOverloadFunc, funcName});
+            goto CHECK_BREAK;
         } else {
-            annot->IsSelfType = false;
-        }
-        ExprAnnot.Annotation = annot;
-    }
-
-    void operator()(Expr& ExprAnnot, ExprSelf& expr) {
-        auto annot = TheSema.allocAnnotation<ExprSelfAnnotation>();
-        annot->hasError = false;
-        annot->Type = GETCLASS(SYMTBL.getSelfType());
-        ExprAnnot.Annotation = annot;
-    }
-
-    void operator()(Expr& ExprAnnot, ExprArithB& expr) {
-        auto annot = TheSema.allocAnnotation<ExprArithBAnnotation>();
-        annot->hasError = false;
-        expr.Left.accept(*this);
-        if (expr.Left.Annotation->hasError) {
+            annot->ClassRef = overloadF.InClass;
+            annot->MethodRef = overloadF.Decl;
+            annot->Type = overloadF.Decl->Annotation->RetClassRef;
+        } 
+        if (overloadF.Decl->Annotation->hasError) {
             annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprArithBLeftExprError, ""});
+            this->TheSema.addError({basic::Diag::Sema_ExprArithBOverloadFuncError, funcName});
+            goto CHECK_BREAK;
         }
-        expr.Right.accept(*this);
-        if (expr.Right.Annotation->hasError) {
+        if (overloadF.Decl->FormalParams.size() != 1) {
             annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprArithBRightExprError, ""});
+            this->TheSema.addError({basic::Diag::Sema_ExprArithBOverloadFuncArgsTypeIncompatible, funcName});
+            goto CHECK_BREAK;
         }
-
-        auto handlerLambda = [annot, this, &expr](const char* funcName) {
-            auto overloadF = expr.Left.Annotation->Type->Annotation->MTable.findMethod(SYMTBL.get(funcName));
-            if (!overloadF.Decl) {
-                annot->hasError = true;
-                this->TheSema.addError({basic::Diag::Sema_ExprArithBNoOverloadFunc, funcName});
-                return;
-            } else {
-                annot->ClassRef = overloadF.InClass;
-                annot->MethodRef = overloadF.Decl;
-                annot->Type = overloadF.Decl->Annotation->RetClass;
-            } 
-            if (overloadF.Decl->Annotation->hasError) {
-                annot->hasError = true;
-                this->TheSema.addError({basic::Diag::Sema_ExprArithBOverloadFuncError, funcName});
-                return;
-            }
-            if (overloadF.Decl->FormalParams.size() != 1) {
-                annot->hasError = true;
-                this->TheSema.addError({basic::Diag::Sema_ExprArithBOverloadFuncArgsTypeIncompatible, funcName});
-                return;
-            }
-            auto formalType = GETCLASS(overloadF.Decl->FormalParams[0].Type);
-            if ( !TheSema.isSuper(formalType, expr.Right.Annotation->Type, SelfClass)) {
-                annot->hasError = true;
-                this->TheSema.addError({basic::Diag::Sema_ExprArithBOverloadFuncArgsTypeIncompatible, funcName});
-            }
-            return;
-        };
-
-        if (!annot->hasError) {
-            switch (expr.Operator) {
-            #define BINARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) \
-            case ExprArithB::OperatorKind:{handlerLambda(OverloadFunction);break;}
-            #include "gcool/AST/OperatorDef.def"
-            default:
-                assert(0 && "shouldn't reach here");
-            }
+        auto formalType = GETCLASS(overloadF.Decl->FormalParams[0].Type);
+        if ( !TheSema.isSuper(formalType, expr.Right.Annotation->Type, SelfClass)) {
+            annot->hasError = true;
+            this->TheSema.addError({basic::Diag::Sema_ExprArithBOverloadFuncArgsTypeIncompatible, funcName});
         }
-        ExprAnnot.Annotation = annot;
+    }
+    CHECK_BREAK:
+    ExprAnnot.Annotation = annot;
+}
+
+void operator()(Expr& ExprAnnot, ExprArithU& expr) {
+    auto annot = TheSema.allocAnnotation<ExprArithUAnnotation>();
+    annot->hasError = false;
+    expr.Operand.accept(*this);
+    if (expr.Operand.Annotation->hasError) {
+        annot->hasError = true;
+        TheSema.addError({basic::Diag::Sema_ExprArithUOperandExprError, ""});
     }
 
-    void operator()(Expr& ExprAnnot, ExprArithU& expr) {
-        auto annot = TheSema.allocAnnotation<ExprArithUAnnotation>();
-        annot->hasError = false;
-        expr.Operand.accept(*this);
-        if (expr.Operand.Annotation->hasError) {
+    if (!annot->hasError) {
+        auto funcName = ast::ExprArithU::OverloadFuncName[expr.Operator];
+        auto overloadF = expr.Operand.Annotation->Type->Annotation->MTable.findMethod(SYMTBL.get(funcName));
+        if (!overloadF.Decl) {
             annot->hasError = true;
-            TheSema.addError({basic::Diag::Sema_ExprArithUOperandExprError, ""});
+            this->TheSema.addError({basic::Diag::Sema_ExprArithUNoOverloadFunc, funcName});
+            goto CHECK_BREAK;
+        } else {
+            annot->ClassRef = overloadF.InClass;
+            annot->MethodRef = overloadF.Decl;
+            annot->Type = overloadF.Decl->Annotation->RetClassRef;
+        } 
+        if (overloadF.Decl->Annotation->hasError) {
+            annot->hasError = true;
+            this->TheSema.addError({basic::Diag::Sema_ExprArithUOverloadFuncError, funcName});
+            goto CHECK_BREAK;
         }
-
-        auto handlerLambda = [annot, this, &expr](const char* funcName) {
-            auto overloadF = expr.Operand.Annotation->Type->Annotation->MTable.findMethod(SYMTBL.get(funcName));
-            if (!overloadF.Decl) {
-                annot->hasError = true;
-                this->TheSema.addError({basic::Diag::Sema_ExprArithUNoOverloadFunc, funcName});
-                return;
-            } else {
-                annot->ClassRef = overloadF.InClass;
-                annot->MethodRef = overloadF.Decl;
-                annot->Type = overloadF.Decl->Annotation->RetClass;
-            } 
-            if (overloadF.Decl->Annotation->hasError) {
-                annot->hasError = true;
-                this->TheSema.addError({basic::Diag::Sema_ExprArithUOverloadFuncError, funcName});
-                return;
-            }
-            if (overloadF.Decl->FormalParams.size() != 0) {
-                annot->hasError = true;
-                this->TheSema.addError({basic::Diag::Sema_ExprArithUOverloadFuncArgsTypeeIncompatible, funcName});
-            }
-            return;
-        };
-
-        if (!annot->hasError) {
-            switch (expr.Operator) {
-            #define UNARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) \
-            case ExprArithU::OperatorKind:{handlerLambda(OverloadFunction);break;}
-            #include "gcool/AST/OperatorDef.def"
-            default:
-                assert(0 && "shouldn't reach here");
-            }
+        if (overloadF.Decl->FormalParams.size() != 0) {
+            annot->hasError = true;
+            this->TheSema.addError({basic::Diag::Sema_ExprArithUOverloadFuncArgsTypeeIncompatible, funcName});
         }
-        ExprAnnot.Annotation = annot;
     }
+    CHECK_BREAK:
+    ExprAnnot.Annotation = annot;
+}
 
 };
 
@@ -811,15 +799,15 @@ bool gcool::sema::Sema::isBuiltinType(ast::Class* c) {
 }
 
 // builtinType, and builtinFunction
-// "(new)" function only call by operator new
+// funcname 0 start(such as 0new) is builtin function that programer can't call and overload
 void gcool::sema::Sema::addBuiltinTypeAST() {
     auto& sym = TheASTContext->Symtbl;
-    auto exprHolder = TheASTContext->ExprAlloc.allocExpr(ast::ExprInt(0));
+    auto exprHolder = TheASTContext->ExprAlloc.allocExpr(ast::ExprString("builtin"));
     // TODO
     TheASTContext->Classes.push_back( 
         Class{TheASTContext->Symtbl.getObject(),
             {},
-            {MethodFeature{sym.get("(new)"), sym.getSelfType(), FormalList{}, exprHolder},
+            {MethodFeature{sym.get("0new"), sym.getSelfType(), FormalList{}, exprHolder},
              MethodFeature{sym.get("opisvoid"), sym.getBool(), FormalList{}, exprHolder}
             },
             Symbol::EmptySymbol

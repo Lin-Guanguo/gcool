@@ -213,6 +213,14 @@ public:
 class ExprArithB : public ExprFacility<ExprArithB> {
 public:
     static constexpr ExprKind TheKind = EK_ARITH_B;
+    static constexpr const char* OperatorLiteral[] = {
+        #define BINARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) String,
+        #include "gcool/AST/OperatorDef.def"
+    };
+    static constexpr const char* OverloadFuncName[] = {
+        #define BINARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) OverloadFunction,
+        #include "gcool/AST/OperatorDef.def"
+    };
     enum Op : int {
         #define BINARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) OperatorKind,
         #include "gcool/AST/OperatorDef.def"
@@ -229,6 +237,14 @@ public:
 class ExprArithU : public ExprFacility<ExprArithU> {
 public:
     static constexpr ExprKind TheKind = EK_ARITH_U;
+    static constexpr const char* OperatorLiteral[] = {
+        #define UNARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) String,
+        #include "gcool/AST/OperatorDef.def"
+    };
+    static constexpr const char* OverloadFuncName[] = {
+        #define UNARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) OverloadFunction,
+        #include "gcool/AST/OperatorDef.def"
+    };
     enum Op : int {
         #define UNARY_OPERATOR_DEF(OperatorKind, String, OverloadFunction) OperatorKind,
         #include "gcool/AST/OperatorDef.def"

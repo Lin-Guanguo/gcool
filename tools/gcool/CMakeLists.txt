@@ -11,4 +11,5 @@ target_link_libraries(gcool
     Parser
     Lexer
     Sema
+    PrettyPrinter
     )

@@ -9,6 +9,7 @@
 #include "gcool/Lexer/Lexer.h"
 #include "gcool/Sema/Sema.h"
 #include "gcool/Basic/Diag.h"
+#include "gcool/PrettyPrinter/ASTPrinter.h"
 #include "llvm/Support/FormatVariadic.h"
 
 using namespace gcool;
@@ -28,12 +29,16 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
 
     Sema sema(&context);
     sema.checkAll();
+    
+    pretty::ASTPrinter printer;
+    printer.IsPrintBuiltin = true;
+    printer.printAST(llvm::outs(), sema);
 
-    if (debugPrint) {
-        for(auto e : sema.TheErrorList) {
-            std::cerr << e.DiagKindName[e.TheDiagKind] << " : " << e.AdditionalMsg << "\n";
-        }
-    }
+    // if (debugPrint) {
+    //     for(auto e : sema.TheErrorList) {
+    //         std::cerr << e.DiagKindName[e.TheDiagKind] << " : " << e.AdditionalMsg << "\n";
+    //     }
+    // }
 
     // EXPECT_EQ(sema.TheErrorList.size(), errorList.size());
     // for(int i = 0; i < errorList.size(); ++i) {
@@ -47,10 +52,14 @@ int main(int argc, char** argv)
     R"(
         class Main {
             c : Int <- 10.opadd(20);
+            b : Int <- 10.opadd(20);
+            main(i : Int) : Int {
+                i
+            };
         };
     )";
     ErrorKindList errorList = {
-
     };
     checkError(input, errorList, true);
+
 }

@@ -90,6 +90,7 @@ public:
     int InheritDepth;
     int AttrOffsetEnd;
     int MethodOffsetEnd; 
+    bool IsBuiltin = false;
 protected:
     ClassAnnotation() {}
     friend class Sema;
@@ -109,7 +110,7 @@ protected:
 class MethodAnnotation : public Annotation {
 public:
     SemaScope MethodScope = SemaScope::SK_Method;
-    ast::Class* RetClass = nullptr;
+    ast::Class* RetClassRef = nullptr;
     int MethodOffset;
 protected:
     MethodAnnotation() {}

@@ -13,7 +13,7 @@ private:
     friend class SymbolTable;
 public:
     using SymbolID = std::intptr_t;
-    std::string_view getName() const { return { s }; }
+    const char* getName() const { return s; }
     SymbolID getID() const { return reinterpret_cast<SymbolID>(s); };
     bool isEmpty() const { return s == nullptr; }
     bool operator==(const Symbol& t) const = default;
