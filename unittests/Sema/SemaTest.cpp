@@ -44,15 +44,17 @@ TEST(SemaTest, InheritTest) {
         class Loop1 inherits Loop2 {};
         class Loop2 inherits Loop1 {};
         class ErrorSelf inherits SelfType {};
+        class InheritFinal inherits Int {};
     )";
     ErrorKindList errorList = {
         basic::Diag::Sema_RedefineClass,  
         basic::Diag::Sema_RedefineClass,  
+        basic::Diag::Sema_InheritFromFinalClass,
         basic::Diag::Sema_LoopInherit,  
         basic::Diag::Sema_LoopInherit,  
         basic::Diag::Sema_LoopInherit,
     };
-    checkError(input, errorList, false);
+    checkError(input, errorList, true);
 }
 
 TEST(SemaTest, AttrMethodRedefineTest) {

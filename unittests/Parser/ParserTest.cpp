@@ -33,11 +33,11 @@ TEST(ParserTest, GCoolClassTest) {
         {
 
         };
-        class help_class{ };
+        final class help_class{ };
     )";
     ClassList expect{
         Class{ SYMTBL.get("Main"), SYMTBL.getObject() },
-        Class{ SYMTBL.get("help_class"), SYMTBL.getObject() }
+        Class{ SYMTBL.get("help_class"), SYMTBL.getObject(), true}
     };
     TestHelper(input, context, expect);
 }

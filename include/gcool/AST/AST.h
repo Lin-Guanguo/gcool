@@ -64,11 +64,13 @@ public:
     AttrList Attrs;
     MethodList Methods;
     Symbol Inheirt;
+    bool IsFinal;
     sema::ClassAnnotation* Annotation = nullptr;
 public:
-    Class(Symbol name, Symbol inheirt) : Name(name), Inheirt(inheirt) {}
-    Class(Symbol name, AttrList&& attrs, MethodList&& methods, Symbol inheirt) 
-        : Name(name), Attrs(attrs), Methods(methods), Inheirt(inheirt) {}
+    Class(Symbol name, Symbol inheirt, bool isFinal=false) 
+        : Name(name), Inheirt(inheirt), IsFinal(isFinal) {}
+    Class(Symbol name, AttrList&& attrs, MethodList&& methods, Symbol inheirt, bool isFinal=false) 
+        : Name(name), Attrs(attrs), Methods(methods), Inheirt(inheirt), IsFinal(isFinal)  {}
     bool operator==(const Class&) const = default;
 };
 

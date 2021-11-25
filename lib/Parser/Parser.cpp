@@ -172,6 +172,10 @@ namespace gcool {
         value.copy< NoneInitHolder<gcool::ast::Symbol> > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_is_final: // is_final
+        value.copy< bool > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.copy< const char* > (YY_MOVE (that.value));
@@ -263,6 +267,10 @@ namespace gcool {
       case symbol_kind::S_inherits: // inherits
       case symbol_kind::S_symbol: // symbol
         value.move< NoneInitHolder<gcool::ast::Symbol> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_is_final: // is_final
+        value.move< bool > (YY_MOVE (s.value));
         break;
 
       case symbol_kind::S_SYMBOL: // SYMBOL
@@ -427,6 +435,10 @@ namespace gcool {
         value.YY_MOVE_OR_COPY< NoneInitHolder<gcool::ast::Symbol> > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_is_final: // is_final
+        value.YY_MOVE_OR_COPY< bool > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.YY_MOVE_OR_COPY< const char* > (YY_MOVE (that.value));
@@ -502,6 +514,10 @@ namespace gcool {
       case symbol_kind::S_inherits: // inherits
       case symbol_kind::S_symbol: // symbol
         value.move< NoneInitHolder<gcool::ast::Symbol> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_is_final: // is_final
+        value.move< bool > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_SYMBOL: // SYMBOL
@@ -581,6 +597,10 @@ namespace gcool {
         value.copy< NoneInitHolder<gcool::ast::Symbol> > (that.value);
         break;
 
+      case symbol_kind::S_is_final: // is_final
+        value.copy< bool > (that.value);
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         value.copy< const char* > (that.value);
@@ -654,6 +674,10 @@ namespace gcool {
       case symbol_kind::S_inherits: // inherits
       case symbol_kind::S_symbol: // symbol
         value.move< NoneInitHolder<gcool::ast::Symbol> > (that.value);
+        break;
+
+      case symbol_kind::S_is_final: // is_final
+        value.move< bool > (that.value);
         break;
 
       case symbol_kind::S_SYMBOL: // SYMBOL
@@ -971,6 +995,10 @@ namespace gcool {
         yylhs.value.emplace< NoneInitHolder<gcool::ast::Symbol> > ();
         break;
 
+      case symbol_kind::S_is_final: // is_final
+        yylhs.value.emplace< bool > ();
+        break;
+
       case symbol_kind::S_SYMBOL: // SYMBOL
       case symbol_kind::S_ERROR: // ERROR
         yylhs.value.emplace< const char* > ();
@@ -1030,343 +1058,355 @@ namespace gcool {
           switch (yyn)
             {
   case 2: // program: class_seq
-#line 71 "Parser.y"
+#line 72 "Parser.y"
                                     { context->Classes = std::move(yystack_[0].value.as < gcool::ast::ClassList > ()); }
-#line 1036 "Parser.cpp"
+#line 1064 "Parser.cpp"
     break;
 
   case 3: // class_seq: %empty
-#line 74 "Parser.y"
+#line 75 "Parser.y"
                                     { yylhs.value.as < gcool::ast::ClassList > () = ClassList{}; }
-#line 1042 "Parser.cpp"
+#line 1070 "Parser.cpp"
     break;
 
   case 4: // class_seq: class_seq class SEMICOLON
-#line 75 "Parser.y"
+#line 76 "Parser.y"
                                     { yylhs.value.as < gcool::ast::ClassList > () = std::move(yystack_[2].value.as < gcool::ast::ClassList > ()); yylhs.value.as < gcool::ast::ClassList > ().push_back(std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Class> > ())); }
-#line 1048 "Parser.cpp"
+#line 1076 "Parser.cpp"
     break;
 
-  case 5: // class: CLASS symbol inherits LB features RB
-#line 78 "Parser.y"
-                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Inheirt = yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Name = yystack_[4].value.as < NoneInitHolder<gcool::ast::Symbol> > (); }
-#line 1054 "Parser.cpp"
+  case 5: // class: is_final CLASS symbol inherits LB features RB
+#line 79 "Parser.y"
+                                                     { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Inheirt = yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Name = yystack_[4].value.as < NoneInitHolder<gcool::ast::Symbol> > (); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->IsFinal = yystack_[6].value.as < bool > (); }
+#line 1082 "Parser.cpp"
     break;
 
-  case 6: // inherits: %empty
-#line 81 "Parser.y"
-                        { yylhs.value.as < NoneInitHolder<gcool::ast::Symbol> > () = context->Symtbl.getObject(); }
-#line 1060 "Parser.cpp"
-    break;
-
-  case 7: // inherits: INHERITS symbol
+  case 6: // is_final: %empty
 #line 82 "Parser.y"
+            { yylhs.value.as < bool > () = false; }
+#line 1088 "Parser.cpp"
+    break;
+
+  case 7: // is_final: FINAL
+#line 83 "Parser.y"
+            { yylhs.value.as < bool > () = true; }
+#line 1094 "Parser.cpp"
+    break;
+
+  case 8: // inherits: %empty
+#line 86 "Parser.y"
+                        { yylhs.value.as < NoneInitHolder<gcool::ast::Symbol> > () = context->Symtbl.getObject(); }
+#line 1100 "Parser.cpp"
+    break;
+
+  case 9: // inherits: INHERITS symbol
+#line 87 "Parser.y"
                         { yylhs.value.as < NoneInitHolder<gcool::ast::Symbol> > () = yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > (); }
-#line 1066 "Parser.cpp"
+#line 1106 "Parser.cpp"
     break;
 
-  case 8: // symbol: SYMBOL
-#line 85 "Parser.y"
+  case 10: // symbol: SYMBOL
+#line 90 "Parser.y"
                 { yylhs.value.as < NoneInitHolder<gcool::ast::Symbol> > () = context->Symtbl.get(yystack_[0].value.as < const char* > ()); }
-#line 1072 "Parser.cpp"
+#line 1112 "Parser.cpp"
     break;
 
-  case 9: // formal: symbol COLON symbol
-#line 88 "Parser.y"
-                            { yylhs.value.as < NoneInitHolder<gcool::ast::FormalDecl> > () = FormalDecl{yystack_[2].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}; }
-#line 1078 "Parser.cpp"
-    break;
-
-  case 10: // features: %empty
-#line 91 "Parser.y"
-            { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = Class{ Symbol::EmptySymbol, Symbol::EmptySymbol }; }
-#line 1084 "Parser.cpp"
-    break;
-
-  case 11: // features: features formal optional_assign SEMICOLON
-#line 92 "Parser.y"
-                                                 { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[3].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Attrs.push_back(AttrFeature{yystack_[2].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[1].value.as < gcool::ast::OptionalExpr > ()}); }
-#line 1090 "Parser.cpp"
-    break;
-
-  case 12: // features: features symbol LP params RP COLON symbol LB expr RB SEMICOLON
+  case 11: // formal: symbol COLON symbol
 #line 93 "Parser.y"
-                                                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[10].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Methods.push_back(MethodFeature{yystack_[9].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[4].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[7].value.as < gcool::ast::FormalList > ()), yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
-#line 1096 "Parser.cpp"
+                            { yylhs.value.as < NoneInitHolder<gcool::ast::FormalDecl> > () = FormalDecl{yystack_[2].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}; }
+#line 1118 "Parser.cpp"
     break;
 
-  case 13: // optional_assign: %empty
+  case 12: // features: %empty
 #line 96 "Parser.y"
-                   { yylhs.value.as < gcool::ast::OptionalExpr > () = OptionalExpr{}; }
-#line 1102 "Parser.cpp"
+            { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = Class{ Symbol::EmptySymbol, Symbol::EmptySymbol }; }
+#line 1124 "Parser.cpp"
     break;
 
-  case 14: // optional_assign: ASSIGN expr
+  case 13: // features: features formal optional_assign SEMICOLON
 #line 97 "Parser.y"
-                   { yylhs.value.as < gcool::ast::OptionalExpr > () = yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (); }
-#line 1108 "Parser.cpp"
+                                                 { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[3].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Attrs.push_back(AttrFeature{yystack_[2].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[1].value.as < gcool::ast::OptionalExpr > ()}); }
+#line 1130 "Parser.cpp"
     break;
 
-  case 15: // params: %empty
-#line 100 "Parser.y"
-                { yylhs.value.as < gcool::ast::FormalList > () = FormalList{}; }
-#line 1114 "Parser.cpp"
+  case 14: // features: features symbol LP params RP COLON symbol LB expr RB SEMICOLON
+#line 98 "Parser.y"
+                                                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Class> > () = std::move(yystack_[10].value.as < NoneInitHolder<gcool::ast::Class> > ()); yylhs.value.as < NoneInitHolder<gcool::ast::Class> > ()->Methods.push_back(MethodFeature{yystack_[9].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[4].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[7].value.as < gcool::ast::FormalList > ()), yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+#line 1136 "Parser.cpp"
     break;
 
-  case 16: // params: params_
+  case 15: // optional_assign: %empty
 #line 101 "Parser.y"
-                { yylhs.value.as < gcool::ast::FormalList > () = std::move(yystack_[0].value.as < gcool::ast::FormalList > ()); }
-#line 1120 "Parser.cpp"
+                   { yylhs.value.as < gcool::ast::OptionalExpr > () = OptionalExpr{}; }
+#line 1142 "Parser.cpp"
     break;
 
-  case 17: // params_: formal
-#line 104 "Parser.y"
-                            { yylhs.value.as < gcool::ast::FormalList > () = FormalList{}; yylhs.value.as < gcool::ast::FormalList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::FormalDecl> > ()); }
-#line 1126 "Parser.cpp"
+  case 16: // optional_assign: ASSIGN expr
+#line 102 "Parser.y"
+                   { yylhs.value.as < gcool::ast::OptionalExpr > () = yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (); }
+#line 1148 "Parser.cpp"
     break;
 
-  case 18: // params_: params_ COMMA formal
+  case 17: // params: %empty
 #line 105 "Parser.y"
-                            { yylhs.value.as < gcool::ast::FormalList > () = std::move(yystack_[2].value.as < gcool::ast::FormalList > ()); yylhs.value.as < gcool::ast::FormalList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::FormalDecl> > ()); }
-#line 1132 "Parser.cpp"
+                { yylhs.value.as < gcool::ast::FormalList > () = FormalList{}; }
+#line 1154 "Parser.cpp"
     break;
 
-  case 19: // expr: symbol
-#line 108 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprSymbol(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
-#line 1138 "Parser.cpp"
+  case 18: // params: params_
+#line 106 "Parser.y"
+                { yylhs.value.as < gcool::ast::FormalList > () = std::move(yystack_[0].value.as < gcool::ast::FormalList > ()); }
+#line 1160 "Parser.cpp"
     break;
 
-  case 20: // expr: TRUE
+  case 19: // params_: formal
 #line 109 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBool(true)); }
-#line 1144 "Parser.cpp"
+                            { yylhs.value.as < gcool::ast::FormalList > () = FormalList{}; yylhs.value.as < gcool::ast::FormalList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::FormalDecl> > ()); }
+#line 1166 "Parser.cpp"
     break;
 
-  case 21: // expr: FALSE
+  case 20: // params_: params_ COMMA formal
 #line 110 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBool(false)); }
-#line 1150 "Parser.cpp"
+                            { yylhs.value.as < gcool::ast::FormalList > () = std::move(yystack_[2].value.as < gcool::ast::FormalList > ()); yylhs.value.as < gcool::ast::FormalList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::FormalDecl> > ()); }
+#line 1172 "Parser.cpp"
     break;
 
-  case 22: // expr: INT
-#line 111 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprInt(yystack_[0].value.as < int > ())); }
-#line 1156 "Parser.cpp"
-    break;
-
-  case 23: // expr: FLOAT
-#line 112 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprFloat(yystack_[0].value.as < double > ())); }
-#line 1162 "Parser.cpp"
-    break;
-
-  case 24: // expr: STR
+  case 21: // expr: symbol
 #line 113 "Parser.y"
-                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprString(yystack_[0].value.as < std::string > ())); }
-#line 1168 "Parser.cpp"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprSymbol(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
+#line 1178 "Parser.cpp"
     break;
 
-  case 25: // expr: symbol ASSIGN expr
+  case 22: // expr: TRUE
 #line 114 "Parser.y"
-                                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprAssign(yystack_[2].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
-#line 1174 "Parser.cpp"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBool(true)); }
+#line 1184 "Parser.cpp"
     break;
 
-  case 26: // expr: expr DOT symbol LP args RP
+  case 23: // expr: FALSE
 #line 115 "Parser.y"
-                                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprDispatch(yystack_[5].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
-#line 1180 "Parser.cpp"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBool(false)); }
+#line 1190 "Parser.cpp"
     break;
 
-  case 27: // expr: expr AT symbol DOT symbol LP args RP
+  case 24: // expr: INT
 #line 116 "Parser.y"
-                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprStaticDispatch(yystack_[7].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
-#line 1186 "Parser.cpp"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprInt(yystack_[0].value.as < int > ())); }
+#line 1196 "Parser.cpp"
     break;
 
-  case 28: // expr: symbol LP args RP
+  case 25: // expr: FLOAT
 #line 117 "Parser.y"
-                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprDispatch(context->ExprAlloc.allocExpr(ExprSelf()), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
-#line 1192 "Parser.cpp"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprFloat(yystack_[0].value.as < double > ())); }
+#line 1202 "Parser.cpp"
     break;
 
-  case 29: // expr: IF expr THEN expr ELSE expr FI
+  case 26: // expr: STR
 #line 118 "Parser.y"
-                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprCond(yystack_[5].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()))); }
-#line 1198 "Parser.cpp"
+                { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprString(yystack_[0].value.as < std::string > ())); }
+#line 1208 "Parser.cpp"
     break;
 
-  case 30: // expr: WHILE expr LOOP expr POOL
+  case 27: // expr: symbol ASSIGN expr
 #line 119 "Parser.y"
-                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprLoop(yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
-#line 1204 "Parser.cpp"
+                                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprAssign(yystack_[2].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
+#line 1214 "Parser.cpp"
     break;
 
-  case 31: // expr: LB block_exprs RB
+  case 28: // expr: expr DOT symbol LP args RP
 #line 120 "Parser.y"
-                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBlock(std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
-#line 1210 "Parser.cpp"
+                                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprDispatch(yystack_[5].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
+#line 1220 "Parser.cpp"
     break;
 
-  case 32: // expr: LET let_init_exprs IN expr
+  case 29: // expr: expr AT symbol DOT symbol LP args RP
 #line 121 "Parser.y"
-                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprLet(std::move(yystack_[2].value.as < gcool::ast::LetInitList > ()), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
-#line 1216 "Parser.cpp"
+                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprStaticDispatch(yystack_[7].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
+#line 1226 "Parser.cpp"
     break;
 
-  case 33: // expr: CASE expr OF case_branchs ESAC
+  case 30: // expr: symbol LP args RP
 #line 122 "Parser.y"
-                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprCase(yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), std::move(yystack_[1].value.as < gcool::ast::CaseBranchList > ()))); }
-#line 1222 "Parser.cpp"
+                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprDispatch(context->ExprAlloc.allocExpr(ExprSelf()), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > (), std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
+#line 1232 "Parser.cpp"
     break;
 
-  case 34: // expr: NEW symbol
+  case 31: // expr: IF expr THEN expr ELSE expr FI
 #line 123 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprNew(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
-#line 1228 "Parser.cpp"
+                                            { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprCond(yystack_[5].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()))); }
+#line 1238 "Parser.cpp"
     break;
 
-  case 35: // expr: ISVOID expr
+  case 32: // expr: WHILE expr LOOP expr POOL
 #line 124 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithU(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithU::OP_ISVOID)); }
-#line 1234 "Parser.cpp"
+                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprLoop(yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
+#line 1244 "Parser.cpp"
     break;
 
-  case 36: // expr: NOT expr
+  case 33: // expr: LB block_exprs RB
 #line 125 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithU(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithU::OP_NOT)); }
-#line 1240 "Parser.cpp"
+                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprBlock(std::move(yystack_[1].value.as < gcool::ast::ExprList > ()))); }
+#line 1250 "Parser.cpp"
     break;
 
-  case 37: // expr: expr ADD expr
+  case 34: // expr: LET let_init_exprs IN expr
 #line 126 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_ADD)); }
-#line 1246 "Parser.cpp"
+                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprLet(std::move(yystack_[2].value.as < gcool::ast::LetInitList > ()), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ())); }
+#line 1256 "Parser.cpp"
     break;
 
-  case 38: // expr: expr SUB expr
+  case 35: // expr: CASE expr OF case_branchs ESAC
 #line 127 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_SUB)); }
-#line 1252 "Parser.cpp"
+                                        { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprCase(yystack_[3].value.as < NoneInitHolder<gcool::ast::Expr> > (), std::move(yystack_[1].value.as < gcool::ast::CaseBranchList > ()))); }
+#line 1262 "Parser.cpp"
     break;
 
-  case 39: // expr: expr MUL expr
+  case 36: // expr: NEW symbol
 #line 128 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_MUL)); }
-#line 1258 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprNew(yystack_[0].value.as < NoneInitHolder<gcool::ast::Symbol> > ())); }
+#line 1268 "Parser.cpp"
     break;
 
-  case 40: // expr: expr DIV expr
+  case 37: // expr: ISVOID expr
 #line 129 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_DIV)); }
-#line 1264 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithU(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithU::OP_ISVOID)); }
+#line 1274 "Parser.cpp"
     break;
 
-  case 41: // expr: expr EQ expr
+  case 38: // expr: NOT expr
 #line 130 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_EQ)); }
-#line 1270 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithU(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithU::OP_NOT)); }
+#line 1280 "Parser.cpp"
     break;
 
-  case 42: // expr: expr LE expr
+  case 39: // expr: expr ADD expr
 #line 131 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_LE)); }
-#line 1276 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_ADD)); }
+#line 1286 "Parser.cpp"
     break;
 
-  case 43: // expr: expr LT expr
+  case 40: // expr: expr SUB expr
 #line 132 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_LT)); }
-#line 1282 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_SUB)); }
+#line 1292 "Parser.cpp"
     break;
 
-  case 44: // expr: expr GE expr
+  case 41: // expr: expr MUL expr
 #line 133 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_GE)); }
-#line 1288 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_MUL)); }
+#line 1298 "Parser.cpp"
     break;
 
-  case 45: // expr: expr GT expr
+  case 42: // expr: expr DIV expr
 #line 134 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_GT)); }
-#line 1294 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_DIV)); }
+#line 1304 "Parser.cpp"
     break;
 
-  case 46: // expr: LP expr RP
+  case 43: // expr: expr EQ expr
 #line 135 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > (); }
-#line 1300 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_EQ)); }
+#line 1310 "Parser.cpp"
     break;
 
-  case 47: // expr: SELF
+  case 44: // expr: expr LE expr
 #line 136 "Parser.y"
-                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprSelf()); }
-#line 1306 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_LE)); }
+#line 1316 "Parser.cpp"
     break;
 
-  case 48: // args: %empty
+  case 45: // expr: expr LT expr
+#line 137 "Parser.y"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_LT)); }
+#line 1322 "Parser.cpp"
+    break;
+
+  case 46: // expr: expr GE expr
+#line 138 "Parser.y"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_GE)); }
+#line 1328 "Parser.cpp"
+    break;
+
+  case 47: // expr: expr GT expr
 #line 139 "Parser.y"
-                { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; }
-#line 1312 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprArithB(yystack_[2].value.as < NoneInitHolder<gcool::ast::Expr> > (), yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > (), ExprArithB::OP_GT)); }
+#line 1334 "Parser.cpp"
     break;
 
-  case 49: // args: args_
+  case 48: // expr: LP expr RP
 #line 140 "Parser.y"
-                { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[0].value.as < gcool::ast::ExprList > ()); }
-#line 1318 "Parser.cpp"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > (); }
+#line 1340 "Parser.cpp"
     break;
 
-  case 50: // args_: expr
-#line 143 "Parser.y"
-                        { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
-#line 1324 "Parser.cpp"
+  case 49: // expr: SELF
+#line 141 "Parser.y"
+                    { yylhs.value.as < NoneInitHolder<gcool::ast::Expr> > () = context->ExprAlloc.allocExpr(ExprSelf()); }
+#line 1346 "Parser.cpp"
     break;
 
-  case 51: // args_: args_ COMMA expr
+  case 50: // args: %empty
 #line 144 "Parser.y"
-                        { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[2].value.as < gcool::ast::ExprList > ()); yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
-#line 1330 "Parser.cpp"
+                { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; }
+#line 1352 "Parser.cpp"
     break;
 
-  case 52: // block_exprs: expr SEMICOLON
-#line 147 "Parser.y"
-                                    { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
-#line 1336 "Parser.cpp"
+  case 51: // args: args_
+#line 145 "Parser.y"
+                { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[0].value.as < gcool::ast::ExprList > ()); }
+#line 1358 "Parser.cpp"
     break;
 
-  case 53: // block_exprs: block_exprs expr SEMICOLON
+  case 52: // args_: expr
 #line 148 "Parser.y"
-                                    { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[2].value.as < gcool::ast::ExprList > ()); yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
-#line 1342 "Parser.cpp"
+                        { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
+#line 1364 "Parser.cpp"
     break;
 
-  case 54: // let_init_exprs: formal optional_assign
-#line 151 "Parser.y"
-                                                   { yylhs.value.as < gcool::ast::LetInitList > () = LetInitList{}; yylhs.value.as < gcool::ast::LetInitList > ().push_back({yystack_[1].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[0].value.as < gcool::ast::OptionalExpr > ()}); }
-#line 1348 "Parser.cpp"
-    break;
-
-  case 55: // let_init_exprs: let_init_exprs COMMA formal optional_assign
-#line 152 "Parser.y"
-                                                   { yylhs.value.as < gcool::ast::LetInitList > () = std::move(yystack_[3].value.as < gcool::ast::LetInitList > ()); yylhs.value.as < gcool::ast::LetInitList > ().push_back({yystack_[1].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[0].value.as < gcool::ast::OptionalExpr > ()}); }
-#line 1354 "Parser.cpp"
-    break;
-
-  case 56: // case_branchs: symbol COLON symbol ARROW expr SEMICOLON
-#line 155 "Parser.y"
-                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = CaseBranchList{}; yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({FormalDecl{yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}, yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
-#line 1360 "Parser.cpp"
-    break;
-
-  case 57: // case_branchs: case_branchs symbol COLON symbol ARROW expr SEMICOLON
-#line 156 "Parser.y"
-                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = std::move(yystack_[6].value.as < gcool::ast::CaseBranchList > ()); yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({FormalDecl{yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}, yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
-#line 1366 "Parser.cpp"
-    break;
-
-
+  case 53: // args_: args_ COMMA expr
+#line 149 "Parser.y"
+                        { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[2].value.as < gcool::ast::ExprList > ()); yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[0].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
 #line 1370 "Parser.cpp"
+    break;
+
+  case 54: // block_exprs: expr SEMICOLON
+#line 152 "Parser.y"
+                                    { yylhs.value.as < gcool::ast::ExprList > () = ExprList{}; yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
+#line 1376 "Parser.cpp"
+    break;
+
+  case 55: // block_exprs: block_exprs expr SEMICOLON
+#line 153 "Parser.y"
+                                    { yylhs.value.as < gcool::ast::ExprList > () = std::move(yystack_[2].value.as < gcool::ast::ExprList > ()); yylhs.value.as < gcool::ast::ExprList > ().push_back(yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()); }
+#line 1382 "Parser.cpp"
+    break;
+
+  case 56: // let_init_exprs: formal optional_assign
+#line 156 "Parser.y"
+                                                   { yylhs.value.as < gcool::ast::LetInitList > () = LetInitList{}; yylhs.value.as < gcool::ast::LetInitList > ().push_back({yystack_[1].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[0].value.as < gcool::ast::OptionalExpr > ()}); }
+#line 1388 "Parser.cpp"
+    break;
+
+  case 57: // let_init_exprs: let_init_exprs COMMA formal optional_assign
+#line 157 "Parser.y"
+                                                   { yylhs.value.as < gcool::ast::LetInitList > () = std::move(yystack_[3].value.as < gcool::ast::LetInitList > ()); yylhs.value.as < gcool::ast::LetInitList > ().push_back({yystack_[1].value.as < NoneInitHolder<gcool::ast::FormalDecl> > (), yystack_[0].value.as < gcool::ast::OptionalExpr > ()}); }
+#line 1394 "Parser.cpp"
+    break;
+
+  case 58: // case_branchs: symbol COLON symbol ARROW expr SEMICOLON
+#line 160 "Parser.y"
+                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = CaseBranchList{}; yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({FormalDecl{yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}, yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+#line 1400 "Parser.cpp"
+    break;
+
+  case 59: // case_branchs: case_branchs symbol COLON symbol ARROW expr SEMICOLON
+#line 161 "Parser.y"
+                                                                { yylhs.value.as < gcool::ast::CaseBranchList > () = std::move(yystack_[6].value.as < gcool::ast::CaseBranchList > ()); yylhs.value.as < gcool::ast::CaseBranchList > ().push_back({FormalDecl{yystack_[5].value.as < NoneInitHolder<gcool::ast::Symbol> > (), yystack_[3].value.as < NoneInitHolder<gcool::ast::Symbol> > ()}, yystack_[1].value.as < NoneInitHolder<gcool::ast::Expr> > ()}); }
+#line 1406 "Parser.cpp"
+    break;
+
+
+#line 1410 "Parser.cpp"
 
             default:
               break;
@@ -1555,195 +1595,195 @@ namespace gcool {
 
 
 
-  const signed char Parser::yypact_ninf_ = -105;
+  const signed char Parser::yypact_ninf_ = -101;
 
-  const signed char Parser::yytable_ninf_ = -1;
+  const signed char Parser::yytable_ninf_ = -7;
 
   const short
   Parser::yypact_[] =
   {
-    -105,     7,    12,  -105,   -33,   -20,  -105,    10,  -105,   -33,
-      -7,  -105,  -105,   -22,  -105,   -24,     2,   -33,   -33,   156,
-     -11,    -6,  -105,     3,    -3,  -105,   156,  -105,  -105,   156,
-     156,   -33,   156,   -33,   156,   156,   156,  -105,  -105,  -105,
-    -105,   -12,   379,  -105,    -5,   -33,    79,   219,   379,     2,
-      -9,   256,  -105,   379,   345,   273,   116,   156,   156,   -33,
-     -33,   156,   156,   156,   156,   156,   156,   156,   156,   156,
-     -33,  -105,   156,   156,  -105,   156,   -33,   -33,  -105,  -105,
-    -105,   291,   379,   379,     9,    -2,    14,    24,    67,    67,
-       0,     0,    36,    36,    36,    36,    36,    18,   183,   237,
-     379,     2,    11,   -10,  -105,  -105,   156,   156,   -33,   156,
-     156,  -105,  -105,   -33,  -105,    16,   379,    20,    30,   362,
-     200,    29,   -33,  -105,   156,    28,  -105,   156,    43,    40,
-    -105,   309,   156,  -105,  -105,   327,  -105
+    -101,    13,    -1,  -101,  -101,   -21,    21,  -101,   -16,  -101,
+      18,   -16,     4,  -101,  -101,   -25,  -101,   -20,    14,   -16,
+     -16,   155,     5,     7,  -101,    19,    11,  -101,   155,  -101,
+    -101,   155,   155,   -16,   155,   -16,   155,   155,   155,  -101,
+    -101,  -101,  -101,   -10,   378,  -101,     8,   -16,    77,   218,
+     378,    14,    -7,   255,  -101,   378,   344,   272,   114,   155,
+     155,   -16,   -16,   155,   155,   155,   155,   155,   155,   155,
+     155,   155,   -16,  -101,   155,   155,  -101,   155,   -16,   -16,
+    -101,  -101,  -101,   290,   378,   378,    24,    17,    22,    36,
+      -6,    -6,    12,    12,    65,    65,    65,    65,    65,    27,
+     182,   236,   378,    14,    20,   -13,  -101,  -101,   155,   155,
+     -16,   155,   155,  -101,  -101,   -16,  -101,    25,   378,    31,
+      33,   361,   199,    40,   -16,  -101,   155,    30,  -101,   155,
+      56,    54,  -101,   308,   155,  -101,  -101,   326,  -101
   };
 
   const signed char
   Parser::yydefact_[] =
   {
-       3,     0,     2,     1,     0,     0,     8,     6,     4,     0,
-       0,     7,    10,     0,     5,     0,    13,    15,     0,     0,
-       0,     0,    17,     0,    16,     9,     0,    20,    21,     0,
-       0,     0,     0,     0,     0,     0,     0,    47,    24,    22,
-      23,    19,    14,    11,     0,     0,     0,     0,    35,    13,
-       0,     0,    34,    36,     0,     0,     0,     0,    48,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,    18,     0,     0,    54,     0,     0,     0,    46,    52,
-      31,     0,    25,    50,     0,    49,     0,     0,    37,    38,
-      39,    40,    41,    42,    44,    43,    45,     0,     0,     0,
-      32,    13,     0,     0,    53,    28,     0,    48,     0,     0,
-       0,    30,    55,     0,    33,     0,    51,     0,     0,     0,
-       0,     0,     0,    26,    48,     0,    29,     0,     0,     0,
-      12,     0,     0,    27,    56,     0,    57
+       3,     0,     2,     1,     7,     0,     0,     4,     0,    10,
+       8,     0,     0,     9,    12,     0,     5,     0,    15,    17,
+       0,     0,     0,     0,    19,     0,    18,    11,     0,    22,
+      23,     0,     0,     0,     0,     0,     0,     0,     0,    49,
+      26,    24,    25,    21,    16,    13,     0,     0,     0,     0,
+      37,    15,     0,     0,    36,    38,     0,     0,     0,     0,
+      50,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,    20,     0,     0,    56,     0,     0,     0,
+      48,    54,    33,     0,    27,    52,     0,    51,     0,     0,
+      39,    40,    41,    42,    43,    44,    46,    45,    47,     0,
+       0,     0,    34,    15,     0,     0,    55,    30,     0,    50,
+       0,     0,     0,    32,    57,     0,    35,     0,    53,     0,
+       0,     0,     0,     0,     0,    28,    50,     0,    31,     0,
+       0,     0,    14,     0,     0,    29,    58,     0,    59
   };
 
   const signed char
   Parser::yypgoto_[] =
   {
-    -105,  -105,  -105,  -105,  -105,    -4,   -15,  -105,   -48,  -105,
-    -105,    13,  -104,  -105,  -105,  -105,  -105
+    -101,  -101,  -101,  -101,  -101,  -101,    -8,   -18,  -101,   -47,
+    -101,  -101,     9,  -100,  -101,  -101,  -101,  -101
   };
 
   const signed char
   Parser::yydefgoto_[] =
   {
-       0,     1,     2,     5,    10,    41,    16,    13,    20,    23,
-      24,    83,    84,    85,    56,    50,   103
+       0,     1,     2,     5,     6,    12,    43,    18,    15,    22,
+      25,    26,    85,    86,    87,    58,    52,   105
   };
 
-  const unsigned char
+  const short
   Parser::yytable_[] =
   {
-       7,    74,    22,   117,    75,    11,    17,     3,   114,    15,
-       6,    14,    57,    21,    25,     4,    49,    18,    58,     8,
-     129,     6,    59,    60,     9,    12,    19,    21,    43,    52,
-      71,    76,    42,     6,    44,    18,    70,    45,   106,    46,
-     105,    21,    47,    48,   107,    51,   108,    53,    54,    55,
-     109,   123,   113,   112,   127,    86,    87,   122,    59,    60,
-     124,   101,    61,    62,    63,    64,    97,   130,   132,    81,
-      82,   133,    21,   102,    88,    89,    90,    91,    92,    93,
-      94,    95,    96,     0,    72,    98,    99,     0,   100,    59,
-      60,     0,     0,     0,     0,    63,    64,     0,     0,   115,
-       0,    59,    60,     0,   118,    61,    62,    63,    64,   121,
-       0,     0,     0,    65,    66,    67,    68,    69,   128,   116,
-      26,     0,   119,   120,    27,    28,    29,     0,     0,     0,
-       0,    30,    31,    32,     0,    33,     0,    34,     0,     0,
-     131,     0,     0,     0,     0,   135,    35,     0,    36,    80,
-       0,     0,     0,     0,     0,     0,     0,     0,    37,     6,
-      26,    38,    39,    40,    27,    28,    29,     0,     0,     0,
-       0,    30,    31,    32,     0,    33,     0,    34,     0,     0,
-       0,     0,     0,     0,     0,     0,    35,     0,    36,   110,
-       0,     0,     0,     0,     0,     0,     0,     0,    37,     6,
-       0,    38,    39,    40,     0,    59,    60,   126,     0,    61,
-      62,    63,    64,     0,     0,     0,     0,    65,    66,    67,
-      68,    69,    59,    60,     0,     0,    61,    62,    63,    64,
-      73,     0,     0,     0,    65,    66,    67,    68,    69,     0,
-       0,    59,    60,     0,     0,    61,    62,    63,    64,   111,
-       0,     0,     0,    65,    66,    67,    68,    69,     0,    59,
-      60,     0,     0,    61,    62,    63,    64,     0,     0,     0,
-       0,    65,    66,    67,    68,    69,    77,     0,    59,    60,
-       0,     0,    61,    62,    63,    64,     0,     0,     0,     0,
-      65,    66,    67,    68,    69,    59,    60,     0,     0,    61,
-      62,    63,    64,     0,     0,     0,     0,    65,    66,    67,
-      68,    69,    79,    59,    60,     0,     0,    61,    62,    63,
-      64,     0,     0,     0,     0,    65,    66,    67,    68,    69,
-     104,    59,    60,     0,     0,    61,    62,    63,    64,     0,
-       0,     0,     0,    65,    66,    67,    68,    69,   134,    59,
-      60,     0,     0,    61,    62,    63,    64,     0,     0,     0,
-       0,    65,    66,    67,    68,    69,   136,    59,    60,     0,
-       0,    61,    62,    63,    64,     0,    78,     0,     0,    65,
-      66,    67,    68,    69,    59,    60,     0,     0,    61,    62,
-      63,    64,     0,     0,     0,   125,    65,    66,    67,    68,
-      69,    59,    60,     0,     0,    61,    62,    63,    64,     0,
-       0,     0,     0,    65,    66,    67,    68,    69
+      10,    24,    -6,    13,    76,   116,    77,    17,    16,   119,
+      19,    23,    27,     3,    59,    51,    61,    62,     7,     9,
+      60,    20,    65,    66,     8,    23,   131,    54,     9,    73,
+      44,     9,    11,    78,    61,    62,    14,    48,    21,    23,
+      49,    50,     4,    53,    45,    55,    56,    57,    20,    72,
+      46,    47,   109,    88,    89,   107,   114,   108,   110,   111,
+     103,   115,   125,   126,    99,   129,   124,    83,    84,   132,
+      23,   104,    90,    91,    92,    93,    94,    95,    96,    97,
+      98,   134,    74,   100,   101,   135,   102,    61,    62,     0,
+       0,    63,    64,    65,    66,     0,     0,   117,     0,    61,
+      62,     0,   120,    63,    64,    65,    66,   123,     0,     0,
+       0,    67,    68,    69,    70,    71,   130,   118,    28,     0,
+     121,   122,    29,    30,    31,     0,     0,     0,     0,    32,
+      33,    34,     0,    35,     0,    36,     0,     0,   133,     0,
+       0,     0,     0,   137,    37,     0,    38,    82,     0,     0,
+       0,     0,     0,     0,     0,     0,    39,     0,     9,    28,
+      40,    41,    42,    29,    30,    31,     0,     0,     0,     0,
+      32,    33,    34,     0,    35,     0,    36,     0,     0,     0,
+       0,     0,     0,     0,     0,    37,     0,    38,   112,     0,
+       0,     0,     0,     0,     0,     0,     0,    39,     0,     9,
+       0,    40,    41,    42,    61,    62,   128,     0,    63,    64,
+      65,    66,     0,     0,     0,     0,    67,    68,    69,    70,
+      71,    61,    62,     0,     0,    63,    64,    65,    66,    75,
+       0,     0,     0,    67,    68,    69,    70,    71,     0,     0,
+      61,    62,     0,     0,    63,    64,    65,    66,   113,     0,
+       0,     0,    67,    68,    69,    70,    71,     0,    61,    62,
+       0,     0,    63,    64,    65,    66,     0,     0,     0,     0,
+      67,    68,    69,    70,    71,    79,     0,    61,    62,     0,
+       0,    63,    64,    65,    66,     0,     0,     0,     0,    67,
+      68,    69,    70,    71,    61,    62,     0,     0,    63,    64,
+      65,    66,     0,     0,     0,     0,    67,    68,    69,    70,
+      71,    81,    61,    62,     0,     0,    63,    64,    65,    66,
+       0,     0,     0,     0,    67,    68,    69,    70,    71,   106,
+      61,    62,     0,     0,    63,    64,    65,    66,     0,     0,
+       0,     0,    67,    68,    69,    70,    71,   136,    61,    62,
+       0,     0,    63,    64,    65,    66,     0,     0,     0,     0,
+      67,    68,    69,    70,    71,   138,    61,    62,     0,     0,
+      63,    64,    65,    66,     0,    80,     0,     0,    67,    68,
+      69,    70,    71,    61,    62,     0,     0,    63,    64,    65,
+      66,     0,     0,     0,   127,    67,    68,    69,    70,    71,
+      61,    62,     0,     0,    63,    64,    65,    66,     0,     0,
+       0,     0,    67,    68,    69,    70,    71
   };
 
   const short
   Parser::yycheck_[] =
   {
-       4,    49,    17,   107,    13,     9,    30,     0,    18,    13,
-      43,    33,    24,    17,    18,     3,    31,    41,    30,    39,
-     124,    43,    22,    23,    14,    32,    24,    31,    39,    33,
-      45,    40,    19,    43,    31,    41,    41,    40,    40,    26,
-      31,    45,    29,    30,    30,    32,    22,    34,    35,    36,
-      32,    31,    41,   101,    25,    59,    60,    41,    22,    23,
-      30,    76,    26,    27,    28,    29,    70,    39,    25,    56,
-      57,    31,    76,    77,    61,    62,    63,    64,    65,    66,
-      67,    68,    69,    -1,     5,    72,    73,    -1,    75,    22,
-      23,    -1,    -1,    -1,    -1,    28,    29,    -1,    -1,   103,
-      -1,    22,    23,    -1,   108,    26,    27,    28,    29,   113,
-      -1,    -1,    -1,    34,    35,    36,    37,    38,   122,   106,
-       4,    -1,   109,   110,     8,     9,    10,    -1,    -1,    -1,
-      -1,    15,    16,    17,    -1,    19,    -1,    21,    -1,    -1,
-     127,    -1,    -1,    -1,    -1,   132,    30,    -1,    32,    33,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    42,    43,
-       4,    45,    46,    47,     8,     9,    10,    -1,    -1,    -1,
-      -1,    15,    16,    17,    -1,    19,    -1,    21,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    30,    -1,    32,     6,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    42,    43,
-      -1,    45,    46,    47,    -1,    22,    23,     7,    -1,    26,
-      27,    28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,
-      37,    38,    22,    23,    -1,    -1,    26,    27,    28,    29,
-      11,    -1,    -1,    -1,    34,    35,    36,    37,    38,    -1,
-      -1,    22,    23,    -1,    -1,    26,    27,    28,    29,    12,
-      -1,    -1,    -1,    34,    35,    36,    37,    38,    -1,    22,
-      23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,    -1,
-      -1,    34,    35,    36,    37,    38,    20,    -1,    22,    23,
+       8,    19,     3,    11,    51,    18,    13,    15,    33,   109,
+      30,    19,    20,     0,    24,    33,    22,    23,    39,    44,
+      30,    41,    28,    29,     3,    33,   126,    35,    44,    47,
+      21,    44,    14,    40,    22,    23,    32,    28,    24,    47,
+      31,    32,    43,    34,    39,    36,    37,    38,    41,    41,
+      31,    40,    30,    61,    62,    31,   103,    40,    22,    32,
+      78,    41,    31,    30,    72,    25,    41,    58,    59,    39,
+      78,    79,    63,    64,    65,    66,    67,    68,    69,    70,
+      71,    25,     5,    74,    75,    31,    77,    22,    23,    -1,
+      -1,    26,    27,    28,    29,    -1,    -1,   105,    -1,    22,
+      23,    -1,   110,    26,    27,    28,    29,   115,    -1,    -1,
+      -1,    34,    35,    36,    37,    38,   124,   108,     4,    -1,
+     111,   112,     8,     9,    10,    -1,    -1,    -1,    -1,    15,
+      16,    17,    -1,    19,    -1,    21,    -1,    -1,   129,    -1,
+      -1,    -1,    -1,   134,    30,    -1,    32,    33,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    42,    -1,    44,     4,
+      46,    47,    48,     8,     9,    10,    -1,    -1,    -1,    -1,
+      15,    16,    17,    -1,    19,    -1,    21,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    30,    -1,    32,     6,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    42,    -1,    44,
+      -1,    46,    47,    48,    22,    23,     7,    -1,    26,    27,
+      28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,    37,
+      38,    22,    23,    -1,    -1,    26,    27,    28,    29,    11,
+      -1,    -1,    -1,    34,    35,    36,    37,    38,    -1,    -1,
+      22,    23,    -1,    -1,    26,    27,    28,    29,    12,    -1,
+      -1,    -1,    34,    35,    36,    37,    38,    -1,    22,    23,
       -1,    -1,    26,    27,    28,    29,    -1,    -1,    -1,    -1,
-      34,    35,    36,    37,    38,    22,    23,    -1,    -1,    26,
-      27,    28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,
-      37,    38,    39,    22,    23,    -1,    -1,    26,    27,    28,
-      29,    -1,    -1,    -1,    -1,    34,    35,    36,    37,    38,
-      39,    22,    23,    -1,    -1,    26,    27,    28,    29,    -1,
-      -1,    -1,    -1,    34,    35,    36,    37,    38,    39,    22,
-      23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,    -1,
-      -1,    34,    35,    36,    37,    38,    39,    22,    23,    -1,
-      -1,    26,    27,    28,    29,    -1,    31,    -1,    -1,    34,
+      34,    35,    36,    37,    38,    20,    -1,    22,    23,    -1,
+      -1,    26,    27,    28,    29,    -1,    -1,    -1,    -1,    34,
       35,    36,    37,    38,    22,    23,    -1,    -1,    26,    27,
-      28,    29,    -1,    -1,    -1,    33,    34,    35,    36,    37,
-      38,    22,    23,    -1,    -1,    26,    27,    28,    29,    -1,
-      -1,    -1,    -1,    34,    35,    36,    37,    38
+      28,    29,    -1,    -1,    -1,    -1,    34,    35,    36,    37,
+      38,    39,    22,    23,    -1,    -1,    26,    27,    28,    29,
+      -1,    -1,    -1,    -1,    34,    35,    36,    37,    38,    39,
+      22,    23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,
+      -1,    -1,    34,    35,    36,    37,    38,    39,    22,    23,
+      -1,    -1,    26,    27,    28,    29,    -1,    -1,    -1,    -1,
+      34,    35,    36,    37,    38,    39,    22,    23,    -1,    -1,
+      26,    27,    28,    29,    -1,    31,    -1,    -1,    34,    35,
+      36,    37,    38,    22,    23,    -1,    -1,    26,    27,    28,
+      29,    -1,    -1,    -1,    33,    34,    35,    36,    37,    38,
+      22,    23,    -1,    -1,    26,    27,    28,    29,    -1,    -1,
+      -1,    -1,    34,    35,    36,    37,    38
   };
 
   const signed char
   Parser::yystos_[] =
   {
-       0,    49,    50,     0,     3,    51,    43,    53,    39,    14,
-      52,    53,    32,    55,    33,    53,    54,    30,    41,    24,
-      56,    53,    54,    57,    58,    53,     4,     8,     9,    10,
-      15,    16,    17,    19,    21,    30,    32,    42,    45,    46,
-      47,    53,    59,    39,    31,    40,    59,    59,    59,    54,
-      63,    59,    53,    59,    59,    59,    62,    24,    30,    22,
-      23,    26,    27,    28,    29,    34,    35,    36,    37,    38,
-      41,    54,     5,    11,    56,    13,    40,    20,    31,    39,
-      33,    59,    59,    59,    60,    61,    53,    53,    59,    59,
-      59,    59,    59,    59,    59,    59,    59,    53,    59,    59,
-      59,    54,    53,    64,    39,    31,    40,    30,    22,    32,
-       6,    12,    56,    41,    18,    53,    59,    60,    53,    59,
-      59,    53,    41,    31,    30,    33,     7,    25,    53,    60,
-      39,    59,    25,    31,    39,    59,    39
+       0,    50,    51,     0,    43,    52,    53,    39,     3,    44,
+      55,    14,    54,    55,    32,    57,    33,    55,    56,    30,
+      41,    24,    58,    55,    56,    59,    60,    55,     4,     8,
+       9,    10,    15,    16,    17,    19,    21,    30,    32,    42,
+      46,    47,    48,    55,    61,    39,    31,    40,    61,    61,
+      61,    56,    65,    61,    55,    61,    61,    61,    64,    24,
+      30,    22,    23,    26,    27,    28,    29,    34,    35,    36,
+      37,    38,    41,    56,     5,    11,    58,    13,    40,    20,
+      31,    39,    33,    61,    61,    61,    62,    63,    55,    55,
+      61,    61,    61,    61,    61,    61,    61,    61,    61,    55,
+      61,    61,    61,    56,    55,    66,    39,    31,    40,    30,
+      22,    32,     6,    12,    58,    41,    18,    55,    61,    62,
+      55,    61,    61,    55,    41,    31,    30,    33,     7,    25,
+      55,    62,    39,    61,    25,    31,    39,    61,    39
   };
 
   const signed char
   Parser::yyr1_[] =
   {
-       0,    48,    49,    50,    50,    51,    52,    52,    53,    54,
-      55,    55,    55,    56,    56,    57,    57,    58,    58,    59,
-      59,    59,    59,    59,    59,    59,    59,    59,    59,    59,
-      59,    59,    59,    59,    59,    59,    59,    59,    59,    59,
-      59,    59,    59,    59,    59,    59,    59,    59,    60,    60,
-      61,    61,    62,    62,    63,    63,    64,    64
+       0,    49,    50,    51,    51,    52,    53,    53,    54,    54,
+      55,    56,    57,    57,    57,    58,    58,    59,    59,    60,
+      60,    61,    61,    61,    61,    61,    61,    61,    61,    61,
+      61,    61,    61,    61,    61,    61,    61,    61,    61,    61,
+      61,    61,    61,    61,    61,    61,    61,    61,    61,    61,
+      62,    62,    63,    63,    64,    64,    65,    65,    66,    66
   };
 
   const signed char
   Parser::yyr2_[] =
   {
-       0,     2,     1,     0,     3,     6,     0,     2,     1,     3,
-       0,     4,    11,     0,     2,     0,     1,     1,     3,     1,
-       1,     1,     1,     1,     1,     3,     6,     8,     4,     7,
-       5,     3,     4,     5,     2,     2,     2,     3,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     1,     0,     1,
-       1,     3,     2,     3,     2,     4,     6,     7
+       0,     2,     1,     0,     3,     7,     0,     1,     0,     2,
+       1,     3,     0,     4,    11,     0,     2,     0,     1,     1,
+       3,     1,     1,     1,     1,     1,     1,     3,     6,     8,
+       4,     7,     5,     3,     4,     5,     2,     2,     2,     3,
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     1,
+       0,     1,     1,     3,     2,     3,     2,     4,     6,     7
   };
 
 
@@ -1758,10 +1798,10 @@ namespace gcool {
   "ISVOID", "LET", "CASE", "ESAC", "NEW", "OF", "NOT", "DOT", "AT",
   "ASSIGN", "ARROW", "ADD", "SUB", "MUL", "DIV", "LP", "RP", "LB", "RB",
   "EQ", "LE", "GE", "LT", "GT", "SEMICOLON", "COMMA", "COLON", "SELF",
-  "SYMBOL", "ERROR", "STR", "INT", "FLOAT", "$accept", "program",
-  "class_seq", "class", "inherits", "symbol", "formal", "features",
-  "optional_assign", "params", "params_", "expr", "args", "args_",
-  "block_exprs", "let_init_exprs", "case_branchs", YY_NULLPTR
+  "FINAL", "SYMBOL", "ERROR", "STR", "INT", "FLOAT", "$accept", "program",
+  "class_seq", "class", "is_final", "inherits", "symbol", "formal",
+  "features", "optional_assign", "params", "params_", "expr", "args",
+  "args_", "block_exprs", "let_init_exprs", "case_branchs", YY_NULLPTR
   };
 #endif
 
@@ -1770,12 +1810,12 @@ namespace gcool {
   const unsigned char
   Parser::yyrline_[] =
   {
-       0,    71,    71,    74,    75,    78,    81,    82,    85,    88,
-      91,    92,    93,    96,    97,   100,   101,   104,   105,   108,
-     109,   110,   111,   112,   113,   114,   115,   116,   117,   118,
-     119,   120,   121,   122,   123,   124,   125,   126,   127,   128,
-     129,   130,   131,   132,   133,   134,   135,   136,   139,   140,
-     143,   144,   147,   148,   151,   152,   155,   156
+       0,    72,    72,    75,    76,    79,    82,    83,    86,    87,
+      90,    93,    96,    97,    98,   101,   102,   105,   106,   109,
+     110,   113,   114,   115,   116,   117,   118,   119,   120,   121,
+     122,   123,   124,   125,   126,   127,   128,   129,   130,   131,
+     132,   133,   134,   135,   136,   137,   138,   139,   140,   141,
+     144,   145,   148,   149,   152,   153,   156,   157,   160,   161
   };
 
   void
@@ -1844,10 +1884,10 @@ namespace gcool {
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46,    47
+      45,    46,    47,    48
     };
     // Last valid token kind.
-    const int code_max = 302;
+    const int code_max = 303;
 
     if (t <= 0)
       return symbol_kind::S_YYEOF;
@@ -1859,9 +1899,9 @@ namespace gcool {
 
 #line 5 "Parser.y"
 } // gcool
-#line 1863 "Parser.cpp"
+#line 1903 "Parser.cpp"
 
-#line 161 "Parser.y"
+#line 166 "Parser.y"
 
 
 void gcool::Parser::error(const std::string& s) {

@@ -409,39 +409,42 @@ namespace gcool {
       // symbol
       char dummy4[sizeof (NoneInitHolder<gcool::ast::Symbol>)];
 
+      // is_final
+      char dummy5[sizeof (bool)];
+
       // SYMBOL
       // ERROR
-      char dummy5[sizeof (const char*)];
+      char dummy6[sizeof (const char*)];
 
       // FLOAT
-      char dummy6[sizeof (double)];
+      char dummy7[sizeof (double)];
 
       // case_branchs
-      char dummy7[sizeof (gcool::ast::CaseBranchList)];
+      char dummy8[sizeof (gcool::ast::CaseBranchList)];
 
       // class_seq
-      char dummy8[sizeof (gcool::ast::ClassList)];
+      char dummy9[sizeof (gcool::ast::ClassList)];
 
       // args
       // args_
       // block_exprs
-      char dummy9[sizeof (gcool::ast::ExprList)];
+      char dummy10[sizeof (gcool::ast::ExprList)];
 
       // params
       // params_
-      char dummy10[sizeof (gcool::ast::FormalList)];
+      char dummy11[sizeof (gcool::ast::FormalList)];
 
       // let_init_exprs
-      char dummy11[sizeof (gcool::ast::LetInitList)];
+      char dummy12[sizeof (gcool::ast::LetInitList)];
 
       // optional_assign
-      char dummy12[sizeof (gcool::ast::OptionalExpr)];
+      char dummy13[sizeof (gcool::ast::OptionalExpr)];
 
       // INT
-      char dummy13[sizeof (int)];
+      char dummy14[sizeof (int)];
 
       // STR
-      char dummy14[sizeof (std::string)];
+      char dummy15[sizeof (std::string)];
     };
 
     /// The size of the largest semantic type.
@@ -525,11 +528,12 @@ namespace gcool {
     TK_COMMA = 295,                // COMMA
     TK_COLON = 296,                // COLON
     TK_SELF = 297,                 // SELF
-    TK_SYMBOL = 298,               // SYMBOL
-    TK_ERROR = 299,                // ERROR
-    TK_STR = 300,                  // STR
-    TK_INT = 301,                  // INT
-    TK_FLOAT = 302                 // FLOAT
+    TK_FINAL = 298,                // FINAL
+    TK_SYMBOL = 299,               // SYMBOL
+    TK_ERROR = 300,                // ERROR
+    TK_STR = 301,                  // STR
+    TK_INT = 302,                  // INT
+    TK_FLOAT = 303                 // FLOAT
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -546,7 +550,7 @@ namespace gcool {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 48, ///< Number of tokens.
+        YYNTOKENS = 49, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -591,28 +595,30 @@ namespace gcool {
         S_COMMA = 40,                            // COMMA
         S_COLON = 41,                            // COLON
         S_SELF = 42,                             // SELF
-        S_SYMBOL = 43,                           // SYMBOL
-        S_ERROR = 44,                            // ERROR
-        S_STR = 45,                              // STR
-        S_INT = 46,                              // INT
-        S_FLOAT = 47,                            // FLOAT
-        S_YYACCEPT = 48,                         // $accept
-        S_program = 49,                          // program
-        S_class_seq = 50,                        // class_seq
-        S_class = 51,                            // class
-        S_inherits = 52,                         // inherits
-        S_symbol = 53,                           // symbol
-        S_formal = 54,                           // formal
-        S_features = 55,                         // features
-        S_optional_assign = 56,                  // optional_assign
-        S_params = 57,                           // params
-        S_params_ = 58,                          // params_
-        S_expr = 59,                             // expr
-        S_args = 60,                             // args
-        S_args_ = 61,                            // args_
-        S_block_exprs = 62,                      // block_exprs
-        S_let_init_exprs = 63,                   // let_init_exprs
-        S_case_branchs = 64                      // case_branchs
+        S_FINAL = 43,                            // FINAL
+        S_SYMBOL = 44,                           // SYMBOL
+        S_ERROR = 45,                            // ERROR
+        S_STR = 46,                              // STR
+        S_INT = 47,                              // INT
+        S_FLOAT = 48,                            // FLOAT
+        S_YYACCEPT = 49,                         // $accept
+        S_program = 50,                          // program
+        S_class_seq = 51,                        // class_seq
+        S_class = 52,                            // class
+        S_is_final = 53,                         // is_final
+        S_inherits = 54,                         // inherits
+        S_symbol = 55,                           // symbol
+        S_formal = 56,                           // formal
+        S_features = 57,                         // features
+        S_optional_assign = 58,                  // optional_assign
+        S_params = 59,                           // params
+        S_params_ = 60,                          // params_
+        S_expr = 61,                             // expr
+        S_args = 62,                             // args
+        S_args_ = 63,                            // args_
+        S_block_exprs = 64,                      // block_exprs
+        S_let_init_exprs = 65,                   // let_init_exprs
+        S_case_branchs = 66                      // case_branchs
       };
     };
 
@@ -663,6 +669,10 @@ namespace gcool {
       case symbol_kind::S_inherits: // inherits
       case symbol_kind::S_symbol: // symbol
         value.move< NoneInitHolder<gcool::ast::Symbol> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_is_final: // is_final
+        value.move< bool > (std::move (that.value));
         break;
 
       case symbol_kind::S_SYMBOL: // SYMBOL
@@ -773,6 +783,18 @@ namespace gcool {
       {}
 #else
       basic_symbol (typename Base::kind_type t, const NoneInitHolder<gcool::ast::Symbol>& v)
+        : Base (t)
+        , value (v)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, bool&& v)
+        : Base (t)
+        , value (std::move (v))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const bool& v)
         : Base (t)
         , value (v)
       {}
@@ -938,6 +960,10 @@ switch (yykind)
       case symbol_kind::S_inherits: // inherits
       case symbol_kind::S_symbol: // symbol
         value.template destroy< NoneInitHolder<gcool::ast::Symbol> > ();
+        break;
+
+      case symbol_kind::S_is_final: // is_final
+        value.template destroy< bool > ();
         break;
 
       case symbol_kind::S_SYMBOL: // SYMBOL
@@ -1810,6 +1836,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_FINAL ()
+      {
+        return symbol_type (token::TK_FINAL);
+      }
+#else
+      static
+      symbol_type
+      make_FINAL ()
+      {
+        return symbol_type (token::TK_FINAL);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_SYMBOL (const char* v)
       {
         return symbol_type (token::TK_SYMBOL, std::move (v));
@@ -1942,7 +1983,7 @@ switch (yykind)
     // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
     // positive, shift that token.  If negative, reduce the rule whose
     // number is the opposite.  If YYTABLE_NINF, syntax error.
-    static const unsigned char yytable_[];
+    static const short yytable_[];
 
     static const short yycheck_[];
 
@@ -2186,8 +2227,8 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 417,     ///< Last index in yytable_.
-      yynnts_ = 17,  ///< Number of nonterminal symbols.
+      yylast_ = 416,     ///< Last index in yytable_.
+      yynnts_ = 18,  ///< Number of nonterminal symbols.
       yyfinal_ = 3 ///< Termination state number.
     };
 
@@ -2201,7 +2242,7 @@ switch (yykind)
 
 #line 5 "Parser.y"
 } // gcool
-#line 2205 "Parser.h"
+#line 2246 "Parser.h"
 
 
 // "%code provides" blocks.
@@ -2209,7 +2250,7 @@ switch (yykind)
 
     int yylex(gcool::Parser::value_type* parserData, yyscan_t scannner);
 
-#line 2213 "Parser.h"
+#line 2254 "Parser.h"
 
 
 #endif // !YY_YY_PARSER_H_INCLUDED

@@ -115,6 +115,11 @@ bool gcool::sema::Sema::pass3() {
         parent.pop();
         for (auto& c : TheASTContext->Classes) {
             if (c.Inheirt == super->Name) {
+                if (super->IsFinal) {
+                    c.Annotation->hasError = true;
+                    addError({basic::Diag::Sema_InheritFromFinalClass, 
+                        std::string(c.Name.getName())});
+                }
                 c.Annotation->SuperClass = super;
                 c.Annotation->InheritDepth = super->Annotation->InheritDepth + 1;
                 c.Annotation->MTable.SuperClassTable = &super->Annotation->MTable;
@@ -826,8 +831,7 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
              MethodFeature{sym.get("ople"), sym.getBool(), FormalList{FormalDecl{sym.get("right"), sym.getInt()}}, exprHolder},
              MethodFeature{sym.get("oplt"), sym.getBool(), FormalList{FormalDecl{sym.get("right"), sym.getInt()}}, exprHolder}
             },
-            TheASTContext->Symtbl.getObject()
-            });
+            TheASTContext->Symtbl.getObject(), true} );
     TheASTContext->Classes.push_back( 
         Class{TheASTContext->Symtbl.getFloat(), 
             {AttrFeature{FormalDecl{sym.get("FloatValue"), sym.getObject()}, {}}}, 
@@ -841,7 +845,7 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
              MethodFeature{sym.get("ople"), sym.getBool(), FormalList{FormalDecl{sym.get("right"), sym.getFloat()}}, exprHolder},
              MethodFeature{sym.get("oplt"), sym.getBool(), FormalList{FormalDecl{sym.get("right"), sym.getFloat()}}, exprHolder}
             },
-            TheASTContext->Symtbl.getObject()} );
+            TheASTContext->Symtbl.getObject(), true} );
     TheASTContext->Classes.push_back( 
         Class{TheASTContext->Symtbl.getBool(), 
             {AttrFeature{FormalDecl{sym.get("BoolValue"), sym.getObject()}, {}}}, 
@@ -850,7 +854,7 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
              MethodFeature{sym.get("opeq"), sym.getBool(), FormalList{FormalDecl{sym.get("right"), sym.getBool()}}, exprHolder},
              MethodFeature{sym.get("opnot"), sym.getBool(), FormalList{}, exprHolder}
             },
-            TheASTContext->Symtbl.getObject()} );
+            TheASTContext->Symtbl.getObject(), true} );
     TheASTContext->Classes.push_back( 
         Class{TheASTContext->Symtbl.getString(), 
             {AttrFeature{FormalDecl{sym.get("StringValue"), sym.getObject()}, {}}}, 
@@ -861,7 +865,7 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
              MethodFeature{sym.get("ople"), sym.getBool(), FormalList{FormalDecl{sym.get("right"), sym.getString()}}, exprHolder},
              MethodFeature{sym.get("oplt"), sym.getBool(), FormalList{FormalDecl{sym.get("right"), sym.getString()}}, exprHolder}
             },
-            TheASTContext->Symtbl.getObject()} );
+            TheASTContext->Symtbl.getObject(), true} );
     
     // abstract class, make code simplifiy
     TheASTContext->Classes.push_back( 

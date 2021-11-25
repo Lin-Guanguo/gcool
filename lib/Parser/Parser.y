@@ -39,7 +39,7 @@
 %}
 
 %token CLASS IF THEN ELSE FI TRUE FALSE WHILE LOOP POOL IN INHERITS ISVOID LET CASE ESAC NEW OF NOT
-%token DOT AT ASSIGN ARROW ADD SUB MUL DIV LP RP LB RB EQ LE GE LT GT SEMICOLON COMMA COLON SELF
+%token DOT AT ASSIGN ARROW ADD SUB MUL DIV LP RP LB RB EQ LE GE LT GT SEMICOLON COMMA COLON SELF FINAL
 %token<const char*> SYMBOL ERROR
 %token<std::string> STR
 %token<int> INT
@@ -56,6 +56,7 @@
 %type<gcool::ast::ExprList> args args_ block_exprs
 %type<gcool::ast::LetInitList> let_init_exprs
 %type<gcool::ast::CaseBranchList> case_branchs
+%type<bool> is_final
 
 // Conflict resolution
 %nonassoc NOT ISVOID
@@ -75,7 +76,11 @@ class_seq:                          { $$ = ClassList{}; }
     | class_seq class SEMICOLON     { $$ = std::move($1); $$.push_back(std::move($2)); }
     ;
 
-class: CLASS symbol inherits LB features RB { $$ = std::move($5); $$->Inheirt = $3; $$->Name = $2; }
+class: is_final CLASS symbol inherits LB features RB { $$ = std::move($6); $$->Inheirt = $4; $$->Name = $3; $$->IsFinal = $1; }
+    ;
+
+is_final:   { $$ = false; }
+    | FINAL { $$ = true; }
     ;
 
 inherits:               { $$ = context->Symtbl.getObject(); }
