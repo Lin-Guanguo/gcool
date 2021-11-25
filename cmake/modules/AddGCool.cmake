@@ -32,3 +32,15 @@ macro(target_link_llvm name )
         )
 endmacro(target_link_llvm)
 
+macro(target_link_llvm_public name )
+    llvm_map_components_to_libnames(llvm_libs ${ARGN})
+    target_link_libraries(${name}
+        PUBLIC
+        ${llvm_libs}
+        )
+    target_include_directories(${name}
+        PUBLIC
+        ${LLVM_INCLUDE_DIRS}
+        )
+endmacro(target_link_llvm)
+

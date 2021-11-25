@@ -10,7 +10,7 @@
 #include "gcool/Sema/Sema.h"
 #include "gcool/Basic/Diag.h"
 #include "gcool/PrettyPrinter/ASTPrinter.h"
-#include "llvm/Support/FormatVariadic.h"
+#include "gcool/LLVMIRGen/LLVMIRGen.h"
 
 using namespace gcool;
 using namespace gcool::ast;

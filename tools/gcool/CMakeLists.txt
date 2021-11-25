@@ -2,7 +2,7 @@ add_gcool_tool(gcool
     main.cpp
     )
 
-target_link_llvm(gcool support core)
+target_link_llvm(gcool support)
 
 target_link_libraries(gcool
     PRIVATE
@@ -12,4 +12,5 @@ target_link_libraries(gcool
     Lexer
     Sema
     PrettyPrinter
+    LLVMIRGen
     )
