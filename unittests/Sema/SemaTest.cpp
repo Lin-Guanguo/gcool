@@ -54,7 +54,7 @@ TEST(SemaTest, InheritTest) {
         basic::Diag::Sema_LoopInherit,  
         basic::Diag::Sema_LoopInherit,
     };
-    checkError(input, errorList, true);
+    checkError(input, errorList, false);
 }
 
 TEST(SemaTest, AttrMethodRedefineTest) {
@@ -167,6 +167,32 @@ TEST(SemaTest, SelfTest) {
         basic::Diag::Sema_MethodParamCantBeSelfType,
         basic::Diag::Sema_ExprAssignTypeIncompatible,
         basic::Diag::Sema_MethodBodyExprError
+    };
+    checkError(input, errorList, false);
+}
+
+TEST(SemaTest, NullTest) {
+    const char* input = 
+    R"(
+        class Main {
+            attr1 : SelfType <- null;
+            attr2 : Int <- null;
+
+            correct1(i : Int) : Int {
+                null
+            };
+
+            correct2(i : Int) : Int {
+                if i >= 0 then
+                    10
+                else
+                    null
+                fi
+            };
+        };
+    )";
+    ErrorKindList errorList = {
+        
     };
     checkError(input, errorList, false);
 }

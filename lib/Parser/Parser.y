@@ -39,7 +39,7 @@
 %}
 
 %token CLASS IF THEN ELSE FI TRUE FALSE WHILE LOOP POOL IN INHERITS ISVOID LET CASE ESAC NEW OF NOT
-%token DOT AT ASSIGN ARROW ADD SUB MUL DIV LP RP LB RB EQ LE GE LT GT SEMICOLON COMMA COLON SELF FINAL
+%token DOT AT ASSIGN ARROW ADD SUB MUL DIV LP RP LB RB EQ LE GE LT GT SEMICOLON COMMA COLON SELF FINAL NULL
 %token<const char*> SYMBOL ERROR
 %token<std::string> STR
 %token<int> INT
@@ -139,6 +139,7 @@ expr: symbol    { $$ = context->ExprAlloc.allocExpr(ExprSymbol($1)); }
     | expr GT expr  { $$ = context->ExprAlloc.allocExpr(ExprArithB($1, $3, ExprArithB::OP_GT)); }
     | LP expr RP    { $$ = $2; }
     | SELF          { $$ = context->ExprAlloc.allocExpr(ExprSelf()); }
+    | NULL          { $$ = context->ExprAlloc.allocExpr(ExprNull()); }
     ;
 
 args:           { $$ = ExprList{}; }

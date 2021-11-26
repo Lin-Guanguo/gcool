@@ -239,6 +239,13 @@ protected:
     friend class Sema;
 };
 
+class ExprNullAnnotation : public ExprAnnotation {
+public:
+protected:
+    ExprNullAnnotation() {}
+    friend class Sema;
+};
+
 class ExprArithBAnnotation : public ExprAnnotation {
 public:
     ast::Class* ClassRef = nullptr;

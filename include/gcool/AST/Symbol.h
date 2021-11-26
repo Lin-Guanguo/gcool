@@ -35,6 +35,8 @@ public:
     Symbol getObject() { return get("Object"); }
     Symbol getSelf() { return get("self"); }
     Symbol getSelfType() { return get("SelfType"); }
+    Symbol getNull() { return get("null"); }
+    Symbol getNullType() { return get("0NullType"); } // programer can't use this type (0 start)
     ~SymbolTable();
 };
 

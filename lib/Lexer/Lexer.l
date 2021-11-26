@@ -57,6 +57,7 @@
 "new"       { return gcool::Parser::token::TK_NEW; }
 "of"        { return gcool::Parser::token::TK_OF; }
 "self"      { return gcool::Parser::token::TK_SELF; }
+"null"      { return gcool::Parser::token::TK_NULL; }
 "final"     { return gcool::Parser::token::TK_FINAL; }
 
 "not"       { return gcool::Parser::token::TK_NOT; }

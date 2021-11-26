@@ -209,6 +209,14 @@ public:
     bool operator==(const ExprSelf&) const = default;
 };
 
+class ExprNull : public ExprFacility<ExprNull> {
+public:
+    static constexpr ExprKind TheKind = EK_NULL;
+public:
+    ExprNull() {}
+    bool operator==(const ExprNull&) const = default;
+};
+
 class ExprArithB : public ExprFacility<ExprArithB> {
 public:
     static constexpr ExprKind TheKind = EK_ARITH_B;

@@ -529,11 +529,12 @@ namespace gcool {
     TK_COLON = 296,                // COLON
     TK_SELF = 297,                 // SELF
     TK_FINAL = 298,                // FINAL
-    TK_SYMBOL = 299,               // SYMBOL
-    TK_ERROR = 300,                // ERROR
-    TK_STR = 301,                  // STR
-    TK_INT = 302,                  // INT
-    TK_FLOAT = 303                 // FLOAT
+    TK_NULL = 299,                 // NULL
+    TK_SYMBOL = 300,               // SYMBOL
+    TK_ERROR = 301,                // ERROR
+    TK_STR = 302,                  // STR
+    TK_INT = 303,                  // INT
+    TK_FLOAT = 304                 // FLOAT
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -550,7 +551,7 @@ namespace gcool {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 49, ///< Number of tokens.
+        YYNTOKENS = 50, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -596,29 +597,30 @@ namespace gcool {
         S_COLON = 41,                            // COLON
         S_SELF = 42,                             // SELF
         S_FINAL = 43,                            // FINAL
-        S_SYMBOL = 44,                           // SYMBOL
-        S_ERROR = 45,                            // ERROR
-        S_STR = 46,                              // STR
-        S_INT = 47,                              // INT
-        S_FLOAT = 48,                            // FLOAT
-        S_YYACCEPT = 49,                         // $accept
-        S_program = 50,                          // program
-        S_class_seq = 51,                        // class_seq
-        S_class = 52,                            // class
-        S_is_final = 53,                         // is_final
-        S_inherits = 54,                         // inherits
-        S_symbol = 55,                           // symbol
-        S_formal = 56,                           // formal
-        S_features = 57,                         // features
-        S_optional_assign = 58,                  // optional_assign
-        S_params = 59,                           // params
-        S_params_ = 60,                          // params_
-        S_expr = 61,                             // expr
-        S_args = 62,                             // args
-        S_args_ = 63,                            // args_
-        S_block_exprs = 64,                      // block_exprs
-        S_let_init_exprs = 65,                   // let_init_exprs
-        S_case_branchs = 66                      // case_branchs
+        S_NULL = 44,                             // NULL
+        S_SYMBOL = 45,                           // SYMBOL
+        S_ERROR = 46,                            // ERROR
+        S_STR = 47,                              // STR
+        S_INT = 48,                              // INT
+        S_FLOAT = 49,                            // FLOAT
+        S_YYACCEPT = 50,                         // $accept
+        S_program = 51,                          // program
+        S_class_seq = 52,                        // class_seq
+        S_class = 53,                            // class
+        S_is_final = 54,                         // is_final
+        S_inherits = 55,                         // inherits
+        S_symbol = 56,                           // symbol
+        S_formal = 57,                           // formal
+        S_features = 58,                         // features
+        S_optional_assign = 59,                  // optional_assign
+        S_params = 60,                           // params
+        S_params_ = 61,                          // params_
+        S_expr = 62,                             // expr
+        S_args = 63,                             // args
+        S_args_ = 64,                            // args_
+        S_block_exprs = 65,                      // block_exprs
+        S_let_init_exprs = 66,                   // let_init_exprs
+        S_case_branchs = 67                      // case_branchs
       };
     };
 
@@ -1851,6 +1853,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_NULL ()
+      {
+        return symbol_type (token::TK_NULL);
+      }
+#else
+      static
+      symbol_type
+      make_NULL ()
+      {
+        return symbol_type (token::TK_NULL);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_SYMBOL (const char* v)
       {
         return symbol_type (token::TK_SYMBOL, std::move (v));
@@ -2227,7 +2244,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 416,     ///< Last index in yytable_.
+      yylast_ = 420,     ///< Last index in yytable_.
       yynnts_ = 18,  ///< Number of nonterminal symbols.
       yyfinal_ = 3 ///< Termination state number.
     };
@@ -2242,7 +2259,7 @@ switch (yykind)
 
 #line 5 "Parser.y"
 } // gcool
-#line 2246 "Parser.h"
+#line 2263 "Parser.h"
 
 
 // "%code provides" blocks.
@@ -2250,7 +2267,7 @@ switch (yykind)
 
     int yylex(gcool::Parser::value_type* parserData, yyscan_t scannner);
 
-#line 2254 "Parser.h"
+#line 2271 "Parser.h"
 
 
 #endif // !YY_YY_PARSER_H_INCLUDED

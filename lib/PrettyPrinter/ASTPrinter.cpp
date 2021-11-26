@@ -233,6 +233,10 @@ void operator()(ast::Expr &expr, ast::ExprSelf &rawExpr) {
     INDENT; os << "self"; NEXTLINE;
 }
 
+void operator()(ast::Expr &expr, ast::ExprNull &rawExpr) {
+    INDENT; os << "null"; NEXTLINE;
+}
+
 void operator()(ast::Expr &expr, ast::ExprArithB &rawExpr) {
     INDENT; os << "binaryOperator= " << ast::ExprArithB::OperatorLiteral[rawExpr.Operator]; NEXTLINE;
     INDENT; os << "leftOperand="; NEXTLINE;

@@ -108,6 +108,7 @@ bool gcool::sema::Sema::pass3() {
     root->Annotation->InheritDepth = 0;
     classNameSet.erase(root->Name);
     classNameSet.erase(TheASTContext->Symtbl.getSelfType()); // Inherit from SelfType is forbid
+    classNameSet.erase(TheASTContext->Symtbl.getNullType()); // can't inherit from abstract class
     std::stack<Class*> parent;
     parent.push(root);
     while (!parent.empty()) {
@@ -669,6 +670,13 @@ void operator()(Expr& ExprAnnot, ExprSelf& expr) {
     ExprAnnot.Annotation = annot;
 }
 
+void operator()(Expr& ExprAnnot, ExprNull& expr) {
+    auto annot = TheSema.allocAnnotation<ExprNullAnnotation>();
+    annot->hasError = false;
+    annot->Type = GETCLASS(SYMTBL.getNullType());
+    ExprAnnot.Annotation = annot;
+}
+
 void operator()(Expr& ExprAnnot, ExprArithB& expr) {
     auto annot = TheSema.allocAnnotation<ExprArithBAnnotation>();
     annot->hasError = false;
@@ -761,6 +769,10 @@ bool gcool::sema::Sema::checkExpr(ast::Expr& e, sema::SemaScope* scope, ast::Cla
 }
 
 bool gcool::sema::Sema::isSuper(ast::Class* super, ast::Class* sub, ast::Class* selfClass) {
+    assert((super->Name != TheASTContext->Symtbl.getNullType()) && "can't assign to null type");
+    // null can assign to any class
+    if (sub->Name == TheASTContext->Symtbl.getNullType())
+        return true;
     if (super->Name == TheASTContext->Symtbl.getSelfType())
         return sub->Name == TheASTContext->Symtbl.getSelfType();
     if (sub->Name == TheASTContext->Symtbl.getSelfType())
@@ -780,6 +792,10 @@ gcool::ast::Class* gcool::sema::Sema::getCommonSuper(ast::Class* sub1, ast::Clas
         sub1 = selfClass;
     else if (sub2->Name == TheASTContext->Symtbl.getSelfType())
         sub2 = selfClass;
+    else if (sub1->Name == TheASTContext->Symtbl.getNullType())
+        return sub2;
+    else if (sub2->Name == TheASTContext->Symtbl.getNullType())
+        return sub1;
     
     while (sub1->Annotation->InheritDepth < sub2->Annotation->InheritDepth)
         sub1 = sub1->Annotation->SuperClass;
@@ -871,6 +887,8 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
     // abstract class, make code simplifiy
     TheASTContext->Classes.push_back( 
         Class{TheASTContext->Symtbl.getSelfType(), Symbol::EmptySymbol} );
+    TheASTContext->Classes.push_back( 
+        Class{TheASTContext->Symtbl.getNullType(), Symbol::EmptySymbol} );
 }
 
 void gcool::sema::Sema::addError(basic::Diag&& error) {
