@@ -201,7 +201,7 @@ bool gcool::sema::Sema::pass5() {
 bool gcool::sema::Sema::annotAttrDecl(ast::Class* Class) {
     bool hasError = false;
 
-    int OffsetEnd = 1; // for objecy
+    int OffsetEnd = 0; // Object
     if (Class->Annotation->SuperClass != nullptr)
         OffsetEnd = Class->Annotation->SuperClass->Annotation->AttrOffsetEnd;
     
@@ -223,7 +223,8 @@ bool gcool::sema::Sema::annotAttrDecl(ast::Class* Class) {
 bool gcool::sema::Sema::annotMethodDecl(ast::Class* Class) {
     bool hasError = false;
     ast::Class* superClass = Class->Annotation->SuperClass;
-    int OffsetEnd = 0;
+
+    int OffsetEnd = 0; // Obejct
     if (superClass != nullptr)
         OffsetEnd = superClass->Annotation->MethodOffsetEnd; // method function table inherit from 
 

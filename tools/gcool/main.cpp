@@ -32,7 +32,11 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
     
     pretty::ASTPrinter printer;
     printer.IsPrintBuiltin = true;
-    printer.printAST(llvm::outs(), sema);
+    //printer.printAST(llvm::outs(), sema);
+
+    ir::LLVMIRGen irgen(&sema);
+    irgen.emitLLVMIR();
+    irgen.print(llvm::outs());
 
     // if (debugPrint) {
     //     for(auto e : sema.TheErrorList) {
@@ -48,6 +52,7 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
 
 int main(int argc, char** argv) 
 {
+    //llvm::outs() << "pointer size " << sizeof(void*) << "\n";
     const char* input = 
     R"(
         class Main {
