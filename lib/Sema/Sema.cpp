@@ -54,10 +54,7 @@ bool gcool::sema::Sema::pass2() {
         TheASTContext->Annotation->ClassMap.insert( {c.Name, &c} );
         c.Annotation = allocAnnotation<ClassAnnotation>();
         c.Annotation->MTable.InClass = &c;
-        if (isBuiltinType(&c))
-            c.Annotation->IsBuiltin = true;
-        else 
-            c.Annotation->IsBuiltin = false;
+        annotClassKind(&c);
 
         nameSet.clear();
         for (auto& a : c.Attrs) {
@@ -157,7 +154,7 @@ bool gcool::sema::Sema::pass5() {
         // class error are serious, stop sematic analysis
         if (c.Annotation->hasError) continue;
         // skip builtinType, their method body is empty
-        if (c.Annotation->IsBuiltin)
+        if (c.Annotation->TheClassKind != sema::ClassAnnotation::CK_Trivial)
             continue;
 
         for (auto& a : c.Attrs) {
@@ -197,6 +194,20 @@ bool gcool::sema::Sema::pass5() {
         }
     }
     return hasError;
+}
+
+void gcool::sema::Sema::annotClassKind(ast::Class* c) {
+    if (c->Name == TheASTContext->Symtbl.getObject()
+        || c->Name == TheASTContext->Symtbl.getInt()
+        || c->Name == TheASTContext->Symtbl.getFloat()
+        || c->Name == TheASTContext->Symtbl.getBool()
+        || c->Name == TheASTContext->Symtbl.getString())
+        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Builtin;
+    else if (c->Name == TheASTContext->Symtbl.getSelfType()
+        || c->Name == TheASTContext->Symtbl.getNullType())
+        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Abstract;
+    else
+        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Trivial;
 }
 
 bool gcool::sema::Sema::annotAttrDecl(ast::Class* Class) {
@@ -809,18 +820,6 @@ gcool::ast::Class* gcool::sema::Sema::getCommonSuper(ast::Class* sub1, ast::Clas
     return sub1;
 }
 
-bool gcool::sema::Sema::isBuiltinType(ast::Class* c) {
-    if (c->Name == TheASTContext->Symtbl.getObject()
-        || c->Name == TheASTContext->Symtbl.getSelfType()
-        || c->Name == TheASTContext->Symtbl.getInt()
-        || c->Name == TheASTContext->Symtbl.getFloat()
-        || c->Name == TheASTContext->Symtbl.getBool()
-        || c->Name == TheASTContext->Symtbl.getString())
-        return true;
-    else
-        return false;
-}
-
 // builtinType, and builtinFunction
 // funcname 0 start(such as 0new) is builtin function that programer can't call and overload
 void gcool::sema::Sema::addBuiltinTypeAST() {
@@ -830,7 +829,7 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
     TheASTContext->Classes.push_back( 
         Class{TheASTContext->Symtbl.getObject(),
             {},
-            {MethodFeature{sym.get("0new"), sym.getSelfType(), FormalList{}, exprHolder},
+            {MethodFeature{sym.getNewMethod(), sym.getSelfType(), FormalList{}, exprHolder},
              MethodFeature{sym.get("opisvoid"), sym.getBool(), FormalList{}, exprHolder}
             },
             Symbol::EmptySymbol

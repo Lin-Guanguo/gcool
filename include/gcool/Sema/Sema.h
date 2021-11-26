@@ -55,6 +55,7 @@ public:
     bool pass5();
 
     // pass3 help function
+    void annotClassKind(ast::Class* c);
     bool annotAttrDecl(ast::Class* Class);
     bool annotMethodDecl(ast::Class* Class);
     bool checkExpr(ast::Expr& e, sema::SemaScope* Scope, ast::Class* selfClass);
@@ -67,7 +68,6 @@ public:
     // only after pass2
     ast::Class* getCommonSuper(ast::Class* sub1, ast::Class* sub2, ast::Class* selfClass);
 
-    bool isBuiltinType(ast::Class* c);
 
     void addBuiltinTypeAST();
 

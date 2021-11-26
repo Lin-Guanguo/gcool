@@ -90,7 +90,14 @@ public:
     int InheritDepth;
     int AttrOffsetEnd;
     int MethodOffsetEnd; 
-    bool IsBuiltin = false;
+
+    enum ClassKind {
+        CK_Trivial,
+        CK_Builtin,
+        CK_Abstract,
+    };
+
+    ClassKind TheClassKind = CK_Trivial;
 protected:
     ClassAnnotation() {}
     friend class Sema;

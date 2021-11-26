@@ -49,7 +49,8 @@ void pretty::ASTPrinter::printClassList(llvm::raw_ostream& os, ast::ClassList& T
     INDENT; os << "ClassList:"; NEXTLINE;
     INCINDENT;
     for (auto& c : TheClassList) {
-        if (!IsPrintBuiltin && c.Annotation->IsBuiltin) continue;
+        if (!IsPrintBuiltin 
+            && ( c.Annotation->TheClassKind != sema::ClassAnnotation::CK_Trivial )) continue;
         printClass(os, c);
     }
     DECINDENT;

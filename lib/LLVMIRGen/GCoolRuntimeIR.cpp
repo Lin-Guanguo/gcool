@@ -5,11 +5,8 @@ using namespace gcool;
 void ir::LLVMIRGen::emitRuntime() {
     // Fat Pointer type dec
     auto IntP = llvm::StructType::create(Context, {VTableTy, BuiltIntTy}, "IntP");
-    addStructT(IntP);
     auto FloatP = llvm::StructType::create(Context, {VTableTy, BuiltFloatTy}, "FloatP");
-    addStructT(FloatP);
     auto BoolP = llvm::StructType::create(Context, {VTableTy, BuiltBoolTy}, "BoolP");
-    addStructT(BoolP);
 
     // ========================== Declaration ==========================
 
