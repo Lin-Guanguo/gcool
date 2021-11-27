@@ -49,23 +49,33 @@ bool ir::LLVMIRGen::emitLLVMIR() {
 
 void ir::LLVMIRGen::pass1() {
     // FatPointer
-    for(auto& c : ASTCONTEXT->Classes) {
-        if (c.Annotation->TheClassKind == sema::ClassAnnotation::CK_Abstract) continue;
-        if (c.Annotation->TheClassKind == sema::ClassAnnotation::CK_Primitive) {
-            auto fp = addFatPointer(c.Name);
-            fp->setBody({VTableRefTy, BuiltObjHold}, true);
-        } else {
-            auto fp = addFatPointer(c.Name);
-            auto obj = addObjectStruct(c.Name);
-            fp->setBody({VTableRefTy, obj}, true);
+    for(auto& c : ASTCONTEXT->Annotation->InheritOrder) {
+        llvm::StructType* fp;
+        switch(c->Annotation->TheClassKind) {
+        case sema::ClassAnnotation::CK_Object: {
+            fp = addFatPointer(c->Name);
+            ObjectRefTy = addObjectStruct(c->Name)->getPointerTo();
+            break;
         }
+        case sema::ClassAnnotation::CK_Primitive: {
+            fp = addFatPointer(c->Name);
+            break;
+        }
+        case sema::ClassAnnotation::CK_Trivial: {
+            fp = addFatPointer(c->Name);
+            addObjectStruct(c->Name);
+            break;
+        }
+        default:
+            assert(0 && "nerver reach here");
+        }
+        fp->setBody({VTableRefTy, ObjectRefTy}, true);
     }
 }
 
 void ir::LLVMIRGen::pass2() {
     TypeList typeListBuf;
     ConstantList vmethodBuf;
-    std::string funcNameBuf;
     for(auto& c : ASTCONTEXT->Annotation->InheritOrder) {
         auto selfFT = getFatPointer(c->Name);
 
@@ -83,9 +93,9 @@ void ir::LLVMIRGen::pass2() {
     
         // MethodDecl
         // new method for operator new
-        auto ft = llvm::FunctionType::get(selfFT, {}, false);
-        llvm::Function::Create(
-                ft, llvm::GlobalValue::LinkageTypes::ExternalLinkage,
+        auto newMethodft = llvm::FunctionType::get(selfFT, {}, false);
+        auto newMethod = llvm::Function::Create(
+                newMethodft, llvm::GlobalValue::LinkageTypes::ExternalLinkage,
                 llvm::StringRef(c->Name.getName()) + "_" + SYMTBL.getNewMethod().getName(), 
                 Module);
         for (auto& m : c->Methods) {
@@ -120,10 +130,7 @@ void ir::LLVMIRGen::pass2() {
         do {
             for (auto& m : curcp->Methods) {
                 if (vmethodBuf[m.Annotation->MethodOffset] == nullptr) {
-                    funcNameBuf = curcp->Name.getName();
-                    funcNameBuf.append("_").append(m.Name.getName());
-                    auto f = Module.getFunction(funcNameBuf);
-                    assert(f != nullptr && "getfunction befor decl");
+                    auto f = getMethod(curcp->Name, m.Name);
                     vmethodBuf[m.Annotation->MethodOffset] = llvm::ConstantExpr::getBitCast(
                         f,
                         VMethodSlotTy
@@ -132,6 +139,7 @@ void ir::LLVMIRGen::pass2() {
             }
             curcp = curcp->Annotation->SuperClass;
         } while(curcp != nullptr);
+        vmethodBuf[0] = llvm::ConstantExpr::getBitCast(newMethod, VMethodSlotTy);
         assert([&vmethodBuf](){
             for (auto& slot : vmethodBuf)
                 if (slot == nullptr) return false;
@@ -142,7 +150,7 @@ void ir::LLVMIRGen::pass2() {
 }
 
 void ir::LLVMIRGen::pass3() {
-    
+    emitNative();
 }
 
 std::string_view ir::LLVMIRGen::bufName(std::string_view lhs, std::string_view rhs) {
@@ -190,7 +198,7 @@ llvm::GlobalVariable* ir::LLVMIRGen::addVTable(ast::Symbol classNameS,
     if (classInfo->Annotation->SuperClass == nullptr)
         superClassVTable = llvm::Constant::getNullValue(VTableRefTy);
     else
-        superClassVTable = llvm::ConstantExpr::getBitCast(getVTable(classInfo->Inheirt), VTableRefTy);
+        superClassVTable = getVTableConstant(classInfo->Inheirt);
     auto vtVal = llvm::ConstantStruct::get(
         vtTy,{
         llvm::ConstantStruct::get(
@@ -217,6 +225,17 @@ llvm::GlobalVariable* ir::LLVMIRGen::getVTable(ast::Symbol classNameS) {
     return p->second;
 }
 
+llvm::Constant* ir::LLVMIRGen::getVTableConstant(ast::Symbol className) {
+    return llvm::ConstantExpr::getBitCast(getVTable(className), VTableRefTy);
+}
+
+llvm::Function* ir::LLVMIRGen::getMethod(ast::Symbol classNameS, ast::Symbol methodNameS) {
+    TempStringBuf = classNameS.getName();
+    TempStringBuf.append("_").append(methodNameS.getName());
+    auto f = Module.getFunction(TempStringBuf);
+    assert(f && "get method for declare");
+    return f;
+}
 
 
 void ir::LLVMIRGen::print(llvm::raw_ostream& os) {

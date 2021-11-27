@@ -33,24 +33,30 @@ private:
     llvm::PointerType*      VMethodSlotTy;
     llvm::StructType*       VTableTy;
     llvm::PointerType*      VTableRefTy;
+    llvm::PointerType*      ObjectRefTy;
     StructTypeMap           FatPointerTyMap;
     StructTypeMap           ObejctTyMap;
     GlobalVariableMap       VTableMap;
     sema::Sema*             TheSema;
 
     StringBufList           NameBufList;
+    std::string             TempStringBuf;
 public:
     LLVMIRGen(sema::Sema* sema);
     ~LLVMIRGen();
     bool emitLLVMIR();
 private:
-    // emitBuitin
+    // Declare FatPointer for allClass
     void pass1();
-    void emitRuntime();
-    // emitDecl
+
+    // Define ObejctStruct
+    // Define VTable
+    // Declare Method
     void pass2();
-    // emitExpr
+    
+    // Define Method, emit Expr IR
     void pass3();
+    void emitNative();
 
     // helper function
     std::string_view bufName(std::string_view lhs, std::string_view rhs);
@@ -60,6 +66,8 @@ private:
     llvm::StructType* getObjectStruct(ast::Symbol className);
     llvm::GlobalVariable* addVTable(ast::Symbol className, ast::Class* classInfo, llvm::ArrayRef<llvm::Constant*> methodInit);
     llvm::GlobalVariable* getVTable(ast::Symbol className);
+    llvm::Constant* getVTableConstant(ast::Symbol className);
+    llvm::Function* getMethod(ast::Symbol classNameS, ast::Symbol methodNameS);
 public:
     void print(llvm::raw_ostream& os);
 };

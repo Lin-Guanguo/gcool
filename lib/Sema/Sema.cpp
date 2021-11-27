@@ -198,7 +198,7 @@ bool gcool::sema::Sema::pass5() {
 
 void gcool::sema::Sema::annotClassKind(ast::Class* c) {
     if (c->Name == TheASTContext->Symtbl.getObject())
-        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Builtin;
+        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Object;
     else if (c->Name == TheASTContext->Symtbl.getInt()
         || c->Name == TheASTContext->Symtbl.getFloat()
         || c->Name == TheASTContext->Symtbl.getBool()

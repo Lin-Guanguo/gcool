@@ -95,7 +95,7 @@ public:
 
     enum ClassKind {
         CK_Trivial,
-        CK_Builtin,
+        CK_Object,
         CK_Primitive,
         CK_Abstract,
     };
