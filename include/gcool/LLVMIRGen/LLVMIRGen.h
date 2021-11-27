@@ -13,11 +13,11 @@ class raw_ostream;
 namespace gcool {
 namespace ir {
 
-using StructTypeMap = std::unordered_map<std::string_view, llvm::StructType*>;
-using ConstantMap = std::unordered_map<std::string_view, llvm::Constant*>;
+using StructTypeMap = std::unordered_map<ast::Symbol, llvm::StructType*>;
+using GlobalVariableMap = std::unordered_map<ast::Symbol, llvm::GlobalVariable*>;
 using StringBufList = std::vector<const char*>;
-using FunctionList = std::vector<llvm::Function*>;
 using TypeList = std::vector<llvm::Type*>;
+using ConstantList = std::vector<llvm::Constant*>;
 
 class LLVMIRGen {
 private:
@@ -28,11 +28,14 @@ private:
     llvm::IntegerType*      BuiltIntTy;
     llvm::Type*             BuiltFloatTy;
     llvm::IntegerType*      BuiltBoolTy;
-    llvm::PointerType*      VTableSlotTy;
-    llvm::PointerType*      VTableTy;
+    llvm::StructType*       ClassInfoTy;
+    int                     ClassInfoSize; // N pointer
+    llvm::PointerType*      VMethodSlotTy;
+    llvm::StructType*       VTableTy;
+    llvm::PointerType*      VTableRefTy;
     StructTypeMap           FatPointerTyMap;
     StructTypeMap           ObejctTyMap;
-    ConstantMap             VTableMap;
+    GlobalVariableMap       VTableMap;
     sema::Sema*             TheSema;
 
     StringBufList           NameBufList;
@@ -51,12 +54,13 @@ private:
 
     // helper function
     std::string_view bufName(std::string_view lhs, std::string_view rhs);
-    llvm::StructType* addFatPointer(std::string_view className);
-    llvm::StructType* getFatPointer(std::string_view className);
-    llvm::StructType* addObjectStruct(std::string_view className);
-    llvm::StructType* getObjectStruct(std::string_view className);
-    llvm::Constant* addVTable(std::string_view className, llvm::ArrayRef<llvm::Constant*> init);
-    llvm::Constant* getVTable(std::string_view className);
+    llvm::StructType* addFatPointer(ast::Symbol className);
+    llvm::StructType* getFatPointer(ast::Symbol className);
+    llvm::StructType* addObjectStruct(ast::Symbol className);
+    llvm::StructType* getObjectStruct(ast::Symbol className);
+    llvm::GlobalVariable* addVTable(ast::Symbol className, int vMethodN);
+    void initVTable(ast::Class& c, llvm::ArrayRef<llvm::Constant*> methodInit);
+    llvm::GlobalVariable* getVTable(ast::Symbol className);
 public:
     void print(llvm::raw_ostream& os);
 };
