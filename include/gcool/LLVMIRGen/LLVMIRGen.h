@@ -32,7 +32,6 @@ private:
     llvm::Type*             BuiltFloatTy;
     llvm::IntegerType*      BuiltBoolTy;
     llvm::StructType*       ClassInfoTy;
-    int                     ClassInfoSize; // N pointer
     llvm::PointerType*      VMethodSlotTy;
     llvm::StructType*       VTableTy;
     llvm::PointerType*      VTableRefTy;

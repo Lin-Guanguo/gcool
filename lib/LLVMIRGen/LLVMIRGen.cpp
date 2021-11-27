@@ -14,7 +14,6 @@ ir::LLVMIRGen::LLVMIRGen(sema::Sema* sema)
     , BuiltFloatTy(llvm::Type::getDoubleTy(Context))
     , BuiltBoolTy(llvm::Type::getInt1Ty(Context))
     , ClassInfoTy(llvm::StructType::create(Context, "ClassInfo"))
-    , ClassInfoSize(4) // N pointer
     , VMethodSlotTy(llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), true)->getPointerTo())
     , VTableTy(llvm::StructType::create(
         Context,
