@@ -58,8 +58,7 @@ private:
     llvm::StructType* getFatPointer(ast::Symbol className);
     llvm::StructType* addObjectStruct(ast::Symbol className);
     llvm::StructType* getObjectStruct(ast::Symbol className);
-    llvm::GlobalVariable* addVTable(ast::Symbol className, int vMethodN);
-    void initVTable(ast::Class& c, llvm::ArrayRef<llvm::Constant*> methodInit);
+    llvm::GlobalVariable* addVTable(ast::Symbol className, ast::Class* classInfo, llvm::ArrayRef<llvm::Constant*> methodInit);
     llvm::GlobalVariable* getVTable(ast::Symbol className);
 public:
     void print(llvm::raw_ostream& os);

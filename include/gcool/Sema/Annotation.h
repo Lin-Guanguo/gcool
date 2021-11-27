@@ -10,6 +10,7 @@ class SemaScope;
 using ScopeVariable = std::unordered_map<ast::Symbol, ast::FormalDecl*>;
 using ClassListMap = std::unordered_map<ast::Symbol, ast::Class*>;
 using MethodListMap = std::unordered_map<ast::Symbol, ast::MethodFeature*>;
+using ClassRefList = std::vector<ast::Class*>;
 using ScopeList = std::vector<SemaScope>;
 
 class SemaScope {
@@ -75,6 +76,7 @@ protected:
 class ASTAnnotation : public Annotation {
 public:
     ClassListMap ClassMap;
+    ClassRefList InheritOrder;
 protected:
     ASTAnnotation() {}
     friend class Sema;
@@ -94,6 +96,7 @@ public:
     enum ClassKind {
         CK_Trivial,
         CK_Builtin,
+        CK_Primitive,
         CK_Abstract,
     };
 

@@ -106,6 +106,7 @@ bool gcool::sema::Sema::pass3() {
     classNameSet.erase(root->Name);
     classNameSet.erase(TheASTContext->Symtbl.getSelfType()); // Inherit from SelfType is forbid
     classNameSet.erase(TheASTContext->Symtbl.getNullType()); // can't inherit from abstract class
+    TheASTContext->Annotation->InheritOrder.push_back(root);
     std::stack<Class*> parent;
     parent.push(root);
     while (!parent.empty()) {
@@ -121,6 +122,7 @@ bool gcool::sema::Sema::pass3() {
                 c.Annotation->SuperClass = super;
                 c.Annotation->InheritDepth = super->Annotation->InheritDepth + 1;
                 c.Annotation->MTable.SuperClassTable = &super->Annotation->MTable;
+                TheASTContext->Annotation->InheritOrder.push_back(&c);
                 parent.push(&c);
                 classNameSet.erase(c.Name);
             }
@@ -139,11 +141,9 @@ bool gcool::sema::Sema::pass3() {
 
 bool gcool::sema::Sema::pass4() {
     bool hasError = false;
-    for (auto& c : TheASTContext->Classes) {
-        if (c.Annotation->hasError) continue;
-        if (c.Name == TheASTContext->Symtbl.getSelfType()) continue;
-        hasError = annotAttrDecl(&c) || hasError;
-        hasError = annotMethodDecl(&c) || hasError;
+    for (auto* c : TheASTContext->Annotation->InheritOrder) {
+        hasError = annotAttrDecl(c) || hasError;
+        hasError = annotMethodDecl(c) || hasError;
     }
     return hasError;
 }
@@ -197,12 +197,13 @@ bool gcool::sema::Sema::pass5() {
 }
 
 void gcool::sema::Sema::annotClassKind(ast::Class* c) {
-    if (c->Name == TheASTContext->Symtbl.getObject()
-        || c->Name == TheASTContext->Symtbl.getInt()
+    if (c->Name == TheASTContext->Symtbl.getObject())
+        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Builtin;
+    else if (c->Name == TheASTContext->Symtbl.getInt()
         || c->Name == TheASTContext->Symtbl.getFloat()
         || c->Name == TheASTContext->Symtbl.getBool()
         || c->Name == TheASTContext->Symtbl.getString())
-        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Builtin;
+        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Primitive;
     else if (c->Name == TheASTContext->Symtbl.getSelfType()
         || c->Name == TheASTContext->Symtbl.getNullType())
         c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Abstract;
@@ -232,6 +233,7 @@ bool gcool::sema::Sema::annotAttrDecl(ast::Class* Class) {
     return hasError;
 }
 
+// follow inherit Order
 bool gcool::sema::Sema::annotMethodDecl(ast::Class* Class) {
     bool hasError = false;
     ast::Class* superClass = Class->Annotation->SuperClass;
