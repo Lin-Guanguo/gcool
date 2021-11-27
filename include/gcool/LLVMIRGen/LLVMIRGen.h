@@ -13,6 +13,8 @@ class raw_ostream;
 namespace gcool {
 namespace ir {
 
+class ExprIRGenVisitor;
+
 using StructTypeMap = std::unordered_map<ast::Symbol, llvm::StructType*>;
 using GlobalVariableMap = std::unordered_map<ast::Symbol, llvm::GlobalVariable*>;
 using StringBufList = std::vector<const char*>;
@@ -20,6 +22,7 @@ using TypeList = std::vector<llvm::Type*>;
 using ConstantList = std::vector<llvm::Constant*>;
 
 class LLVMIRGen {
+    friend class ExprIRGenVisitor;
 private:
     llvm::LLVMContext       Context;
     llvm::Module            Module;
@@ -57,6 +60,8 @@ private:
     // Define Method, emit Expr IR
     void pass3();
     void emitNative();
+    void emitNewMethod(ast::Class* c);
+    void emitMethod(ast::Class* c, ast::MethodFeature* m);
     llvm::Value* emitExpr(ast::Expr expr);
 
     // helper function

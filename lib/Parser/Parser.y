@@ -69,11 +69,11 @@
 
 %%
 
-program: class_seq                  { context->Classes = std::move($1); }
+program: class_seq                  { }
     ;
 
-class_seq:                          { $$ = ClassList{}; }
-    | class_seq class SEMICOLON     { $$ = std::move($1); $$.push_back(std::move($2)); }
+class_seq:                          { }
+    | class_seq class SEMICOLON     { context->Classes.push_back(std::move($2)); }
     ;
 
 class: is_final CLASS symbol inherits LB features RB { $$ = std::move($6); $$->Inheirt = $4; $$->Name = $3; $$->IsFinal = $1; }

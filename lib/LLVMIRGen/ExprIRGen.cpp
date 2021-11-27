@@ -3,10 +3,14 @@
 
 using namespace gcool;
 
-#define ASTCONTEXT TheSema->TheASTContext
-#define SYMTBL TheSema->TheASTContext->Symtbl
+#define ASTCONTEXT IRGen.TheSema->TheASTContext
+#define SYMTBL IRGen.TheSema->TheASTContext->Symtbl
+#define IRBuilder IRGen.IRBuilder
+#define Module IRGen.Module
+#define Context IRGen.Context
 
-namespace {
+namespace gcool {
+namespace ir {
 
 class ExprIRGenVisitor : public ast::ExprVisitor {
 public:
@@ -15,7 +19,15 @@ public:
     ExprIRGenVisitor(ir::LLVMIRGen& iRGen) : IRGen(iRGen) {}
 public:
 void operator()(ast::Expr &expr, ast::ExprInt &rawExpr) {
-
+    auto IntS = SYMTBL.getInt();
+    auto retval = IRBuilder.CreateInsertValue(
+        llvm::UndefValue::get(
+            IRGen.getFatPointer(IntS)), 
+        IRGen.getVTableConstant(IntS), {0});
+    retval = IRBuilder.CreateInsertValue(retval, 
+        llvm::ConstantInt::get(IRGen.BuiltIntTy, 
+            llvm::APInt(64, rawExpr.Val,true)), {1});
+    RetVal = retval;
 }
  
 void operator()(ast::Expr &expr, ast::ExprFloat &rawExpr) {
@@ -86,6 +98,8 @@ void operator()(ast::Expr &expr, ast::ExprArithU &rawExpr) {
 
 }
 };
+
+}
 }
 
 llvm::Value* ir::LLVMIRGen::emitExpr(ast::Expr expr) {

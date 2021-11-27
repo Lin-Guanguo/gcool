@@ -147,7 +147,28 @@ void ir::LLVMIRGen::pass2() {
 
 void ir::LLVMIRGen::pass3() {
     emitNative();
-    // TODO: emitExpr();
+    for (auto* c : ASTCONTEXT->Annotation->InheritOrder) {
+        if (c->Annotation->TheClassKind != sema::ClassAnnotation::CK_Trivial) continue;
+        //emitNewMethod(c);
+        for (auto& m : c->Methods){
+            //emitMethod(c, &m);
+        }
+    }
+}
+
+void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
+    auto newMethod = getMethod(c->Name, SYMTBL.getNewMethod());
+    auto BB = llvm::BasicBlock::Create(Context, "entry", newMethod);
+    IRBuilder.SetInsertPoint(BB);
+    // TODO:
+}
+
+void ir::LLVMIRGen::emitMethod(ast::Class* c, ast::MethodFeature* m) {
+    auto methodFunc = getMethod(c->Name, m->Name);
+    auto BB = llvm::BasicBlock::Create(Context, "entry", methodFunc);
+    IRBuilder.SetInsertPoint(BB);
+    auto val = emitExpr(m->Body);
+    // TODO:
 }
 
 std::string_view ir::LLVMIRGen::bufName(std::string_view lhs, std::string_view rhs) {

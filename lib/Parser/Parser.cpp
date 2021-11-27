@@ -1059,19 +1059,19 @@ namespace gcool {
             {
   case 2: // program: class_seq
 #line 72 "Parser.y"
-                                    { context->Classes = std::move(yystack_[0].value.as < gcool::ast::ClassList > ()); }
+                                    { }
 #line 1064 "Parser.cpp"
     break;
 
   case 3: // class_seq: %empty
 #line 75 "Parser.y"
-                                    { yylhs.value.as < gcool::ast::ClassList > () = ClassList{}; }
+                                    { }
 #line 1070 "Parser.cpp"
     break;
 
   case 4: // class_seq: class_seq class SEMICOLON
 #line 76 "Parser.y"
-                                    { yylhs.value.as < gcool::ast::ClassList > () = std::move(yystack_[2].value.as < gcool::ast::ClassList > ()); yylhs.value.as < gcool::ast::ClassList > ().push_back(std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Class> > ())); }
+                                    { context->Classes.push_back(std::move(yystack_[1].value.as < NoneInitHolder<gcool::ast::Class> > ())); }
 #line 1076 "Parser.cpp"
     break;
 
