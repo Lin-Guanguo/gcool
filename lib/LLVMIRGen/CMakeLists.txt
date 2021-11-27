@@ -1,6 +1,7 @@
 add_gcool_library(LLVMIRGen
     LLVMIRGen.cpp
-    GCoolRuntimeIR.cpp
+    NativeIRGen.cpp
+    ExprIRGen.cpp
 )
 
 target_include_directories(LLVMIRGen

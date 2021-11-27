@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <string>
 #include <unordered_map>
 #include "gcool/AST/AST.h"
 #include "gcool/Basic/Diag.h"

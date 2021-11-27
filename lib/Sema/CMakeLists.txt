@@ -1,5 +1,6 @@
 add_gcool_library(Sema
     Sema.cpp
+    SemaExpr.cpp
     Annotation.cpp
 )
 

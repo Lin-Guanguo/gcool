@@ -57,6 +57,7 @@ private:
     // Define Method, emit Expr IR
     void pass3();
     void emitNative();
+    llvm::Value* emitExpr(ast::Expr expr);
 
     // helper function
     std::string_view bufName(std::string_view lhs, std::string_view rhs);
