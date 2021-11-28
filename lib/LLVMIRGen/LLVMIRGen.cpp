@@ -13,16 +13,22 @@ ir::LLVMIRGen::LLVMIRGen(sema::Sema* sema)
     , BuiltIntTy(llvm::Type::getInt64Ty(Context))
     , BuiltFloatTy(llvm::Type::getDoubleTy(Context))
     , BuiltBoolTy(llvm::Type::getInt1Ty(Context))
+    , FatPointerTy(llvm::StructType::create(Context, "FatPointer"))
     , ClassInfoTy(llvm::StructType::create(Context, "ClassInfo"))
     , VMethodSlotTy(llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), true)->getPointerTo())
     , VTableTy(llvm::StructType::create(
         Context,
         {ClassInfoTy, llvm::ArrayType::get(VMethodSlotTy, 0)},
-        "VTable", true
-        ))
+        "VTable", true))
     , VTableRefTy(VTableTy->getPointerTo())
+    , ObjectStructTy(llvm::ArrayType::get(FatPointerTy, 0))
+    , ObjectRefTy(ObjectStructTy->getPointerTo())
     , TheSema(sema)
 {
+    FatPointerTy->setBody({
+        VTableRefTy,
+        ObjectRefTy},
+        true);
     ClassInfoTy->setBody({
         VTableRefTy,                     // SuperClass VTableRef
         llvm::Type::getInt64Ty(Context), // inheritDepth
@@ -43,70 +49,26 @@ bool ir::LLVMIRGen::emitLLVMIR() {
 }
 
 void ir::LLVMIRGen::pass1() {
-    // FatPointer
-    for(auto& c : ASTCONTEXT->Annotation->InheritOrder) {
-        llvm::StructType* fp;
-        switch(c->Annotation->TheClassKind) {
-        case sema::ClassAnnotation::CK_Object:
-            fp = addFatPointer(c->Name);
-            ObjectRefTy = addObjectStruct(c->Name)->getPointerTo();
-            break;
-        case sema::ClassAnnotation::CK_Primitive:
-            fp = addFatPointer(c->Name);
-            break;
-        case sema::ClassAnnotation::CK_Trivial:
-            fp = addFatPointer(c->Name);
-            addObjectStruct(c->Name);
-            break;
-        default:
-            assert(0 && "nerver reach here");
-        }
-        fp->setBody({VTableRefTy, ObjectRefTy}, true);
-    }
+
 }
 
 void ir::LLVMIRGen::pass2() {
     TypeList typeListBuf;
     ConstantList vmethodBuf;
     for(auto& c : ASTCONTEXT->Annotation->InheritOrder) {
-        auto selfFP = getFatPointer(c->Name);
-
-        // ObjectStruct Defination, Primitive Class use special implement
-        if (c->Annotation->TheClassKind != sema::ClassAnnotation::CK_Primitive) {
-            typeListBuf.clear();
-            typeListBuf.reserve(c->Attrs.size() + 1);
-            auto superClass = c->Annotation->SuperClass;
-            if (superClass != nullptr) 
-                typeListBuf.push_back(getObjectStruct(c->Inheirt));
-            for (auto& a : c->Attrs)
-                typeListBuf.push_back(getFatPointer(a.Formal.Type));
-            getObjectStruct(c->Name)->setBody(typeListBuf, true);
-        }
-    
         // MethodDecl
         // new method for operator new
-        auto newMethodft = llvm::FunctionType::get(selfFP, {}, false);
+        auto newMethodft = llvm::FunctionType::get(FatPointerTy, {}, false);
         auto newMethod = addMethod(newMethodft, c->Name, SYMTBL.getNewMethod());
         // initMethod
         if (c->Annotation->TheClassKind != sema::ClassAnnotation::CK_Primitive) {
-            auto initMethodft = llvm::FunctionType::get(llvm::Type::getVoidTy(Context), {selfFP}, false);
+            auto initMethodft = llvm::FunctionType::get(llvm::Type::getVoidTy(Context), {FatPointerTy}, false);
             auto initMethod = addMethod(initMethodft, c->Name, SYMTBL.getInitMethod());
         }
         for (auto& m : c->Methods) {
             if (m.Name == SYMTBL.getNewMethod()) continue;
-            // param type
-            typeListBuf.clear();
-            typeListBuf.reserve(m.FormalParams.size() + 1);
-            typeListBuf.push_back(selfFP);
-            for(auto& p : m.FormalParams)
-                typeListBuf.push_back(getFatPointer(p.Type));
-            // return type
-            auto retType = selfFP;
-            if (m.RetType != SYMTBL.getSelfType())
-                retType = getFatPointer(m.RetType);
-            // function type
-            auto ft = llvm::FunctionType::get(retType, typeListBuf, false);
-            // funtion
+            typeListBuf.resize(m.FormalParams.size() + 1, FatPointerTy);
+            auto ft = llvm::FunctionType::get(FatPointerTy, typeListBuf, false);
             addMethod(ft, c->Name, m.Name);
         }
 
@@ -154,7 +116,7 @@ void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
         {llvm::ConstantInt::get(Context, llvm::APInt(64, 64 * 2 * c->Annotation->AttrOffsetEnd))},
         "heapObj");
     auto retval = IRBuilder.CreateInsertValue(
-        llvm::UndefValue::get(getFatPointer(c->Name)), 
+        llvm::UndefValue::get(FatPointerTy), 
         getVTableConstant(c->Name), {0});
     retval = IRBuilder.CreateInsertValue(retval,
         IRBuilder.CreateBitCast(heapObj, ObjectRefTy), {1});
@@ -168,14 +130,12 @@ void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
     IRBuilder.SetInsertPoint(BB);
     auto initFP = initMethod->arg_begin();
     auto initObjRef = IRBuilder.CreateExtractValue(initFP, {1});
-    auto attrList = IRBuilder.CreateBitCast(initObjRef, 
-        llvm::ArrayType::get(getFatPointer(SYMTBL.getObject()), 0)->getPointerTo());
     for (auto& a : c->Attrs) {
         if (a.Init.has_value()) {
             auto val = emitExpr(a.Init.value());
             auto fp = IRBuilder.CreateGEP(
-                llvm::ArrayType::get(getFatPointer(SYMTBL.getObject()), 0),
-                attrList, {
+                ObjectStructTy,
+                initObjRef, {
                     llvm::ConstantInt::get(Context, llvm::APInt(32, 0)),
                     llvm::ConstantInt::get(Context, llvm::APInt(32, a.Annotation->AttrOffset))
                 });
@@ -191,38 +151,6 @@ void ir::LLVMIRGen::emitMethod(ast::Class* c, ast::MethodFeature* m) {
     IRBuilder.SetInsertPoint(BB);
     auto val = emitExpr(m->Body);
     IRBuilder.CreateRet(val);
-}
-
-llvm::StructType* ir::LLVMIRGen::addFatPointer(ast::Symbol classNameS) {
-    TempStringBuf = classNameS.getName();
-    TempStringBuf.append("FP");
-    auto fp = llvm::StructType::create(Context, TempStringBuf);
-    FatPointerTyMap.insert({classNameS, fp});
-    return fp;
-}
-
-llvm::StructType* ir::LLVMIRGen::getFatPointer(ast::Symbol classNameS) {
-    // TODO: use better way to bit cast FatPointerStruct, 
-    //       now all FatPointer use the same struct
-
-    // auto p = FatPointerTyMap.find(classNameS);
-    auto p = FatPointerTyMap.find(SYMTBL.getObject());
-    assert(p != FatPointerTyMap.end() && "getFatPointer before add");
-    return p->second;
-}
-
-llvm::StructType* ir::LLVMIRGen::addObjectStruct(ast::Symbol classNameS) {
-    TempStringBuf = classNameS.getName();
-    TempStringBuf.append("Obj");
-    auto obj = llvm::StructType::create(Context, TempStringBuf);
-    ObejctTyMap.insert({classNameS, obj});
-    return obj;
-}
-
-llvm::StructType* ir::LLVMIRGen::getObjectStruct(ast::Symbol classNameS) {
-    auto p = ObejctTyMap.find(classNameS);
-    assert(p != ObejctTyMap.end() && "getObjectStruct before add");
-    return p->second;
 }
 
 // super class should already decl VTable

@@ -20,33 +20,31 @@ public:
 public:
 void operator()(ast::Expr &expr, ast::ExprInt &rawExpr) {
     auto IntS = SYMTBL.getInt();
-    auto retval = IRBuilder.CreateInsertValue(
-        llvm::UndefValue::get(
-            IRGen.getFatPointer(IntS)), 
-        IRGen.getVTableConstant(IntS), {0});
-    retval = IRBuilder.CreateInsertValue(retval,
-        IRBuilder.CreateIntToPtr(
-            llvm::ConstantInt::get(IRGen.BuiltIntTy, 
-                llvm::APInt(64, rawExpr.Val, true)), 
-            IRGen.ObjectRefTy), 
-        {1});
+    auto retval = llvm::ConstantStruct::get(
+        IRGen.FatPointerTy, {
+            IRGen.getVTableConstant(IntS),
+            llvm::ConstantExpr::getIntToPtr(
+                llvm::ConstantInt::get(IRGen.BuiltIntTy, 
+                    llvm::APInt(64, rawExpr.Val, true)), 
+                IRGen.ObjectRefTy)
+        }
+    );
     RetVal = retval;
 }
  
 void operator()(ast::Expr &expr, ast::ExprFloat &rawExpr) {
     auto FloatS = SYMTBL.getFloat();
-    auto retval = IRBuilder.CreateInsertValue(
-        llvm::UndefValue::get(
-            IRGen.getFatPointer(FloatS)), 
-        IRGen.getVTableConstant(FloatS), {0});
-    retval = IRBuilder.CreateInsertValue(retval, 
-        IRBuilder.CreateIntToPtr(
-            IRBuilder.CreateBitCast(
-                llvm::ConstantFP::get(IRGen.BuiltFloatTy, 
-                    llvm::APFloat(rawExpr.Val)), 
-                IRGen.BuiltIntTy), 
-            IRGen.ObjectRefTy), 
-        {1});
+    auto retval = llvm::ConstantStruct::get(
+        IRGen.FatPointerTy, {
+            IRGen.getVTableConstant(FloatS),
+            llvm::ConstantExpr::getIntToPtr(
+                llvm::ConstantExpr::getBitCast(
+                    llvm::ConstantFP::get(IRGen.BuiltFloatTy, 
+                        llvm::APFloat(rawExpr.Val)), 
+                    IRGen.BuiltIntTy), 
+                IRGen.ObjectRefTy)
+        }
+    );
     RetVal = retval;
 }
  

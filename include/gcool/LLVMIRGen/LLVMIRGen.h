@@ -31,13 +31,13 @@ private:
     llvm::IntegerType*      BuiltIntTy;
     llvm::Type*             BuiltFloatTy;
     llvm::IntegerType*      BuiltBoolTy;
+    llvm::StructType*       FatPointerTy;
     llvm::StructType*       ClassInfoTy;
     llvm::PointerType*      VMethodSlotTy;
     llvm::StructType*       VTableTy;
     llvm::PointerType*      VTableRefTy;
+    llvm::ArrayType*        ObjectStructTy;
     llvm::PointerType*      ObjectRefTy;
-    StructTypeMap           FatPointerTyMap;
-    StructTypeMap           ObejctTyMap;
     GlobalVariableMap       VTableMap;
     sema::Sema*             TheSema;
 
@@ -63,10 +63,6 @@ private:
     llvm::Value* emitExpr(ast::Expr expr);
 
     // helper function
-    llvm::StructType* addFatPointer(ast::Symbol className);
-    llvm::StructType* getFatPointer(ast::Symbol className);
-    llvm::StructType* addObjectStruct(ast::Symbol className);
-    llvm::StructType* getObjectStruct(ast::Symbol className);
     llvm::GlobalVariable* addVTable(ast::Symbol className, ast::Class* classInfo, llvm::ArrayRef<llvm::Constant*> methodInit);
     llvm::GlobalVariable* getVTable(ast::Symbol className);
     llvm::Constant* getVTableConstant(ast::Symbol className);
