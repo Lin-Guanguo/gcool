@@ -93,7 +93,10 @@ void operator()(ast::Expr &expr, ast::ExprDispatch &rawExpr) {
         CONSTINT32(methodAnnot->MethodOffset)
         });
     auto staticF = IRGen.getMethod(methodAnnot->InClass->Name, rawExpr.Method);
-    RetVal = IRBuilder.CreateCall(staticF->getFunctionType(), dynF, agrsVal);
+    auto staticFT = staticF->getFunctionType();
+    dynF = IRBuilder.CreateBitCast(dynF, staticFT->getPointerTo()->getPointerTo());
+    dynF = IRBuilder.CreateLoad(staticFT->getPointerTo(), dynF);
+    RetVal = IRBuilder.CreateCall(staticFT, dynF, agrsVal);
 }
  
 void operator()(ast::Expr &expr, ast::ExprStaticDispatch &rawExpr) {

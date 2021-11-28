@@ -102,9 +102,10 @@ void ir::LLVMIRGen::pass3() {
         if (c->Annotation->TheClassKind != sema::ClassAnnotation::CK_Trivial) continue;
         emitNewMethod(c);
         for (auto& m : c->Methods) {
-            //emitMethod(c, &m);
+            emitMethod(c, &m);
         }
     }
+    emitDeriver();
 }
 
 void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
@@ -150,6 +151,28 @@ void ir::LLVMIRGen::emitMethod(ast::Class* c, ast::MethodFeature* m) {
     IRBuilder.SetInsertPoint(BB);
     auto val = emitExpr(m->Body);
     IRBuilder.CreateRet(val);
+}
+
+void ir::LLVMIRGen::emitDeriver() {
+    // i32 @main(i32 %argc, i8** %argv)
+    auto mainFt = llvm::FunctionType::get(
+        llvm::IntegerType::getInt32Ty(Context), {
+            llvm::IntegerType::getInt32Ty(Context),
+            llvm::IntegerType::getInt8PtrTy(Context)->getPointerTo()
+        }, false);
+    auto mainFunc = llvm::Function::Create(mainFt, 
+        llvm::GlobalValue::LinkageTypes::ExternalLinkage, "main", Module);
+    auto BB = llvm::BasicBlock::Create(Context, "entry", mainFunc);
+    IRBuilder.SetInsertPoint(BB);
+    auto newMain = getMethod(SYMTBL.getMainClass(), SYMTBL.getNewMethod());
+    auto objFP = IRBuilder.CreateCall(newMain, {});
+    auto mainMethod = getMethod(SYMTBL.getMainClass(), SYMTBL.getMainMethod());
+    auto mainRet = IRBuilder.CreateCall(mainMethod, {objFP});
+    auto retVal = IRBuilder.CreateExtractValue(mainRet, {1});
+    retVal = IRBuilder.CreateTrunc(
+        IRBuilder.CreatePtrToInt(retVal, BuiltIntTy), 
+        llvm::IntegerType::getInt32Ty(Context));
+    IRBuilder.CreateRet(retVal);
 }
 
 // super class should already decl VTable

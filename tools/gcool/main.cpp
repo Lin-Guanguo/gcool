@@ -32,7 +32,7 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
     
     pretty::ASTPrinter printer;
     printer.IsPrintBuiltin = true;
-    printer.printAST(llvm::outs(), sema);
+    //printer.printAST(llvm::outs(), sema);
 
     ir::LLVMIRGen irgen(&sema);
     irgen.emitLLVMIR();
@@ -58,15 +58,15 @@ int main(int argc, char** argv)
         class Main {
             c : Int <- 10.opadd(2);
             b : Float <- 20.0;
-            main(i : Int) : Int {
-                i
+            main() : Int {
+                10
             };
         };
 
         class Main4 inherits Main2 {
             c : Float <- 20.2;
             hello() : Float {
-                c
+                20.0
             };
         };
 

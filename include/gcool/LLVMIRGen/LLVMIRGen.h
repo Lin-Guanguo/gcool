@@ -59,6 +59,7 @@ private:
     void emitNative();
     void emitNewMethod(ast::Class* c);
     void emitMethod(ast::Class* c, ast::MethodFeature* m);
+    void emitDeriver();
     llvm::Value* emitExpr(ast::Expr expr);
 
     // helper function

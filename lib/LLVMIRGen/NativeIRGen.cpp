@@ -130,9 +130,9 @@ void ir::LLVMIRGen::emitNative() {
     }
     // Bool arith
     ast::Symbol boolMethod[] = {
-        SYMTBL.get("opadd"), SYMTBL.get("opmul")
+        SYMTBL.get("opadd"), SYMTBL.get("opmul"), SYMTBL.get("opeq")
     };
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 3; ++i) {
         auto func = getMethod(BoolS, boolMethod[i]);
         auto BB = llvm::BasicBlock::Create(Context, "entry", func);
         IRBuilder.SetInsertPoint(BB);
@@ -145,6 +145,7 @@ void ir::LLVMIRGen::emitNative() {
         switch (i) {
         case 0: arithRes = IRBuilder.CreateOr(v1, v2); break;
         case 1: arithRes = IRBuilder.CreateAnd(v1, v2); break;
+        case 2: arithRes = IRBuilder.CreateICmpEQ(v1, v2); break;
         default: assert(0 && "never reach");
         }
         arithRes = IRBuilder.CreateIntToPtr(arithRes, ObjectRefTy);
@@ -165,6 +166,18 @@ void ir::LLVMIRGen::emitNative() {
             llvm::ConstantStruct::get(FatPointerTy, {getVTableConstant(BoolS), llvm::UndefValue::get(ObjectRefTy)}), 
             arithRes, {1});
         IRBuilder.CreateRet(retval);
+    }
+
+    // String Method
+    ast::Symbol stringMethod[] = {
+        SYMTBL.getNewMethod(), SYMTBL.get("opadd"),
+        SYMTBL.get("opeq"), SYMTBL.get("opge"), SYMTBL.get("opgt"), SYMTBL.get("ople"),  SYMTBL.get("oplt")
+    };
+    for (int i = 0; i < 7; ++i) {
+        auto func = getMethod(SYMTBL.getString(), stringMethod[i]);
+        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
+        IRBuilder.SetInsertPoint(BB);
+        IRBuilder.CreateRet(llvm::UndefValue::get(FatPointerTy));
     }
 
 }
