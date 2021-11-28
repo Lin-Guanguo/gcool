@@ -41,7 +41,6 @@ private:
     GlobalVariableMap       VTableMap;
     sema::Sema*             TheSema;
 
-    StringBufList           NameBufList;
     std::string             TempStringBuf;
 public:
     LLVMIRGen(sema::Sema* sema);
@@ -64,7 +63,6 @@ private:
     llvm::Value* emitExpr(ast::Expr expr);
 
     // helper function
-    std::string_view bufName(std::string_view lhs, std::string_view rhs);
     llvm::StructType* addFatPointer(ast::Symbol className);
     llvm::StructType* getFatPointer(ast::Symbol className);
     llvm::StructType* addObjectStruct(ast::Symbol className);
@@ -72,7 +70,12 @@ private:
     llvm::GlobalVariable* addVTable(ast::Symbol className, ast::Class* classInfo, llvm::ArrayRef<llvm::Constant*> methodInit);
     llvm::GlobalVariable* getVTable(ast::Symbol className);
     llvm::Constant* getVTableConstant(ast::Symbol className);
+    llvm::Function* addMethod(llvm::FunctionType* ft, ast::Symbol classNameS, ast::Symbol methodNameS);
     llvm::Function* getMethod(ast::Symbol classNameS, ast::Symbol methodNameS);
+    enum BuiltinFunctionKind {
+        BK_Malloc,
+    };
+    llvm::Function* getBuiltinFunction(BuiltinFunctionKind Bk);
 public:
     void print(llvm::raw_ostream& os);
 };

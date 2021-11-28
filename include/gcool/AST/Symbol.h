@@ -38,6 +38,9 @@ public:
     Symbol getNull() { return get("null"); }
     Symbol getNullType() { return get("0NullType"); } // programer can't use this type (0 start)
     Symbol getNewMethod() { return get("0new"); } // programer can't use this type (0 start)
+    Symbol getInitMethod() { return get("0init"); }
+
+    Symbol getMallocMethod() { return get("0malloc"); }
     ~SymbolTable();
 };
 

@@ -344,7 +344,6 @@ using namespace ast;
 void gcool::sema::Sema::addBuiltinTypeAST() {
     auto& sym = SYMTBL;
     auto exprHolder = TheASTContext->ExprAlloc.allocExpr(ast::ExprString("builtin"));
-    // TODO
     TheASTContext->Classes.push_back( 
         Class{SYMTBL.getObject(),
             {},

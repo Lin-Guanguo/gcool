@@ -6,7 +6,51 @@ using namespace gcool;
 #define SYMTBL TheSema->TheASTContext->Symtbl
 
 void ir::LLVMIRGen::emitNative() {
-    // 0new
+    auto ObjectS = SYMTBL.getObject();
+    ast::Symbol BoolS = SYMTBL.getBool();
+
+    // builtinFunction
+    auto mallocft = llvm::FunctionType::get(
+        llvm::IntegerType::getInt8PtrTy(Context), 
+        {llvm::IntegerType::getInt64Ty(Context)}, false);
+    auto mallocFunc = llvm::Function::Create(mallocft, 
+        llvm::GlobalValue::LinkageTypes::ExternalLinkage, "gcool_malloc", Module);    
+
+    // Obejct
+    { // Object.0new
+        auto func = getMethod(ObjectS, SYMTBL.getNewMethod());
+        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
+        IRBuilder.SetInsertPoint(BB);
+        auto retval = IRBuilder.CreateInsertValue(
+            llvm::UndefValue::get(getFatPointer(ObjectS)), 
+            getVTableConstant(ObjectS), {0});
+        auto obj = IRBuilder.CreateCall(mallocFunc, 
+            {llvm::ConstantInt::get(Context, llvm::APInt(64, 0))},
+            "obj");
+        retval = IRBuilder.CreateInsertValue(
+            retval, IRBuilder.CreateBitCast(obj, ObjectRefTy), {1});
+        IRBuilder.CreateRet(retval);
+    } { // Object.0init
+        auto func = getMethod(ObjectS, SYMTBL.getInitMethod());
+        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
+        IRBuilder.SetInsertPoint(BB);
+        IRBuilder.CreateRet(nullptr);
+    } { // Object.opisvoid
+        auto func = getMethod(ObjectS, SYMTBL.get("opisvoid"));
+        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
+        IRBuilder.SetInsertPoint(BB);
+        auto retval = IRBuilder.CreateInsertValue(
+            llvm::UndefValue::get(getFatPointer(BoolS)), 
+            getVTableConstant(BoolS), {0});
+        // TODO: use true expr
+        retval = IRBuilder.CreateInsertValue(retval, 
+            IRBuilder.CreateIntToPtr(
+                llvm::ConstantInt::get(Context, llvm::APInt(64, 1)), ObjectRefTy), 
+            {1});
+        IRBuilder.CreateRet(retval);
+    }
+
+    // Int Float Bool new method
     ast::Symbol className[] =
         {SYMTBL.getInt(), SYMTBL.getFloat(), SYMTBL.getBool()};
     for (int i = 0; i < 3; ++i) { // Int_0new
@@ -14,8 +58,7 @@ void ir::LLVMIRGen::emitNative() {
         auto BB = llvm::BasicBlock::Create(Context, "entry", func);
         IRBuilder.SetInsertPoint(BB);
         auto retval = IRBuilder.CreateInsertValue(
-            llvm::UndefValue::get(
-                getFatPointer(className[i])), 
+            llvm::UndefValue::get(getFatPointer(className[i])), 
             getVTableConstant(className[i]), {0});
         IRBuilder.CreateRet(retval);
     }
@@ -24,7 +67,6 @@ void ir::LLVMIRGen::emitNative() {
         SYMTBL.get("opadd"), SYMTBL.get("opsub"), SYMTBL.get("opmul"), SYMTBL.get("opdiv"),
         SYMTBL.get("opeq"), SYMTBL.get("opge"), SYMTBL.get("opgt"), SYMTBL.get("ople"),  SYMTBL.get("oplt")
     };
-    ast::Symbol BoolS = SYMTBL.getBool();
     for (int i = 0; i < 2; ++i) {
     for (int j = 0; j < 9; ++j) {
         auto func = getMethod(className[i], methods[j]);
@@ -117,8 +159,7 @@ void ir::LLVMIRGen::emitNative() {
             getVTableConstant(BoolS), {0});
         retval = IRBuilder.CreateInsertValue(retval, arithRes, {1});
         IRBuilder.CreateRet(retval);
-    }
-    {
+    } {
         auto func = getMethod(BoolS, SYMTBL.get("opnot"));
         auto BB = llvm::BasicBlock::Create(Context, "entry", func);
         IRBuilder.SetInsertPoint(BB);

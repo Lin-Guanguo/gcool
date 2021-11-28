@@ -56,8 +56,8 @@ int main(int argc, char** argv)
     const char* input = 
     R"(
         class Main {
-            c : Int <- 10.opadd(20);
-            b : Int <- 10.opadd(20);
+            c : Int <- 10;
+            b : Float <- 20.0;
             main(i : Int) : Int {
                 i
             };
