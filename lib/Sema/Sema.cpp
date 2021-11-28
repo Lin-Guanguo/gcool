@@ -71,6 +71,7 @@ bool gcool::sema::Sema::pass2() {
         nameSet.clear();
         for (auto& m : c.Methods) {
             m.Annotation = allocAnnotation<MethodAnnotation>();
+            m.Annotation->InClass = &c;
             if (multiDefineCheck(m.Name)) {
                 hasError = true;
                 m.Annotation->hasError = true;
@@ -185,7 +186,7 @@ bool gcool::sema::Sema::pass5() {
             }
             
             if (!m.Annotation->hasError
-                && !isSuper(m.Annotation->RetClassRef, m.Body.Annotation->Type, &c)) {
+                && !isSuper(GETCLASS(m.RetType), m.Body.Annotation->Type, &c)) {
                 m.Annotation->hasError = hasError = true;
                 addError({basic::Diag::Sema_MethodBodyExprTypeIncompatible, 
                     std::string(m.RetType.getName()) + "<-" +
@@ -244,8 +245,8 @@ bool gcool::sema::Sema::annotMethodDecl(ast::Class* Class) {
 
     for (auto& m : Class->Methods) {
         // check method return type
-        m.Annotation->RetClassRef = GETCLASS(m.RetType);
-        if (!m.Annotation->RetClassRef || m.Annotation->RetClassRef->Annotation->hasError) {
+        auto retType = GETCLASS(m.RetType);
+        if (!retType || retType->Annotation->hasError) {
             m.Annotation->hasError = true;
             addError({basic::Diag::Sema_MethodRetTypeError, std::string(m.RetType.getName())});
         }

@@ -56,7 +56,7 @@ int main(int argc, char** argv)
     const char* input = 
     R"(
         class Main {
-            c : Int <- 10;
+            c : Int <- 10.opadd(2);
             b : Float <- 20.0;
             main(i : Int) : Int {
                 i
@@ -64,14 +64,14 @@ int main(int argc, char** argv)
         };
 
         class Main4 inherits Main2 {
-            c : Float;
+            c : Float <- 20.2;
             hello() : Float {
                 c
             };
         };
 
         class Main2 inherits Main {
-            
+            c : Float <- 9.02;
         };
     )";
     ErrorKindList errorList = {

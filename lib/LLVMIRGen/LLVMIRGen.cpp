@@ -9,7 +9,7 @@ ir::LLVMIRGen::LLVMIRGen(sema::Sema* sema)
     : Context()
     , Module("Main", Context)
     , IRBuilder(Context)
-    , BuiltObjHold(llvm::IntegerType::getInt32PtrTy(Context))
+    , Holder64bit(llvm::IntegerType::getInt32PtrTy(Context))
     , BuiltIntTy(llvm::Type::getInt64Ty(Context))
     , BuiltFloatTy(llvm::Type::getDoubleTy(Context))
     , BuiltBoolTy(llvm::Type::getInt1Ty(Context))
@@ -32,7 +32,7 @@ ir::LLVMIRGen::LLVMIRGen(sema::Sema* sema)
     ClassInfoTy->setBody({
         VTableRefTy,                     // SuperClass VTableRef
         llvm::Type::getInt64Ty(Context), // inheritDepth
-        BuiltObjHold, BuiltObjHold},     // holder
+        Holder64bit, Holder64bit},     // holder
         true);
 }
 
@@ -63,7 +63,7 @@ void ir::LLVMIRGen::pass2() {
         // initMethod
         if (c->Annotation->TheClassKind != sema::ClassAnnotation::CK_Primitive) {
             auto initMethodft = llvm::FunctionType::get(llvm::Type::getVoidTy(Context), {FatPointerTy}, false);
-            auto initMethod = addMethod(initMethodft, c->Name, SYMTBL.getInitMethod());
+            addMethod(initMethodft, c->Name, SYMTBL.getInitMethod());
         }
         for (auto& m : c->Methods) {
             if (m.Name == SYMTBL.getNewMethod()) continue;
@@ -101,7 +101,7 @@ void ir::LLVMIRGen::pass3() {
     for (auto* c : ASTCONTEXT->Annotation->InheritOrder) {
         if (c->Annotation->TheClassKind != sema::ClassAnnotation::CK_Trivial) continue;
         emitNewMethod(c);
-        for (auto& m : c->Methods){
+        for (auto& m : c->Methods) {
             //emitMethod(c, &m);
         }
     }
@@ -113,14 +113,13 @@ void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
     IRBuilder.SetInsertPoint(BB);
     auto heapObj = IRBuilder.CreateCall(
         getBuiltinFunction(BK_Malloc), 
-        {llvm::ConstantInt::get(Context, llvm::APInt(64, 64 * 2 * c->Annotation->AttrOffsetEnd))},
+        {llvm::ConstantInt::get(Context, llvm::APInt(64, 8 * 2 * c->Annotation->AttrOffsetEnd))},
         "heapObj");
     auto retval = IRBuilder.CreateInsertValue(
         llvm::UndefValue::get(FatPointerTy), 
         getVTableConstant(c->Name), {0});
     retval = IRBuilder.CreateInsertValue(retval,
         IRBuilder.CreateBitCast(heapObj, ObjectRefTy), {1});
-    IRBuilder.CreateCall(getMethod(c->Inheirt, SYMTBL.getInitMethod()), {retval});
     IRBuilder.CreateCall(getMethod(c->Name, SYMTBL.getInitMethod()), {retval});
     IRBuilder.CreateRet(retval);
 
@@ -129,13 +128,13 @@ void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
     BB = llvm::BasicBlock::Create(Context, "entry", initMethod);
     IRBuilder.SetInsertPoint(BB);
     auto initFP = initMethod->arg_begin();
+    IRBuilder.CreateCall(getMethod(c->Inheirt, SYMTBL.getInitMethod()), {initFP});
     auto initObjRef = IRBuilder.CreateExtractValue(initFP, {1});
     for (auto& a : c->Attrs) {
         if (a.Init.has_value()) {
             auto val = emitExpr(a.Init.value());
             auto fp = IRBuilder.CreateGEP(
-                ObjectStructTy,
-                initObjRef, {
+                ObjectStructTy, initObjRef, {
                     llvm::ConstantInt::get(Context, llvm::APInt(32, 0)),
                     llvm::ConstantInt::get(Context, llvm::APInt(32, a.Annotation->AttrOffset))
                 });
@@ -168,12 +167,11 @@ llvm::GlobalVariable* ir::LLVMIRGen::addVTable(ast::Symbol classNameS,
         llvm::ConstantStruct::get(
             ClassInfoTy, {
                 superClassVTable,
-                llvm::ConstantInt::get(llvm::Type::getInt64Ty(Context), llvm::APInt(64, classInfo->Annotation->InheritDepth)),
-                llvm::Constant::getNullValue(BuiltObjHold),
-                llvm::Constant::getNullValue(BuiltObjHold),
+                llvm::ConstantInt::get(Context, llvm::APInt(64, classInfo->Annotation->InheritDepth)),
+                llvm::Constant::getNullValue(Holder64bit),
+                llvm::Constant::getNullValue(Holder64bit),
             }),
-        llvm::ConstantArray::get(vtArrayTy, methodInit)
-        });
+        llvm::ConstantArray::get(vtArrayTy, methodInit)});
     auto globalVt = new llvm::GlobalVariable(
         Module, vtTy, true, 
         llvm::GlobalValue::ExternalLinkage,

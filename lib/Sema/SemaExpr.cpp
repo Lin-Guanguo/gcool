@@ -140,7 +140,7 @@ void findMethodAndCheckParam(ExprDispatchAnnotation* annot, Expr& Callee, ExprLi
     if (method->RetType == SYMTBL.getSelfType())
         annot->Type = Callee.Annotation->Type;
     else
-        annot->Type = method->Annotation->RetClassRef;
+        annot->Type = GETCLASS(method->RetType);
     
     // error decl method
     if (method->Annotation->hasError) {
@@ -426,7 +426,7 @@ void operator()(Expr& ExprAnnot, ExprArithB& expr) {
         } else {
             annot->ClassRef = overloadF.InClass;
             annot->MethodRef = overloadF.Decl;
-            annot->Type = overloadF.Decl->Annotation->RetClassRef;
+            annot->Type = GETCLASS(overloadF.Decl->RetType);
         } 
         if (overloadF.Decl->Annotation->hasError) {
             annot->hasError = true;
@@ -467,7 +467,7 @@ void operator()(Expr& ExprAnnot, ExprArithU& expr) {
         } else {
             annot->ClassRef = overloadF.InClass;
             annot->MethodRef = overloadF.Decl;
-            annot->Type = overloadF.Decl->Annotation->RetClassRef;
+            annot->Type = GETCLASS(overloadF.Decl->RetType);
         } 
         if (overloadF.Decl->Annotation->hasError) {
             annot->hasError = true;

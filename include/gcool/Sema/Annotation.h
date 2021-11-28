@@ -120,7 +120,7 @@ protected:
 class MethodAnnotation : public Annotation {
 public:
     SemaScope MethodScope = SemaScope::SK_Method;
-    ast::Class* RetClassRef = nullptr;
+    ast::Class* InClass = nullptr;
     int MethodOffset;
 protected:
     MethodAnnotation() {}

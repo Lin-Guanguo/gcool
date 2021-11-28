@@ -15,11 +15,10 @@ namespace ir {
 
 class ExprIRGenVisitor;
 
-using StructTypeMap = std::unordered_map<ast::Symbol, llvm::StructType*>;
 using GlobalVariableMap = std::unordered_map<ast::Symbol, llvm::GlobalVariable*>;
-using StringBufList = std::vector<const char*>;
-using TypeList = std::vector<llvm::Type*>;
 using ConstantList = std::vector<llvm::Constant*>;
+using TypeList = std::vector<llvm::Type*>;
+using ValueList = std::vector<llvm::Value*>;
 
 class LLVMIRGen {
     friend class ExprIRGenVisitor;
@@ -27,7 +26,7 @@ private:
     llvm::LLVMContext       Context;
     llvm::Module            Module;
     llvm::IRBuilder<>       IRBuilder;
-    llvm::Type*             BuiltObjHold;
+    llvm::Type*             Holder64bit;
     llvm::IntegerType*      BuiltIntTy;
     llvm::Type*             BuiltFloatTy;
     llvm::IntegerType*      BuiltBoolTy;

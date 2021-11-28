@@ -9,6 +9,8 @@ using namespace gcool;
 #define Module IRGen.Module
 #define Context IRGen.Context
 
+#define CONSTINT32(val) llvm::ConstantInt::get(Context, llvm::APInt(32, val))
+
 namespace gcool {
 namespace ir {
 
@@ -49,7 +51,17 @@ void operator()(ast::Expr &expr, ast::ExprFloat &rawExpr) {
 }
  
 void operator()(ast::Expr &expr, ast::ExprBool &rawExpr) {
-
+    auto BoolS = SYMTBL.getFloat();
+    auto retval = llvm::ConstantStruct::get(
+        IRGen.FatPointerTy, {
+            IRGen.getVTableConstant(BoolS),
+            llvm::ConstantExpr::getIntToPtr(
+                llvm::ConstantInt::get(IRGen.BuiltIntTy, 
+                    llvm::APInt(64, static_cast<int>(rawExpr.Val), true)), 
+                IRGen.ObjectRefTy)
+        }
+    );
+    RetVal = retval;
 }
  
 void operator()(ast::Expr &expr, ast::ExprString &rawExpr) {
@@ -65,7 +77,23 @@ void operator()(ast::Expr &expr, ast::ExprAssign &rawExpr) {
 }
  
 void operator()(ast::Expr &expr, ast::ExprDispatch &rawExpr) {
-
+    auto annot = static_cast<sema::ExprDispatchAnnotation*>(expr.Annotation);
+    auto methodAnnot = annot->MethodRef->Annotation;
+    rawExpr.Callee.accept(*this);
+    auto CalleeFP = RetVal;
+    ValueList agrsVal; agrsVal.reserve(rawExpr.Args.size() + 1);
+    agrsVal.push_back(CalleeFP);
+    for(auto& args : rawExpr.Args) {
+        args.accept(*this);
+        agrsVal.push_back(RetVal);
+    }
+    auto vtable = IRBuilder.CreateExtractValue(CalleeFP, {0});
+    auto dynF = IRBuilder.CreateGEP(IRGen.VTableTy, vtable,{
+        CONSTINT32(0), CONSTINT32(1), 
+        CONSTINT32(methodAnnot->MethodOffset)
+        });
+    auto staticF = IRGen.getMethod(methodAnnot->InClass->Name, rawExpr.Method);
+    RetVal = IRBuilder.CreateCall(staticF->getFunctionType(), dynF, agrsVal);
 }
  
 void operator()(ast::Expr &expr, ast::ExprStaticDispatch &rawExpr) {
