@@ -205,10 +205,10 @@ void gcool::sema::Sema::annotClassKind(ast::Class* c) {
     else if (c->Name == SYMTBL.getInt()
         || c->Name == SYMTBL.getFloat()
         || c->Name == SYMTBL.getBool()
-        || c->Name == SYMTBL.getString())
-        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Primitive;
-    else if (c->Name == SYMTBL.getSelfType()
+        || c->Name == SYMTBL.getString()
         || c->Name == SYMTBL.getNullType())
+        c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Primitive;
+    else if (c->Name == SYMTBL.getSelfType())
         c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Abstract;
     else
         c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Trivial;
@@ -406,9 +406,12 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
     
     // abstract class, make code simplifiy
     TheASTContext->Classes.push_back( 
-        Class{SYMTBL.getSelfType(), Symbol::EmptySymbol} );
+        Class{SYMTBL.getSelfType(), Symbol::EmptySymbol, true} );
     TheASTContext->Classes.push_back( 
-        Class{SYMTBL.getNullType(), Symbol::EmptySymbol} );
+        Class{SYMTBL.getNullType(), 
+            {},
+            {MethodFeature{sym.get("opisvoid"), sym.getBool(), FormalList{}, exprHolder}},
+        SYMTBL.getObject(), true} );
 }
 
 void gcool::sema::Sema::addError(basic::Diag&& error) {

@@ -39,8 +39,7 @@ void ir::LLVMIRGen::emitNative() {
         IRBuilder.SetInsertPoint(BB);
         auto retval = llvm::ConstantStruct::get(FatPointerTy, {
             getVTableConstant(BoolS), 
-            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 1)), HeapObjRefTy)
-            });
+            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 1)), HeapObjRefTy)});
         IRBuilder.CreateRet(retval);
     }
 
@@ -51,9 +50,8 @@ void ir::LLVMIRGen::emitNative() {
         auto func = getMethod(className[i], SYMTBL.getNewMethod());
         auto BB = llvm::BasicBlock::Create(Context, "entry", func);
         IRBuilder.SetInsertPoint(BB);
-        auto retval = IRBuilder.CreateInsertValue(
-            llvm::UndefValue::get(FatPointerTy), 
-            getVTableConstant(className[i]), {0});
+        auto retval = llvm::ConstantStruct::get(FatPointerTy, 
+            {getVTableConstant(className[i]), llvm::UndefValue::get(HeapObjRefTy)});
         IRBuilder.CreateRet(retval);
     }
     // Int Float arith
@@ -181,6 +179,25 @@ void ir::LLVMIRGen::emitNative() {
         auto BB = llvm::BasicBlock::Create(Context, "entry", func);
         IRBuilder.SetInsertPoint(BB);
         IRBuilder.CreateRet(llvm::UndefValue::get(FatPointerTy));
+    }
+
+    // NullType
+    auto NullTypeS = SYMTBL.getNullType();
+    {
+        auto func = getMethod(NullTypeS, SYMTBL.getNewMethod());
+        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
+        IRBuilder.SetInsertPoint(BB);
+        auto retval = llvm::ConstantStruct::get(FatPointerTy, 
+            {getVTableConstant(NullTypeS), llvm::UndefValue::get(HeapObjRefTy)});
+        IRBuilder.CreateRet(retval);
+    } {
+        auto func = getMethod(NullTypeS, SYMTBL.get("opisvoid"));
+        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
+        IRBuilder.SetInsertPoint(BB);
+        auto retval = llvm::ConstantStruct::get(FatPointerTy, {
+            getVTableConstant(BoolS), 
+            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 0)), HeapObjRefTy)});
+        IRBuilder.CreateRet(retval);
     }
 
 }

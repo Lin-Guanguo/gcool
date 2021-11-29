@@ -63,7 +63,6 @@ void operator()(Expr& ExprAnnot, ExprSymbol& expr) {
         TheSema.addError({basic::Diag::Sema_ExprSymbolNotDefine, 
             std::string(expr.TheSymbol.getName())});
     } else {
-        annot->Offset = decl.Offset;
         annot->ScopeRef = decl.Scope;
         annot->Type = GETCLASS(decl.Decl->Type);
         if (!annot->Type || annot->Type->Annotation->hasError) {
@@ -88,7 +87,6 @@ void operator()(Expr& ExprAnnot, ExprAssign& expr) {
     } else {
         annot->Type = GETCLASS(decl.Decl->Type);
         annot->ScopeRef = decl.Scope;
-        annot->Offset = decl.Offset;
         if (!annot->Type || annot->Type->Annotation->hasError) {
             annot->hasError = true;
             TheSema.addError({basic::Diag::Sema_ExprAssignVariableTypeError, 

@@ -161,7 +161,8 @@ void ir::LLVMIRGen::emitMethod(ast::Class* c, ast::MethodFeature* m) {
         local = IRBuilder.CreateAlloca(FatPointerTy, CONSTINT32(m->Annotation->BodyLocalVarN), "LocalVars");
     int i = 0;
     for (auto arg = self + 1; arg != methodFunc->arg_end(); ++arg) {
-        auto localvar = IRBuilder.CreateGEP(FatPointerTy, local, CONSTINT32(i), m->FormalParams[i].Name.getName());
+        auto localvar = IRBuilder.CreateGEP(FatPointerTy, local, CONSTINT32(i), 
+            m->FormalParams[i].Name.getName());
         IRBuilder.CreateStore(arg, localvar);
         ++i;
     }

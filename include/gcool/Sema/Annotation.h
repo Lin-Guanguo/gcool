@@ -47,8 +47,6 @@ public:
     VariableDecl findVariable(ast::Symbol name);
     void addVariable(ast::FormalDecl& formal, int AttrOffset = -1);
 
-    // not used
-    // static SemaScope EmptyScope;
 };
 
 
@@ -180,7 +178,6 @@ protected:
 class ExprSymbolAnnotation : public ExprAnnotation {
 public:
     SemaScope* ScopeRef = nullptr;
-    int Offset; // attr offset or local offset
 protected:
     ExprSymbolAnnotation() {}
     friend class Sema;
@@ -189,7 +186,6 @@ protected:
 class ExprAssignAnnotation : public ExprAnnotation {
 public:
     SemaScope* ScopeRef = nullptr;
-    int Offset;  // attr offset or local offset
 protected:
     ExprAssignAnnotation() {}
     friend class Sema;

@@ -64,15 +64,31 @@ int main(int argc, char** argv)
             d : Int <- 10;
             b : Float <- 20.0;
             main() : Int {
-                (new Main4).hello(d, d)
+                (new Main4).hello2(11)
             };
         };
 
         class Main4 inherits Main2 {
             c : Float <- 20.2;
             d : Int <- 5;
-            hello(i : Int, i2 : Int) : Int {
-                i2
+            hello(i : Int, i2 : Int, b : Bool) : Int {
+                if b then
+                    while d.oplt(10) loop {
+                        d <- d.opadd(1);
+                        i <- i.opadd(1);
+                    }
+                    pool
+                else
+                    i.opadd(i2)
+                fi
+            };
+
+            hello2(i : Int) : Int {
+                let count : Int <- 1 in
+                    while count.oplt(10) loop {
+                        count <- count.opadd(1);
+                        i <- i.opadd(1);
+                    } pool
             };
         };
 
