@@ -251,7 +251,7 @@ bool gcool::sema::Sema::annotMethodDecl(ast::Class* Class) {
             addError({basic::Diag::Sema_MethodRetTypeError, std::string(m.RetType.getName())});
         }
         // check method params
-        m.Annotation->MethodScope.OuterScope = &Class->Annotation->Scope;
+        m.Annotation->MethodScope.setOuter(&Class->Annotation->Scope);
         for (auto& f : m.FormalParams) {
             auto ft = GETCLASS(f.Type);
             if (!ft || ft->Annotation->hasError) {

@@ -3,21 +3,46 @@
 
 using namespace gcool;
 
+#define CONSTINT32(val) llvm::ConstantInt::get(Context, llvm::APInt(32, val))
+#define CONSTINT64(val) llvm::ConstantInt::get(Context, llvm::APInt(64, val))
+
+namespace gcool {
+namespace ir {
+
+class LocalVarTable {
+private:
+    LocalVarMap Map;
+public:
+    void addLocalVar(ast::Symbol s, int Depth, llvm::Value* val) {
+        Map.insert({std::make_tuple(s, Depth), val});
+    }
+
+    llvm::Value* getLocalVal(ast::Symbol s, int Depth) {
+        auto p = Map.find(std::make_tuple(s, Depth));
+        assert((p != Map.end()) && "get local var before add");
+        return p->second;
+    }
+
+    llvm::Value* getLocalValOrNull(ast::Symbol s, int Depth) {
+        auto p = Map.find(std::make_tuple(s, Depth));
+        if (p == Map.end())
+            return nullptr;
+        else
+            return p->second;
+    }
+};
+
 #define ASTCONTEXT IRGen.TheSema->TheASTContext
 #define SYMTBL IRGen.TheSema->TheASTContext->Symtbl
 #define IRBuilder IRGen.IRBuilder
 #define Module IRGen.Module
 #define Context IRGen.Context
 
-#define CONSTINT32(val) llvm::ConstantInt::get(Context, llvm::APInt(32, val))
-
-namespace gcool {
-namespace ir {
-
 class ExprIRGenVisitor : public ast::ExprVisitor {
 public:
     ir::LLVMIRGen& IRGen;
     llvm::Value* RetVal;
+    LocalVarTable LocalVar;
     ExprIRGenVisitor(ir::LLVMIRGen& iRGen) : IRGen(iRGen) {}
 public:
 void operator()(ast::Expr &expr, ast::ExprInt &rawExpr) {
@@ -28,7 +53,7 @@ void operator()(ast::Expr &expr, ast::ExprInt &rawExpr) {
             llvm::ConstantExpr::getIntToPtr(
                 llvm::ConstantInt::get(IRGen.BuiltIntTy, 
                     llvm::APInt(64, rawExpr.Val, true)), 
-                IRGen.ObjectRefTy)
+                IRGen.HeapObjRefTy)
         }
     );
     RetVal = retval;
@@ -44,7 +69,7 @@ void operator()(ast::Expr &expr, ast::ExprFloat &rawExpr) {
                     llvm::ConstantFP::get(IRGen.BuiltFloatTy, 
                         llvm::APFloat(rawExpr.Val)), 
                     IRGen.BuiltIntTy), 
-                IRGen.ObjectRefTy)
+                IRGen.HeapObjRefTy)
         }
     );
     RetVal = retval;
@@ -58,7 +83,7 @@ void operator()(ast::Expr &expr, ast::ExprBool &rawExpr) {
             llvm::ConstantExpr::getIntToPtr(
                 llvm::ConstantInt::get(IRGen.BuiltIntTy, 
                     llvm::APInt(64, static_cast<int>(rawExpr.Val), true)), 
-                IRGen.ObjectRefTy)
+                IRGen.HeapObjRefTy)
         }
     );
     RetVal = retval;
@@ -67,8 +92,20 @@ void operator()(ast::Expr &expr, ast::ExprBool &rawExpr) {
 void operator()(ast::Expr &expr, ast::ExprString &rawExpr) {
 
 }
- 
+
+llvm::Value* allocLocalVar(sema::SemaScope* scope, ast::Symbol varName) {
+    auto var = IRBuilder.CreateAlloca(IRGen.FatPointerTy, nullptr, varName.getName());
+    LocalVar.addLocalVar(varName, scope->getDepth(), var);
+    return var;
+    // TODO: Sema Local Offset
+}
+
+llvm::Value* getVarPointer(sema::SemaScope* scope, ast::Symbol varName) {
+    return LocalVar.getLocalVal(varName, scope->getDepth());
+}
+
 void operator()(ast::Expr &expr, ast::ExprSymbol &rawExpr) {
+    auto annot = static_cast<sema::ExprSymbolAnnotation*>(expr.Annotation);
 
 }
  
@@ -78,7 +115,7 @@ void operator()(ast::Expr &expr, ast::ExprAssign &rawExpr) {
  
 void operator()(ast::Expr &expr, ast::ExprDispatch &rawExpr) {
     auto annot = static_cast<sema::ExprDispatchAnnotation*>(expr.Annotation);
-    auto methodAnnot = annot->MethodRef->Annotation;
+    auto methodAnnot = annot->StaticMethodRef->Annotation;
     rawExpr.Callee.accept(*this);
     auto CalleeFP = RetVal;
     ValueList agrsVal; agrsVal.reserve(rawExpr.Args.size() + 1);
@@ -92,7 +129,7 @@ void operator()(ast::Expr &expr, ast::ExprDispatch &rawExpr) {
         CONSTINT32(0), CONSTINT32(1), 
         CONSTINT32(methodAnnot->MethodOffset)
         });
-    auto staticF = IRGen.getMethod(methodAnnot->InClass->Name, rawExpr.Method);
+    auto staticF = IRGen.getMethod(annot->StaticMethodClassRef->Name, rawExpr.Method);
     auto staticFT = staticF->getFunctionType();
     dynF = IRBuilder.CreateBitCast(dynF, staticFT->getPointerTo()->getPointerTo());
     dynF = IRBuilder.CreateLoad(staticFT->getPointerTo(), dynF);
@@ -147,7 +184,7 @@ void operator()(ast::Expr &expr, ast::ExprArithU &rawExpr) {
 }
 }
 
-llvm::Value* ir::LLVMIRGen::emitExpr(ast::Expr expr) {
+llvm::Value* ir::LLVMIRGen::emitExpr(ast::Expr expr, sema::SemaScope* scope, llvm::Value* self) {
     ExprIRGenVisitor v(*this);
     expr.accept(v);
     return v.RetVal; //TODO

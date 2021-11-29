@@ -20,16 +20,20 @@ public:
         SK_Method,
         SK_Local
     };
-
+private:
     SemaScope* OuterScope;
     ScopeVariable Variables;
     ScopeKind TheScopeKind;
+    int Depth;
 public:
     SemaScope(ScopeKind scopeKind) 
-        : OuterScope (nullptr), TheScopeKind(scopeKind) {}
+        : OuterScope (nullptr), TheScopeKind(scopeKind), Depth(0) {}
     SemaScope(SemaScope* outer, ScopeKind scopeKind) 
-        : OuterScope(outer), TheScopeKind(scopeKind) {}
+        : TheScopeKind(scopeKind) { setOuter(outer); }
 
+    void setOuter(SemaScope* outer);
+    ScopeKind getKind() const { return TheScopeKind; }
+    int getDepth() const { return Depth; }
     struct VariableDecl {
         SemaScope* Scope;
         ast::FormalDecl* Decl;
@@ -46,12 +50,9 @@ class MethodTable {
 public:
     MethodTable* SuperClassTable;
     ast::Class* InClass;
+private:
     MethodListMap ClassMethod;
 public:
-    struct MethodDecl {
-        ast::Class* InClass;
-        ast::MethodFeature* Decl;
-    };
     MethodTable()
         : SuperClassTable(nullptr), InClass(nullptr) {}
 
@@ -61,6 +62,10 @@ public:
     MethodTable(MethodTable* super, ast::Class* curClass)
         : SuperClassTable(super), InClass(curClass) {}
 
+    struct MethodDecl {
+        ast::Class* InClass;
+        ast::MethodFeature* Decl;
+    };
     MethodDecl findMethod(ast::Symbol Name);
     MethodDecl findMethodInClass(ast::Symbol Name);
     void addMethod(ast::MethodFeature& method);
@@ -184,8 +189,8 @@ protected:
 
 class ExprDispatchAnnotation : public ExprAnnotation {
 public:
-    ast::Class* ClassRef = nullptr;
-    ast::MethodFeature* MethodRef = nullptr;
+    ast::Class* StaticMethodClassRef = nullptr;
+    ast::MethodFeature* StaticMethodRef = nullptr;
 protected:
     ExprDispatchAnnotation() {}
     friend class Sema;
@@ -258,8 +263,8 @@ protected:
 
 class ExprArithBAnnotation : public ExprAnnotation {
 public:
-    ast::Class* ClassRef = nullptr;
-    ast::MethodFeature* MethodRef = nullptr;
+    ast::Class* StaticMethodClassRef = nullptr;
+    ast::MethodFeature* StaticMethodRef = nullptr;
 protected:
     ExprArithBAnnotation() {}
     friend class Sema;
@@ -267,8 +272,8 @@ protected:
 
 class ExprArithUAnnotation : public ExprAnnotation {
 public:
-    ast::Class* ClassRef = nullptr;
-    ast::MethodFeature* MethodRef = nullptr;
+    ast::Class* StaticMethodClassRef = nullptr;
+    ast::MethodFeature* StaticMethodRef = nullptr;
 protected:
     ExprArithUAnnotation() {}
     friend class Sema;

@@ -1,6 +1,6 @@
 #pragma once
-#include <memory>
 #include <string_view>
+#include <tuple>
 #include "gcool/AST/AST.h"
 #include "gcool/Sema/Sema.h"
 #include "llvm/IR/IRBuilder.h"
@@ -16,6 +16,7 @@ namespace ir {
 class ExprIRGenVisitor;
 
 using GlobalVariableMap = std::unordered_map<ast::Symbol, llvm::GlobalVariable*>;
+using LocalVarMap = std::unordered_map<std::tuple<ast::Symbol, int>, llvm::Value*>;
 using ConstantList = std::vector<llvm::Constant*>;
 using TypeList = std::vector<llvm::Type*>;
 using ValueList = std::vector<llvm::Value*>;
@@ -35,8 +36,8 @@ private:
     llvm::PointerType*      VMethodSlotTy;
     llvm::StructType*       VTableTy;
     llvm::PointerType*      VTableRefTy;
-    llvm::ArrayType*        ObjectStructTy;
-    llvm::PointerType*      ObjectRefTy;
+    llvm::ArrayType*        HeapObjTy;
+    llvm::PointerType*      HeapObjRefTy;
     GlobalVariableMap       VTableMap;
     sema::Sema*             TheSema;
 
@@ -60,7 +61,7 @@ private:
     void emitNewMethod(ast::Class* c);
     void emitMethod(ast::Class* c, ast::MethodFeature* m);
     void emitDeriver();
-    llvm::Value* emitExpr(ast::Expr expr);
+    llvm::Value* emitExpr(ast::Expr expr, sema::SemaScope* scope, llvm::Value* self);
 
     // helper function
     llvm::GlobalVariable* addVTable(ast::Symbol className, ast::Class* classInfo, llvm::ArrayRef<llvm::Constant*> methodInit);

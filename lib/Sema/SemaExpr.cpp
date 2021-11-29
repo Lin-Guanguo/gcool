@@ -135,8 +135,8 @@ void findMethodAndCheckParam(ExprDispatchAnnotation* annot, Expr& Callee, ExprLi
             std::string(Method.getName())});
         return;
     }
-    annot->ClassRef = methodDecl.InClass;
-    annot->MethodRef = method;
+    annot->StaticMethodClassRef = methodDecl.InClass;
+    annot->StaticMethodRef = method;
     if (method->RetType == SYMTBL.getSelfType())
         annot->Type = Callee.Annotation->Type;
     else
@@ -324,9 +324,10 @@ void operator()(Expr& ExprAnnot, ExprBlock& expr) {
 void operator()(Expr& ExprAnnot, ExprLet& expr) {
     auto annot = TheSema.allocAnnotation<ExprLetAnnotation>();
     annot->hasError = false;
-    std::unordered_set<ast::Symbol> nameset;
+    annot->LocalScope.setOuter(TheScope);
     auto outerScope = TheScope;
     TheScope = &annot->LocalScope;
+    std::unordered_set<ast::Symbol> nameset;
     for(auto& decl : expr.InitVariables) {
         bool declError = false;
         if (nameset.find(decl.Formal.Name) != nameset.end()) {
@@ -424,8 +425,8 @@ void operator()(Expr& ExprAnnot, ExprArithB& expr) {
             this->TheSema.addError({basic::Diag::Sema_ExprArithBNoOverloadFunc, funcName});
             goto CHECK_BREAK;
         } else {
-            annot->ClassRef = overloadF.InClass;
-            annot->MethodRef = overloadF.Decl;
+            annot->StaticMethodClassRef = overloadF.InClass;
+            annot->StaticMethodRef = overloadF.Decl;
             annot->Type = GETCLASS(overloadF.Decl->RetType);
         } 
         if (overloadF.Decl->Annotation->hasError) {
@@ -465,8 +466,8 @@ void operator()(Expr& ExprAnnot, ExprArithU& expr) {
             this->TheSema.addError({basic::Diag::Sema_ExprArithUNoOverloadFunc, funcName});
             goto CHECK_BREAK;
         } else {
-            annot->ClassRef = overloadF.InClass;
-            annot->MethodRef = overloadF.Decl;
+            annot->StaticMethodClassRef = overloadF.InClass;
+            annot->StaticMethodRef = overloadF.Decl;
             annot->Type = GETCLASS(overloadF.Decl->RetType);
         } 
         if (overloadF.Decl->Annotation->hasError) {

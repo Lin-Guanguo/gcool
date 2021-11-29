@@ -2,6 +2,11 @@
 
 using namespace gcool;
 
+void gcool::sema::SemaScope::setOuter(SemaScope* outer) {
+    OuterScope = outer;
+    Depth = outer->Depth + 1;
+}
+
 gcool::sema::SemaScope::VariableDecl gcool::sema::SemaScope::findVariable(ast::Symbol name) {
     auto p = this;
     while (p != nullptr) {

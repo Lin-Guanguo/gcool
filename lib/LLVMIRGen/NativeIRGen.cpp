@@ -25,8 +25,8 @@ void ir::LLVMIRGen::emitNative() {
             {llvm::ConstantInt::get(Context, llvm::APInt(64, 0))},
             "obj");
         auto retval = IRBuilder.CreateInsertValue(
-            llvm::ConstantStruct::get(FatPointerTy, {getVTableConstant(ObjectS), llvm::UndefValue::get(ObjectRefTy)}), 
-            IRBuilder.CreateBitCast(obj, ObjectRefTy), {1});
+            llvm::ConstantStruct::get(FatPointerTy, {getVTableConstant(ObjectS), llvm::UndefValue::get(HeapObjRefTy)}), 
+            IRBuilder.CreateBitCast(obj, HeapObjRefTy), {1});
         IRBuilder.CreateRet(retval);
     } { // Object.0init
         auto func = getMethod(ObjectS, SYMTBL.getInitMethod());
@@ -39,7 +39,7 @@ void ir::LLVMIRGen::emitNative() {
         IRBuilder.SetInsertPoint(BB);
         auto retval = llvm::ConstantStruct::get(FatPointerTy, {
             getVTableConstant(BoolS), 
-            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 1)), ObjectRefTy)
+            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 1)), HeapObjRefTy)
             });
         IRBuilder.CreateRet(retval);
     }
@@ -108,17 +108,17 @@ void ir::LLVMIRGen::emitNative() {
         llvm::Value* retval;
         if (j < 4) {
             if (i == 0)
-                arithRes = IRBuilder.CreateIntToPtr(arithRes, ObjectRefTy);
+                arithRes = IRBuilder.CreateIntToPtr(arithRes, HeapObjRefTy);
             else
                 arithRes = IRBuilder.CreateIntToPtr(
-                    IRBuilder.CreateBitCast(arithRes, BuiltIntTy), ObjectRefTy);
+                    IRBuilder.CreateBitCast(arithRes, BuiltIntTy), HeapObjRefTy);
             retval = IRBuilder.CreateInsertValue(
                 llvm::UndefValue::get(FatPointerTy), 
                 getVTableConstant(className[i]), {0});
         }
         else {
             arithRes = IRBuilder.CreateIntToPtr(
-                IRBuilder.CreateZExt(arithRes, BuiltIntTy), ObjectRefTy);
+                IRBuilder.CreateZExt(arithRes, BuiltIntTy), HeapObjRefTy);
             retval = IRBuilder.CreateInsertValue(
                 llvm::UndefValue::get(FatPointerTy), 
                 getVTableConstant(BoolS), {0});
@@ -148,9 +148,9 @@ void ir::LLVMIRGen::emitNative() {
         case 2: arithRes = IRBuilder.CreateICmpEQ(v1, v2); break;
         default: assert(0 && "never reach");
         }
-        arithRes = IRBuilder.CreateIntToPtr(arithRes, ObjectRefTy);
+        arithRes = IRBuilder.CreateIntToPtr(arithRes, HeapObjRefTy);
         auto retval = IRBuilder.CreateInsertValue(
-            llvm::ConstantStruct::get(FatPointerTy, {getVTableConstant(BoolS), llvm::UndefValue::get(ObjectRefTy)}), 
+            llvm::ConstantStruct::get(FatPointerTy, {getVTableConstant(BoolS), llvm::UndefValue::get(HeapObjRefTy)}), 
             arithRes, {1});
         IRBuilder.CreateRet(retval);
     } {
@@ -161,9 +161,9 @@ void ir::LLVMIRGen::emitNative() {
         auto v1 = IRBuilder.CreateExtractValue(arg, {1});
         v1 = IRBuilder.CreatePtrToInt(v1, BuiltIntTy);
         llvm::Value* arithRes = IRBuilder.CreateNot(v1);
-        arithRes = IRBuilder.CreateIntToPtr(arithRes, ObjectRefTy);
+        arithRes = IRBuilder.CreateIntToPtr(arithRes, HeapObjRefTy);
         auto retval = IRBuilder.CreateInsertValue(
-            llvm::ConstantStruct::get(FatPointerTy, {getVTableConstant(BoolS), llvm::UndefValue::get(ObjectRefTy)}), 
+            llvm::ConstantStruct::get(FatPointerTy, {getVTableConstant(BoolS), llvm::UndefValue::get(HeapObjRefTy)}), 
             arithRes, {1});
         IRBuilder.CreateRet(retval);
     }

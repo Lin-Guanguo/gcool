@@ -5,6 +5,9 @@ using namespace gcool;
 #define ASTCONTEXT TheSema->TheASTContext
 #define SYMTBL TheSema->TheASTContext->Symtbl
 
+#define CONSTINT32(val) llvm::ConstantInt::get(Context, llvm::APInt(32, val))
+#define CONSTINT64(val) llvm::ConstantInt::get(Context, llvm::APInt(64, val))
+
 ir::LLVMIRGen::LLVMIRGen(sema::Sema* sema)
     : Context()
     , Module("Main", Context)
@@ -14,6 +17,7 @@ ir::LLVMIRGen::LLVMIRGen(sema::Sema* sema)
     , BuiltFloatTy(llvm::Type::getDoubleTy(Context))
     , BuiltBoolTy(llvm::Type::getInt1Ty(Context))
     , FatPointerTy(llvm::StructType::create(Context, "FatPointer"))
+    // vtable
     , ClassInfoTy(llvm::StructType::create(Context, "ClassInfo"))
     , VMethodSlotTy(llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), true)->getPointerTo())
     , VTableTy(llvm::StructType::create(
@@ -21,13 +25,14 @@ ir::LLVMIRGen::LLVMIRGen(sema::Sema* sema)
         {ClassInfoTy, llvm::ArrayType::get(VMethodSlotTy, 0)},
         "VTable", true))
     , VTableRefTy(VTableTy->getPointerTo())
-    , ObjectStructTy(llvm::ArrayType::get(FatPointerTy, 0))
-    , ObjectRefTy(ObjectStructTy->getPointerTo())
+    // heapObj
+    , HeapObjTy(llvm::ArrayType::get(FatPointerTy, 0))
+    , HeapObjRefTy(HeapObjTy->getPointerTo())
     , TheSema(sema)
 {
     FatPointerTy->setBody({
         VTableRefTy,
-        ObjectRefTy},
+        HeapObjRefTy},
         true);
     ClassInfoTy->setBody({
         VTableRefTy,                     // SuperClass VTableRef
@@ -114,13 +119,13 @@ void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
     IRBuilder.SetInsertPoint(BB);
     auto heapObj = IRBuilder.CreateCall(
         getBuiltinFunction(BK_Malloc), 
-        {llvm::ConstantInt::get(Context, llvm::APInt(64, 8 * 2 * c->Annotation->AttrOffsetEnd))},
+        {CONSTINT64(8 * 2 * c->Annotation->AttrOffsetEnd)},
         "heapObj");
     auto retval = IRBuilder.CreateInsertValue(
         llvm::UndefValue::get(FatPointerTy), 
         getVTableConstant(c->Name), {0});
     retval = IRBuilder.CreateInsertValue(retval,
-        IRBuilder.CreateBitCast(heapObj, ObjectRefTy), {1});
+        IRBuilder.CreateBitCast(heapObj, HeapObjRefTy), {1});
     IRBuilder.CreateCall(getMethod(c->Name, SYMTBL.getInitMethod()), {retval});
     IRBuilder.CreateRet(retval);
 
@@ -133,12 +138,10 @@ void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
     auto initObjRef = IRBuilder.CreateExtractValue(initFP, {1});
     for (auto& a : c->Attrs) {
         if (a.Init.has_value()) {
-            auto val = emitExpr(a.Init.value());
+            auto val = emitExpr(a.Init.value(), &c->Annotation->Scope, initFP);
             auto fp = IRBuilder.CreateGEP(
-                ObjectStructTy, initObjRef, {
-                    llvm::ConstantInt::get(Context, llvm::APInt(32, 0)),
-                    llvm::ConstantInt::get(Context, llvm::APInt(32, a.Annotation->AttrOffset))
-                });
+                HeapObjTy, initObjRef, {
+                    CONSTINT32(0), CONSTINT32(a.Annotation->AttrOffset)});
             IRBuilder.CreateStore(val, fp);
         }
     }
@@ -149,7 +152,8 @@ void ir::LLVMIRGen::emitMethod(ast::Class* c, ast::MethodFeature* m) {
     auto methodFunc = getMethod(c->Name, m->Name);
     auto BB = llvm::BasicBlock::Create(Context, "entry", methodFunc);
     IRBuilder.SetInsertPoint(BB);
-    auto val = emitExpr(m->Body);
+    auto arg = methodFunc->arg_begin();
+    auto val = emitExpr(m->Body, &m->Annotation->MethodScope, arg);
     IRBuilder.CreateRet(val);
 }
 
@@ -190,7 +194,7 @@ llvm::GlobalVariable* ir::LLVMIRGen::addVTable(ast::Symbol classNameS,
         llvm::ConstantStruct::get(
             ClassInfoTy, {
                 superClassVTable,
-                llvm::ConstantInt::get(Context, llvm::APInt(64, classInfo->Annotation->InheritDepth)),
+                CONSTINT64(classInfo->Annotation->InheritDepth),
                 llvm::Constant::getNullValue(Holder64bit),
                 llvm::Constant::getNullValue(Holder64bit),
             }),

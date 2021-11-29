@@ -34,15 +34,17 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
     printer.IsPrintBuiltin = true;
     //printer.printAST(llvm::outs(), sema);
 
+    if (debugPrint) {
+        for(auto e : sema.TheErrorList) {
+            std::cerr << e.DiagKindName[e.TheDiagKind] << " : " << e.AdditionalMsg << "\n";
+        }
+    }
+
     ir::LLVMIRGen irgen(&sema);
     irgen.emitLLVMIR();
     irgen.print(llvm::outs());
 
-    // if (debugPrint) {
-    //     for(auto e : sema.TheErrorList) {
-    //         std::cerr << e.DiagKindName[e.TheDiagKind] << " : " << e.AdditionalMsg << "\n";
-    //     }
-    // }
+   
 
     // EXPECT_EQ(sema.TheErrorList.size(), errorList.size());
     // for(int i = 0; i < errorList.size(); ++i) {
@@ -59,7 +61,7 @@ int main(int argc, char** argv)
             c : Int <- 10.opadd(2);
             b : Float <- 20.0;
             main() : Int {
-                10
+                152
             };
         };
 
