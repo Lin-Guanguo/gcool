@@ -136,9 +136,12 @@ void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
     auto initFP = initMethod->arg_begin();
     IRBuilder.CreateCall(getMethod(c->Inheirt, SYMTBL.getInitMethod()), {initFP});
     auto initObjRef = IRBuilder.CreateExtractValue(initFP, {1});
+    llvm::AllocaInst* local = nullptr;
+    if (c->Annotation->InitLocalVarN != 0)
+        local = IRBuilder.CreateAlloca(FatPointerTy, c->Annotation->InitLocalVarN, nullptr, "LocalVars");
     for (auto& a : c->Attrs) {
         if (a.Init.has_value()) {
-            auto val = emitExpr(a.Init.value(), &c->Annotation->Scope, initFP);
+            auto val = emitExpr(a.Init.value(), &c->Annotation->Scope, initFP, local);
             auto fp = IRBuilder.CreateGEP(
                 HeapObjTy, initObjRef, {
                     CONSTINT32(0), CONSTINT32(a.Annotation->AttrOffset)});
@@ -152,14 +155,22 @@ void ir::LLVMIRGen::emitMethod(ast::Class* c, ast::MethodFeature* m) {
     auto methodFunc = getMethod(c->Name, m->Name);
     auto BB = llvm::BasicBlock::Create(Context, "entry", methodFunc);
     IRBuilder.SetInsertPoint(BB);
-    auto arg = methodFunc->arg_begin();
-    auto val = emitExpr(m->Body, &m->Annotation->MethodScope, arg);
+    auto self = methodFunc->arg_begin();
+    llvm::AllocaInst* local = nullptr;
+    if (m->Annotation->BodyLocalVarN != 0)
+        local = IRBuilder.CreateAlloca(FatPointerTy, m->Annotation->BodyLocalVarN, nullptr, "LocalVars");
+    int i = 0;
+    for (auto arg = self + 1; arg != methodFunc->arg_end(); ++arg) {
+        auto localvar = IRBuilder.CreateGEP(FatPointerTy, local, CONSTINT32(i), m->FormalParams[i].Name.getName());
+        IRBuilder.CreateStore(arg, localvar);
+        ++i;
+    }
+    auto val = emitExpr(m->Body, &m->Annotation->MethodScope, self, local);
     IRBuilder.CreateRet(val);
 }
 
 void ir::LLVMIRGen::emitDeriver() {
-    // i32 @main(i32 %argc, i8** %argv)
-    auto mainFt = llvm::FunctionType::get(
+    auto mainFt = llvm::FunctionType::get(  // i32 @main(i32 %argc, i8** %argv)
         llvm::IntegerType::getInt32Ty(Context), {
             llvm::IntegerType::getInt32Ty(Context),
             llvm::IntegerType::getInt8PtrTy(Context)->getPointerTo()

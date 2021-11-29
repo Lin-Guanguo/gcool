@@ -61,7 +61,7 @@ private:
     void emitNewMethod(ast::Class* c);
     void emitMethod(ast::Class* c, ast::MethodFeature* m);
     void emitDeriver();
-    llvm::Value* emitExpr(ast::Expr expr, sema::SemaScope* scope, llvm::Value* self);
+    llvm::Value* emitExpr(ast::Expr expr, sema::SemaScope* scope, llvm::Value* self, llvm::AllocaInst* local);
 
     // helper function
     llvm::GlobalVariable* addVTable(ast::Symbol className, ast::Class* classInfo, llvm::ArrayRef<llvm::Constant*> methodInit);

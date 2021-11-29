@@ -19,7 +19,9 @@ class ExprIRGenVisitor : public ast::ExprVisitor {
 public:
     ir::LLVMIRGen& IRGen;
     llvm::Value* RetVal;
-    ExprIRGenVisitor(ir::LLVMIRGen& iRGen) : IRGen(iRGen) {}
+    llvm::AllocaInst* Local;
+    ExprIRGenVisitor(ir::LLVMIRGen& iRGen, llvm::AllocaInst* local) 
+        : IRGen(iRGen), Local(local) {}
 public:
 void operator()(ast::Expr &expr, ast::ExprInt &rawExpr) {
     auto IntS = SYMTBL.getInt();
@@ -162,8 +164,8 @@ void operator()(ast::Expr &expr, ast::ExprArithU &rawExpr) {
 }
 }
 
-llvm::Value* ir::LLVMIRGen::emitExpr(ast::Expr expr, sema::SemaScope* scope, llvm::Value* self) {
-    ExprIRGenVisitor v(*this);
+llvm::Value* ir::LLVMIRGen::emitExpr(ast::Expr expr, sema::SemaScope* scope, llvm::Value* self, llvm::AllocaInst* local) {
+    ExprIRGenVisitor v(*this, local);
     expr.accept(v);
     return v.RetVal; //TODO
 }

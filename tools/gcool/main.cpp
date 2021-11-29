@@ -67,8 +67,8 @@ int main(int argc, char** argv)
 
         class Main4 inherits Main2 {
             c : Float <- 20.2;
-            hello() : Float {
-                20.0
+            hello(f : Float, i : Int, b : Bool) : Float {
+                10.2
             };
         };
 

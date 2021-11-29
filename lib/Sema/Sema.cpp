@@ -160,6 +160,7 @@ bool gcool::sema::Sema::pass5() {
 
         for (auto& a : c.Attrs) {
             if (a.Init.has_value()){
+                c.Annotation->InitLocalVarN = 0;
                 if (checkExpr(a.Init.value(), &c.Annotation->Scope, &c, &c.Annotation->InitLocalVarN)){
                     a.Annotation->hasError = hasError = true;
                     addError({basic::Diag::Sema_DeclInitExprError, 
@@ -179,6 +180,7 @@ bool gcool::sema::Sema::pass5() {
         }
 
         for (auto& m : c.Methods) {
+            m.Annotation->BodyLocalVarN = static_cast<int>(m.FormalParams.size());
             if (checkExpr(m.Body, &m.Annotation->MethodScope, &c, &m.Annotation->BodyLocalVarN)) {
                 m.Annotation->hasError = hasError = true;
                 addError({basic::Diag::Sema_MethodBodyExprError, 

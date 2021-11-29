@@ -494,7 +494,6 @@ void operator()(Expr& ExprAnnot, ExprArithU& expr) {
 }
 
 bool gcool::sema::Sema::checkExpr(ast::Expr& e, sema::SemaScope* scope, ast::Class* selfClass, int* LocalVarN) {
-    UPDATELOCALVARN(scope->getLocalVarN());
     SemaExprVisitor visitor(*this, scope, selfClass, LocalVarN);
     e.accept(visitor);
     return e.Annotation->hasError;
