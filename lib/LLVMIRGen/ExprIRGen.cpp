@@ -6,6 +6,8 @@ using namespace gcool;
 #define CONSTINT32(val) llvm::ConstantInt::get(Context, llvm::APInt(32, val))
 #define CONSTINT64(val) llvm::ConstantInt::get(Context, llvm::APInt(64, val))
 
+#define SYMCONCAT(sym, str) sym.getName() + llvm::StringRef(str)
+
 namespace gcool {
 namespace ir {
 
@@ -91,11 +93,14 @@ llvm::Value* getVarPointer(sema::SemaScope* scope, int Offset, llvm::StringRef n
 void operator()(ast::Expr &expr, ast::ExprSymbol &rawExpr) {
     auto annot = static_cast<sema::ExprSymbolAnnotation*>(expr.Annotation);
     auto var = getVarPointer(annot->ScopeRef, annot->Offset, rawExpr.TheSymbol.getName());
-    RetVal = IRBuilder.CreateLoad(IRGen.FatPointerTy, var, rawExpr.TheSymbol.getName() + llvm::StringRef(".val"));
+    RetVal = IRBuilder.CreateLoad(IRGen.FatPointerTy, var, SYMCONCAT(rawExpr.TheSymbol, ".val"));
 }
  
 void operator()(ast::Expr &expr, ast::ExprAssign &rawExpr) {
-
+    auto annot = static_cast<sema::ExprAssignAnnotation*>(expr.Annotation);
+    rawExpr.Value.accept(*this);
+    auto var = getVarPointer(annot->ScopeRef, annot->Offset, rawExpr.Variable.getName());
+    IRBuilder.CreateStore(RetVal, var);
 }
 
 // TODO: final class Devirtual
@@ -147,7 +152,8 @@ void operator()(ast::Expr &expr, ast::ExprLet &rawExpr) {
 }
  
 void operator()(ast::Expr &expr, ast::ExprNew &rawExpr) {
-
+    auto newMethod = IRGen.getMethod(rawExpr.Type, SYMTBL.getNewMethod());
+    RetVal = IRBuilder.CreateCall(newMethod, {}, SYMCONCAT(rawExpr.Type, ".val"));
 }
  
 void operator()(ast::Expr &expr, ast::ExprSelf &rawExpr) {

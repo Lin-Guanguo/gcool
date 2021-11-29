@@ -32,7 +32,7 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
     
     pretty::ASTPrinter printer;
     printer.IsPrintBuiltin = true;
-    //printer.printAST(llvm::outs(), sema);
+    printer.printAST(llvm::errs(), sema);
 
     if (debugPrint) {
         for(auto e : sema.TheErrorList) {
@@ -52,25 +52,27 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
     // }
 }
 
+// function with more than one args Segmentation fault
+
 int main(int argc, char** argv) 
 {
     //llvm::outs() << "pointer size " << sizeof(void*) << "\n";
     const char* input = 
     R"(
         class Main {
-            c : Int <- 10.opadd(2);
-            d : Int <- 10.opadd(13);
+            c : Int <- 10;
+            d : Int <- 10;
             b : Float <- 20.0;
             main() : Int {
-                c.opadd(d)
+                (new Main4).hello(d, d)
             };
         };
 
         class Main4 inherits Main2 {
             c : Float <- 20.2;
             d : Int <- 5;
-            hello(f : Float, i : Int, b : Bool) : Int {
-                i.opadd(d)
+            hello(i : Int, i2 : Int) : Int {
+                i2
             };
         };
 
