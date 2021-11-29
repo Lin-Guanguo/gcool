@@ -253,6 +253,7 @@ void operator()(ast::Expr &expr, ast::ExprLet &rawExpr) {
 void operator()(ast::Expr &expr, ast::ExprNew &rawExpr) {
     auto newMethod = IRGen.getMethod(rawExpr.Type, SYMTBL.getNewMethod());
     RetVal = IRBuilder.CreateCall(newMethod, {}, SYMCONCAT(rawExpr.Type, ".val"));
+    // TODO: SelfType
 }
  
 void operator()(ast::Expr &expr, ast::ExprSelf &rawExpr) {

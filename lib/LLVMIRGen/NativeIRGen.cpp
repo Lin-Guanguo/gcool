@@ -39,7 +39,7 @@ void ir::LLVMIRGen::emitNative() {
         IRBuilder.SetInsertPoint(BB);
         auto retval = llvm::ConstantStruct::get(FatPointerTy, {
             getVTableConstant(BoolS), 
-            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 1)), HeapObjRefTy)});
+            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 0)), HeapObjRefTy)});
         IRBuilder.CreateRet(retval);
     }
 
@@ -196,7 +196,7 @@ void ir::LLVMIRGen::emitNative() {
         IRBuilder.SetInsertPoint(BB);
         auto retval = llvm::ConstantStruct::get(FatPointerTy, {
             getVTableConstant(BoolS), 
-            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 0)), HeapObjRefTy)});
+            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 1)), HeapObjRefTy)});
         IRBuilder.CreateRet(retval);
     }
 

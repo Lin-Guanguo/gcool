@@ -64,7 +64,7 @@ int main(int argc, char** argv)
             d : Int <- 10;
             b : Float <- 20.0;
             main() : Int {
-                (new Main4).hello2(11)
+                (new Main4).hello3(null, 6) + (new Main4).hello3(3, 9)
             };
         };
 
@@ -89,6 +89,14 @@ int main(int argc, char** argv)
                         count <- count + 2;
                         i <- i + 1;
                     } pool
+            };
+
+            hello3(i : Int, i2 : Int) : Int {
+                if isvoid i then
+                    i2
+                else
+                    i
+                fi
             };
         };
 
