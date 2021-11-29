@@ -145,7 +145,10 @@ void ir::LLVMIRGen::emitNative() {
         switch (i) {
         case 0: arithRes = IRBuilder.CreateOr(v1, v2); break;
         case 1: arithRes = IRBuilder.CreateAnd(v1, v2); break;
-        case 2: arithRes = IRBuilder.CreateICmpEQ(v1, v2); break;
+        case 2: 
+            v1 = IRBuilder.CreateTrunc(v1, BuiltBoolTy);
+            v2 = IRBuilder.CreateTrunc(v2, BuiltBoolTy);
+            arithRes = IRBuilder.CreateICmpEQ(v1, v2); break;
         default: assert(0 && "never reach");
         }
         arithRes = IRBuilder.CreateIntToPtr(arithRes, HeapObjRefTy);
@@ -160,7 +163,7 @@ void ir::LLVMIRGen::emitNative() {
         auto arg = func->arg_begin();
         auto v1 = IRBuilder.CreateExtractValue(arg, {1});
         v1 = IRBuilder.CreatePtrToInt(v1, BuiltIntTy);
-        llvm::Value* arithRes = IRBuilder.CreateNot(v1);
+        auto arithRes = IRBuilder.CreateXor(v1, llvm::ConstantInt::get(Context, llvm::APInt(64, 1)));
         arithRes = IRBuilder.CreateIntToPtr(arithRes, HeapObjRefTy);
         auto retval = IRBuilder.CreateInsertValue(
             llvm::ConstantStruct::get(FatPointerTy, {getVTableConstant(BoolS), llvm::UndefValue::get(HeapObjRefTy)}), 
