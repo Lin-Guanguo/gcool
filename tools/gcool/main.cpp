@@ -85,9 +85,9 @@ int main(int argc, char** argv)
 
             hello2(i : Int) : Int {
                 let count : Int <- 1 in
-                    while count.oplt(10) loop {
-                        count <- count.opadd(1);
-                        i <- i.opadd(1);
+                    while not count.opgt(10) loop {
+                        count <- count + 2;
+                        i <- i + 1;
                     } pool
             };
         };

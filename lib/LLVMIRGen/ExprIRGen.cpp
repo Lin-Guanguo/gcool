@@ -26,8 +26,6 @@ public:
     llvm::Value* Self;
     ExprIRGenVisitor(ir::LLVMIRGen& iRGen, llvm::AllocaInst* local, llvm::Value* self) 
         : IRGen(iRGen), Local(local), Self(self) { 
-        //SelfVTable = IRBuilder.CreateExtractValue(Self, {0}, "self.vtable");
-        //SelfHeapObj = IRBuilder.CreateExtractValue(Self, {1}, "self.heapObj");
     }
 public:
 void operator()(ast::Expr &expr, ast::ExprInt &rawExpr) {
@@ -75,7 +73,7 @@ void operator()(ast::Expr &expr, ast::ExprBool &rawExpr) {
 }
  
 void operator()(ast::Expr &expr, ast::ExprString &rawExpr) {
-    
+    // TODO: ExprString
 }
 
 llvm::Value* getVarPointer(sema::SemaScope* scope, ast::Symbol varName, llvm::StringRef name = "") {
@@ -105,32 +103,53 @@ void operator()(ast::Expr &expr, ast::ExprAssign &rawExpr) {
     IRBuilder.CreateStore(RetVal, var);
 }
 
-// TODO: final class Devirtual
+llvm::Value* createCall(llvm::Function* staticF,
+                           int methodOffset,
+                           ast::Expr callee, 
+                           llvm::MutableArrayRef<ast::Expr> args,
+                           bool isStatic) {
+    callee.accept(*this);
+    auto CalleeFP = RetVal;
+    ValueList agrsVal; agrsVal.reserve(args.size() + 1);
+    agrsVal.push_back(CalleeFP);
+    for(auto& arg : args) {
+        arg.accept(*this);
+        agrsVal.push_back(RetVal);
+    }
+    if (isStatic) {
+        return IRBuilder.CreateCall(staticF, agrsVal);
+    } else {
+        auto vtable = IRBuilder.CreateExtractValue(CalleeFP, {0});
+        auto dynF = IRBuilder.CreateGEP(IRGen.VTableTy, vtable,{
+            CONSTINT32(0), CONSTINT32(1), 
+            CONSTINT32(methodOffset)
+            });
+        auto staticFT = staticF->getFunctionType();
+        dynF = IRBuilder.CreateBitCast(dynF, staticFT->getPointerTo()->getPointerTo());
+        dynF = IRBuilder.CreateLoad(staticFT->getPointerTo(), dynF);
+        return IRBuilder.CreateCall(staticFT, dynF, agrsVal);
+    }
+}
+
 void operator()(ast::Expr &expr, ast::ExprDispatch &rawExpr) {
     auto annot = static_cast<sema::ExprDispatchAnnotation*>(expr.Annotation);
     auto methodAnnot = annot->StaticMethodRef->Annotation;
-    rawExpr.Callee.accept(*this);
-    auto CalleeFP = RetVal;
-    ValueList agrsVal; agrsVal.reserve(rawExpr.Args.size() + 1);
-    agrsVal.push_back(CalleeFP);
-    for(auto& args : rawExpr.Args) {
-        args.accept(*this);
-        agrsVal.push_back(RetVal);
-    }
-    auto vtable = IRBuilder.CreateExtractValue(CalleeFP, {0});
-    auto dynF = IRBuilder.CreateGEP(IRGen.VTableTy, vtable,{
-        CONSTINT32(0), CONSTINT32(1), 
-        CONSTINT32(methodAnnot->MethodOffset)
-        });
     auto staticF = IRGen.getMethod(annot->StaticMethodClassRef->Name, rawExpr.Method);
-    auto staticFT = staticF->getFunctionType();
-    dynF = IRBuilder.CreateBitCast(dynF, staticFT->getPointerTo()->getPointerTo());
-    dynF = IRBuilder.CreateLoad(staticFT->getPointerTo(), dynF);
-    RetVal = IRBuilder.CreateCall(staticFT, dynF, agrsVal);
+    bool canStatic =  annot->StaticMethodClassRef->IsFinal;
+    RetVal = this->createCall(
+        staticF, methodAnnot->MethodOffset,
+        rawExpr.Callee, rawExpr.Args, canStatic
+    );
 }
  
 void operator()(ast::Expr &expr, ast::ExprStaticDispatch &rawExpr) {
-
+    auto annot = static_cast<sema::ExprStaticDispatchAnnotation*>(expr.Annotation);
+    auto methodAnnot = annot->StaticMethodRef->Annotation;
+    auto staticF = IRGen.getMethod(annot->StaticMethodClassRef->Name, rawExpr.Method);
+    RetVal = this->createCall(
+        staticF, methodAnnot->MethodOffset,
+        rawExpr.Callee, rawExpr.Args, true
+    );
 }
  
 void operator()(ast::Expr &expr, ast::ExprCond &rawExpr) {
@@ -210,7 +229,7 @@ void operator()(ast::Expr &expr, ast::ExprLoop &rawExpr) {
 }
  
 void operator()(ast::Expr &expr, ast::ExprCase &rawExpr) {
-
+    // TODO: case
 }
  
 void operator()(ast::Expr &expr, ast::ExprBlock &rawExpr) {
@@ -251,11 +270,29 @@ void operator()(ast::Expr &expr, ast::ExprNull &rawExpr) {
 }
  
 void operator()(ast::Expr &expr, ast::ExprArithB &rawExpr) {
-
+    auto annot = static_cast<sema::ExprArithBAnnotation*>(expr.Annotation);
+    auto methodAnnot = annot->StaticMethodRef->Annotation;
+    auto staticF = IRGen.getMethod(
+        annot->StaticMethodClassRef->Name, 
+        SYMTBL.get(rawExpr.getFuncName()));
+    bool canStatic =  annot->StaticMethodClassRef->IsFinal;
+    RetVal = this->createCall(
+        staticF, methodAnnot->MethodOffset,
+        rawExpr.Left, rawExpr.Right, canStatic
+    );
 }
  
 void operator()(ast::Expr &expr, ast::ExprArithU &rawExpr) {
-
+    auto annot = static_cast<sema::ExprArithBAnnotation*>(expr.Annotation);
+    auto methodAnnot = annot->StaticMethodRef->Annotation;
+    auto staticF = IRGen.getMethod(
+        annot->StaticMethodClassRef->Name, 
+        SYMTBL.get(rawExpr.getFuncName()));
+    bool canStatic =  annot->StaticMethodClassRef->IsFinal;
+    RetVal = this->createCall(
+        staticF, methodAnnot->MethodOffset,
+        rawExpr.Operand, {}, canStatic
+    );
 }
 };
 

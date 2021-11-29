@@ -36,8 +36,7 @@ ir::LLVMIRGen::LLVMIRGen(sema::Sema* sema)
         true);
     ClassInfoTy->setBody({
         VTableRefTy,                     // SuperClass VTableRef
-        llvm::Type::getInt64Ty(Context), // inheritDepth
-        Holder64bit, Holder64bit},     // holder
+        llvm::Type::getInt64Ty(Context)}, // inheritDepth
         true);
 }
 
@@ -206,9 +205,7 @@ llvm::GlobalVariable* ir::LLVMIRGen::addVTable(ast::Symbol classNameS,
         llvm::ConstantStruct::get(
             ClassInfoTy, {
                 superClassVTable,
-                CONSTINT64(classInfo->Annotation->InheritDepth),
-                llvm::Constant::getNullValue(Holder64bit),
-                llvm::Constant::getNullValue(Holder64bit),
+                CONSTINT64(classInfo->Annotation->InheritDepth)
             }),
         llvm::ConstantArray::get(vtArrayTy, methodInit)});
     auto globalVt = new llvm::GlobalVariable(

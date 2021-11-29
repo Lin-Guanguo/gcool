@@ -262,7 +262,7 @@ void operator()(ast::Expr &expr, ast::ExprArithB &rawExpr) {
 }
 
 void operator()(ast::Expr &expr, ast::ExprArithU &rawExpr) {
-    INDENT; os << "binaryOperator= " << ast::ExprArithU::OperatorLiteral[rawExpr.Operator]; NEXTLINE;
+    INDENT; os << "unaryOperator= " << ast::ExprArithU::OperatorLiteral[rawExpr.Operator]; NEXTLINE;
     INDENT; os << "operand="; NEXTLINE;
     SUBEXPR(rawExpr.Operand);
 }

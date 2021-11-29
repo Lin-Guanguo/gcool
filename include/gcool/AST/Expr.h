@@ -239,6 +239,7 @@ public:
     ExprArithB(Expr left, Expr right, Op op)
         : Left(left), Right(right), Operator(op) {}
     bool operator==(const ExprArithB&) const = default;
+    const char* getFuncName() { return OverloadFuncName[Operator]; }
 };
 
 class ExprArithU : public ExprFacility<ExprArithU> {
@@ -262,6 +263,7 @@ public:
     ExprArithU(Expr operand, Op op)
         : Operand(operand), Operator(op) {}
     bool operator==(const ExprArithU&) const = default;
+    const char* getFuncName() { return OverloadFuncName[Operator]; }
 };
 
 }
