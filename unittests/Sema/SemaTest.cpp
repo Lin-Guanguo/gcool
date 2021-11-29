@@ -214,7 +214,7 @@ TEST(SemaTest, ScopeAnnotTest) {
             };
         };
 
-        class Main2 {
+        class Main2 inherits Main {
             attr21 : Int;
             attr22 : Int;
             main2(i : Int, b : Bool, f : Float) : Int {

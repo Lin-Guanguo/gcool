@@ -135,15 +135,15 @@ void ir::LLVMIRGen::emitNewMethod(ast::Class* c) {
     IRBuilder.SetInsertPoint(BB);
     auto initFP = initMethod->arg_begin();
     IRBuilder.CreateCall(getMethod(c->Inheirt, SYMTBL.getInitMethod()), {initFP});
-    auto initObjRef = IRBuilder.CreateExtractValue(initFP, {1});
+    auto initHeapObj = IRBuilder.CreateExtractValue(initFP, {1});
     llvm::AllocaInst* local = nullptr;
     if (c->Annotation->InitLocalVarN != 0)
         local = IRBuilder.CreateAlloca(FatPointerTy, c->Annotation->InitLocalVarN, nullptr, "LocalVars");
     for (auto& a : c->Attrs) {
         if (a.Init.has_value()) {
-            auto val = emitExpr(a.Init.value(), &c->Annotation->Scope, initFP, local);
+            auto val = emitExpr(a.Init.value(), initFP, local);
             auto fp = IRBuilder.CreateGEP(
-                HeapObjTy, initObjRef, {
+                HeapObjTy, initHeapObj, {
                     CONSTINT32(0), CONSTINT32(a.Annotation->AttrOffset)});
             IRBuilder.CreateStore(val, fp);
         }
@@ -165,7 +165,7 @@ void ir::LLVMIRGen::emitMethod(ast::Class* c, ast::MethodFeature* m) {
         IRBuilder.CreateStore(arg, localvar);
         ++i;
     }
-    auto val = emitExpr(m->Body, &m->Annotation->MethodScope, self, local);
+    auto val = emitExpr(m->Body, self, local);
     IRBuilder.CreateRet(val);
 }
 

@@ -20,8 +20,12 @@ public:
     ir::LLVMIRGen& IRGen;
     llvm::Value* RetVal;
     llvm::AllocaInst* Local;
-    ExprIRGenVisitor(ir::LLVMIRGen& iRGen, llvm::AllocaInst* local) 
-        : IRGen(iRGen), Local(local) {}
+    llvm::Value* Self;
+    ExprIRGenVisitor(ir::LLVMIRGen& iRGen, llvm::AllocaInst* local, llvm::Value* self) 
+        : IRGen(iRGen), Local(local), Self(self) { 
+        //SelfVTable = IRBuilder.CreateExtractValue(Self, {0}, "self.vtable");
+        //SelfHeapObj = IRBuilder.CreateExtractValue(Self, {1}, "self.heapObj");
+    }
 public:
 void operator()(ast::Expr &expr, ast::ExprInt &rawExpr) {
     auto IntS = SYMTBL.getInt();
@@ -68,31 +72,33 @@ void operator()(ast::Expr &expr, ast::ExprBool &rawExpr) {
 }
  
 void operator()(ast::Expr &expr, ast::ExprString &rawExpr) {
-
+    
 }
 
-llvm::Value* allocLocalVar(sema::SemaScope* scope, ast::Symbol varName) {
-    // auto var = IRBuilder.CreateAlloca(IRGen.FatPointerTy, nullptr, varName.getName());
-    // LocalVar.addLocalVar(varName, scope->getDepth(), var);
-    // return var;
-    // TODO: Sema Local Offset
-    return nullptr;
-}
-
-llvm::Value* getVarPointer(sema::SemaScope* scope, ast::Symbol varName) {
-    // return LocalVar.getLocalVal(varName, scope->getDepth());
-    return nullptr;
+llvm::Value* getVarPointer(sema::SemaScope* scope, int Offset, llvm::StringRef name = "") {
+    llvm::Value* var ;
+    if (scope->getKind() == sema::SemaScope::SK_Class) {
+        auto selfHeapObj = IRBuilder.CreateExtractValue(Self, {1}, "self.heapObj");
+        var = IRBuilder.CreateGEP(
+            IRGen.HeapObjTy, selfHeapObj, {CONSTINT32(0), CONSTINT32(Offset)});
+    } else {
+        var = IRBuilder.CreateGEP(
+            IRGen.FatPointerTy, Local, CONSTINT32(Offset), name);
+    }
+    return var;
 }
 
 void operator()(ast::Expr &expr, ast::ExprSymbol &rawExpr) {
     auto annot = static_cast<sema::ExprSymbolAnnotation*>(expr.Annotation);
-
+    auto var = getVarPointer(annot->ScopeRef, annot->Offset, rawExpr.TheSymbol.getName());
+    RetVal = IRBuilder.CreateLoad(IRGen.FatPointerTy, var, rawExpr.TheSymbol.getName() + llvm::StringRef(".val"));
 }
  
 void operator()(ast::Expr &expr, ast::ExprAssign &rawExpr) {
 
 }
- 
+
+// TODO: final class Devirtual
 void operator()(ast::Expr &expr, ast::ExprDispatch &rawExpr) {
     auto annot = static_cast<sema::ExprDispatchAnnotation*>(expr.Annotation);
     auto methodAnnot = annot->StaticMethodRef->Annotation;
@@ -164,8 +170,8 @@ void operator()(ast::Expr &expr, ast::ExprArithU &rawExpr) {
 }
 }
 
-llvm::Value* ir::LLVMIRGen::emitExpr(ast::Expr expr, sema::SemaScope* scope, llvm::Value* self, llvm::AllocaInst* local) {
-    ExprIRGenVisitor v(*this, local);
+llvm::Value* ir::LLVMIRGen::emitExpr(ast::Expr expr, llvm::Value* self, llvm::AllocaInst* local) {
+    ExprIRGenVisitor v(*this, local, self);
     expr.accept(v);
     return v.RetVal; //TODO
 }

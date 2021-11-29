@@ -176,7 +176,7 @@ bool gcool::sema::Sema::pass5() {
                 }
             }
             // attr can use front attr to init
-            c.Annotation->Scope.addVariable(a.Formal);
+            c.Annotation->Scope.addVariable(a.Formal, a.Annotation->AttrOffset);
         }
 
         for (auto& m : c.Methods) {

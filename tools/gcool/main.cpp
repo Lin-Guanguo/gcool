@@ -59,16 +59,18 @@ int main(int argc, char** argv)
     R"(
         class Main {
             c : Int <- 10.opadd(2);
+            d : Int <- 10.opadd(13);
             b : Float <- 20.0;
             main() : Int {
-                152
+                c.opadd(d)
             };
         };
 
         class Main4 inherits Main2 {
             c : Float <- 20.2;
-            hello(f : Float, i : Int, b : Bool) : Float {
-                10.2
+            d : Int <- 5;
+            hello(f : Float, i : Int, b : Bool) : Int {
+                i.opadd(d)
             };
         };
 

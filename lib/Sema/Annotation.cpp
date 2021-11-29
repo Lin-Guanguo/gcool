@@ -1,4 +1,5 @@
 #include "gcool/Sema/Annotation.h"
+#include <cassert>
 
 using namespace gcool;
 
@@ -21,8 +22,14 @@ gcool::sema::SemaScope::VariableDecl gcool::sema::SemaScope::findVariable(ast::S
     return {nullptr, 0};
 }
 
-void gcool::sema::SemaScope::addVariable(ast::FormalDecl& formal) {
-    int offset = LocalVarN++;
+void gcool::sema::SemaScope::addVariable(ast::FormalDecl& formal, int AttrOffset) {
+    int offset;
+    if (getKind() == SK_Class) {
+        assert((AttrOffset != -1) && "class attr var without offset");
+        offset = AttrOffset;
+    } else {
+        offset = LocalVarN++;
+    }
     this->Variables.insert({formal.Name, std::make_tuple(&formal, offset)});
 }
 
