@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <tuple>
 #include <vector>
 #include "gcool/AST/AST.h"
 
@@ -7,7 +8,7 @@ namespace gcool {
 namespace sema {
 
 class SemaScope;
-using ScopeVariable = std::unordered_map<ast::Symbol, ast::FormalDecl*>;
+using ScopeVariable = std::unordered_map<ast::Symbol, std::tuple<ast::FormalDecl*, int>>; // name -> FormalDecl, localOffset
 using ClassListMap = std::unordered_map<ast::Symbol, ast::Class*>;
 using MethodListMap = std::unordered_map<ast::Symbol, ast::MethodFeature*>;
 using ClassRefList = std::vector<ast::Class*>;
@@ -21,10 +22,11 @@ public:
         SK_Local
     };
 private:
-    SemaScope* OuterScope;
     ScopeVariable Variables;
+    SemaScope* OuterScope;
     ScopeKind TheScopeKind;
     int Depth;
+    int LocalVarN = 0;
 public:
     SemaScope(ScopeKind scopeKind) 
         : OuterScope (nullptr), TheScopeKind(scopeKind), Depth(0) {}
@@ -34,9 +36,13 @@ public:
     void setOuter(SemaScope* outer);
     ScopeKind getKind() const { return TheScopeKind; }
     int getDepth() const { return Depth; }
+    int getLocalVarN() const { return LocalVarN; }
+    auto begin() { return Variables.begin(); }
+    auto end() { return Variables.end(); }
     struct VariableDecl {
         SemaScope* Scope;
         ast::FormalDecl* Decl;
+        int LocalOffset;
     };
     VariableDecl findVariable(ast::Symbol name);
     void addVariable(ast::FormalDecl& formal);
@@ -97,6 +103,7 @@ public:
     int InheritDepth;
     int AttrOffsetEnd;
     int MethodOffsetEnd; 
+    int InitLocalVarN = 0; // 初始化时需要的局部变量个数
 
     enum ClassKind {
         CK_Trivial,
@@ -127,6 +134,7 @@ public:
     SemaScope MethodScope = SemaScope::SK_Method;
     ast::Class* InClass = nullptr;
     int MethodOffset;
+    int BodyLocalVarN = 0;
 protected:
     MethodAnnotation() {}
     friend class Sema;
@@ -172,7 +180,7 @@ protected:
 class ExprSymbolAnnotation : public ExprAnnotation {
 public:
     SemaScope* ScopeRef = nullptr;
-    ast::FormalDecl* DeclRef = nullptr;
+    int LocalOffset; // attr offset or local offset
 protected:
     ExprSymbolAnnotation() {}
     friend class Sema;
@@ -181,7 +189,7 @@ protected:
 class ExprAssignAnnotation : public ExprAnnotation {
 public:
     SemaScope* ScopeRef = nullptr;
-    ast::FormalDecl* DeclRef = nullptr;
+    int LocalOffset;  // attr offset or local offset
 protected:
     ExprAssignAnnotation() {}
     friend class Sema;

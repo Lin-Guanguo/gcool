@@ -5,6 +5,9 @@ using namespace gcool;
 void gcool::sema::SemaScope::setOuter(SemaScope* outer) {
     OuterScope = outer;
     Depth = outer->Depth + 1;
+    if (OuterScope->getKind() == SK_Method || OuterScope->getKind() == SK_Local) {
+        LocalVarN = OuterScope->LocalVarN;
+    }
 }
 
 gcool::sema::SemaScope::VariableDecl gcool::sema::SemaScope::findVariable(ast::Symbol name) {
@@ -12,14 +15,15 @@ gcool::sema::SemaScope::VariableDecl gcool::sema::SemaScope::findVariable(ast::S
     while (p != nullptr) {
         auto vp = p->Variables.find(name);
         if (vp != p->Variables.end())
-            return {p, vp->second};
+            return {p, std::get<0>(vp->second), std::get<1>(vp->second)};
         p = p->OuterScope;
     }
-    return {nullptr, nullptr};
+    return {nullptr, 0};
 }
 
 void gcool::sema::SemaScope::addVariable(ast::FormalDecl& formal) {
-    this->Variables.insert({formal.Name, &formal});
+    int offset = LocalVarN++;
+    this->Variables.insert({formal.Name, std::make_tuple(&formal, offset)});
 }
 
 gcool::sema::MethodTable::MethodDecl gcool::sema::MethodTable::findMethod(ast::Symbol Name) {

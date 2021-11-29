@@ -160,7 +160,7 @@ bool gcool::sema::Sema::pass5() {
 
         for (auto& a : c.Attrs) {
             if (a.Init.has_value()){
-                if (checkExpr(a.Init.value(), &c.Annotation->Scope, &c)){
+                if (checkExpr(a.Init.value(), &c.Annotation->Scope, &c, &c.Annotation->InitLocalVarN)){
                     a.Annotation->hasError = hasError = true;
                     addError({basic::Diag::Sema_DeclInitExprError, 
                         std::string(a.Formal.Name.getName())});
@@ -179,7 +179,7 @@ bool gcool::sema::Sema::pass5() {
         }
 
         for (auto& m : c.Methods) {
-            if (checkExpr(m.Body, &m.Annotation->MethodScope, &c)) {
+            if (checkExpr(m.Body, &m.Annotation->MethodScope, &c, &m.Annotation->BodyLocalVarN)) {
                 m.Annotation->hasError = hasError = true;
                 addError({basic::Diag::Sema_MethodBodyExprError, 
                     std::string(m.Name.getName())});

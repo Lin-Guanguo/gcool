@@ -2,6 +2,8 @@ add_executable(SemaTest
 SemaTest.cpp
     )
 
+target_link_llvm(SemaTest support)
+
 target_link_libraries(SemaTest
     PRIVATE
     GTestLib
@@ -9,4 +11,5 @@ target_link_libraries(SemaTest
     Lexer
     AST
     Sema
+    PrettyPrinter
     )

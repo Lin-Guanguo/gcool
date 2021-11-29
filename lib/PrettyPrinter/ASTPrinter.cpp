@@ -60,7 +60,9 @@ void pretty::ASTPrinter::printClass(llvm::raw_ostream& os, ast::Class& TheClass)
     INDENT; os << "class " << TheClass.Name.getName() << " inherits " << TheClass.Inheirt.getName(); NEXTLINE;
     INCINDENT;
     auto& annot = TheClass.Annotation;
-    INDENT; os << ANNOT(annot) << "InheritDepth=" << annot->InheritDepth << "; " ; NEXTLINE;
+    INDENT; os << ANNOT(annot) << "InheritDepth=" << annot->InheritDepth << "; " 
+        << "InitLocalVarN=" << TheClass.Annotation->InitLocalVarN; NEXTLINE;
+    INDENT; printScope(os, &TheClass.Annotation->Scope); NEXTLINE;
     for(auto& a : TheClass.Attrs) {
         printAttr(os, a);
     }
@@ -94,7 +96,9 @@ void pretty::ASTPrinter::printMethod(llvm::raw_ostream& os, ast::MethodFeature& 
     os << ") : " << method.RetType.getName(); NEXTLINE;
     INCINDENT;
     {
-        INDENT; os << ANNOT(method.Annotation) << "methodOffset=" << method.Annotation->MethodOffset << "; "; NEXTLINE;
+        INDENT; os << ANNOT(method.Annotation) << "methodOff=" << method.Annotation->MethodOffset << "; " 
+            << "LocalVarN=" << method.Annotation->BodyLocalVarN; NEXTLINE;
+        INDENT; printScope(os, &method.Annotation->MethodScope); NEXTLINE;
 
         INDENT; os << "methodBody{"; NEXTLINE;
         INCINDENT;
@@ -105,8 +109,14 @@ void pretty::ASTPrinter::printMethod(llvm::raw_ostream& os, ast::MethodFeature& 
     DECINDENT;
 }
 
-namespace {
+void pretty::ASTPrinter::printScope(llvm::raw_ostream& os, sema::SemaScope* scope) {
+    os << "Scope: total:" << scope->getLocalVarN() << "; ";
+    for(auto& ent : *scope) {
+        os << std::get<1>(ent.second) << ":" << ent.first.getName() << "; ";
+    }
+}
 
+namespace {
 
 #undef INDENT
 #define INDENT Printer.printIndent(os)
@@ -191,7 +201,9 @@ void operator()(ast::Expr &expr, ast::ExprLoop &rawExpr) {
 }
 
 void operator()(ast::Expr &expr, ast::ExprCase &rawExpr) {
+    auto annot = static_cast<sema::ExprCaseAnnotation*>(expr.Annotation);
     INDENT; os << "case"; NEXTLINE;
+    INDENT; os << ANNOT(annot) << "totalLocalVar=" << annot->BranchScope[0].getLocalVarN(); NEXTLINE;
     SUBEXPR(rawExpr.Cond);
     INDENT; os << "of"; NEXTLINE;
     for(auto& branch : rawExpr.Branchs) {
@@ -210,7 +222,10 @@ void operator()(ast::Expr &expr, ast::ExprBlock &rawExpr) {
 }
 
 void operator()(ast::Expr &expr, ast::ExprLet &rawExpr) {
+    auto annot = static_cast<sema::ExprLetAnnotation*>(expr.Annotation);
     INDENT; os << "let"; NEXTLINE;
+    INDENT; os << ANNOT(annot); NEXTLINE;
+    INDENT; Printer.printScope(os, &annot->LocalScope); NEXTLINE;
     INCINDENT;
     for(auto& init : rawExpr.InitVariables) {
         INDENT; os << FORMAL(init.Formal);

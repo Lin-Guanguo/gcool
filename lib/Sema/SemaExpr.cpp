@@ -13,13 +13,16 @@ namespace {
 #define SYMTBL TheSema.TheASTContext->Symtbl
 #define GETCLASS(Sym) TheSema.TheASTContext->Annotation->findClass(Sym)
 
+#define UPDATELOCALVARN(newMax) *LocalVarN = std::max(*LocalVarN, newMax)
+
 class SemaExprVisitor : public gcool::ast::ExprVisitor {
 public:
     gcool::sema::Sema& TheSema;
     gcool::sema::SemaScope* TheScope;
     ast::Class* SelfClass;
-    SemaExprVisitor(gcool::sema::Sema& theSema, SemaScope* outerScope, ast::Class* selfClass)
-        : TheSema(theSema), TheScope(outerScope), SelfClass(selfClass) {}
+    int* LocalVarN;
+    SemaExprVisitor(gcool::sema::Sema& theSema, SemaScope* outerScope, ast::Class* selfClass, int* localvarN)
+        : TheSema(theSema), TheScope(outerScope), SelfClass(selfClass), LocalVarN(localvarN) {}
     
 public:
 void operator()(Expr& ExprAnnot, ExprInt& expr) {
@@ -60,7 +63,7 @@ void operator()(Expr& ExprAnnot, ExprSymbol& expr) {
         TheSema.addError({basic::Diag::Sema_ExprSymbolNotDefine, 
             std::string(expr.TheSymbol.getName())});
     } else {
-        annot->DeclRef = decl.Decl;
+        annot->LocalOffset = decl.LocalOffset;
         annot->ScopeRef = decl.Scope;
         annot->Type = GETCLASS(decl.Decl->Type);
         if (!annot->Type || annot->Type->Annotation->hasError) {
@@ -85,7 +88,7 @@ void operator()(Expr& ExprAnnot, ExprAssign& expr) {
     } else {
         annot->Type = GETCLASS(decl.Decl->Type);
         annot->ScopeRef = decl.Scope;
-        annot->DeclRef = decl.Decl;
+        annot->LocalOffset = decl.LocalOffset;
         if (!annot->Type || annot->Type->Annotation->hasError) {
             annot->hasError = true;
             TheSema.addError({basic::Diag::Sema_ExprAssignVariableTypeError, 
@@ -277,7 +280,7 @@ void operator()(Expr& ExprAnnot, ExprCase& expr) {
         auto&b = expr.Branchs[i];
         auto&branchScope = annot->BranchScope[i];
 
-        auto c = GETCLASS(b.Formal.Name);
+        auto c = GETCLASS(b.Formal.Type);
         if (!c) {
             annot->hasError = true;
             TheSema.addError({basic::Diag::Sema_ExprCaseBrachTypeUnkonw, 
@@ -287,6 +290,7 @@ void operator()(Expr& ExprAnnot, ExprCase& expr) {
             auto outerScope = TheScope;
             TheScope = &branchScope;
             b.Body.accept(*this);
+            UPDATELOCALVARN(TheScope->getLocalVarN());
             TheScope = outerScope;
             if (b.Body.Annotation->hasError) {
                 annot->hasError = true;
@@ -362,6 +366,7 @@ void operator()(Expr& ExprAnnot, ExprLet& expr) {
     }
 
     expr.LetBody.accept(*this);
+    UPDATELOCALVARN(TheScope->getLocalVarN());
     TheScope = outerScope;
 
     annot->Type = expr.LetBody.Annotation->Type;
@@ -488,8 +493,9 @@ void operator()(Expr& ExprAnnot, ExprArithU& expr) {
 
 }
 
-bool gcool::sema::Sema::checkExpr(ast::Expr& e, sema::SemaScope* scope, ast::Class* selfClass) {
-    SemaExprVisitor visitor(*this, scope, selfClass);
+bool gcool::sema::Sema::checkExpr(ast::Expr& e, sema::SemaScope* scope, ast::Class* selfClass, int* LocalVarN) {
+    UPDATELOCALVARN(scope->getLocalVarN());
+    SemaExprVisitor visitor(*this, scope, selfClass, LocalVarN);
     e.accept(visitor);
     return e.Annotation->hasError;
 }

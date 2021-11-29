@@ -24,7 +24,9 @@ public:
     void printClass(llvm::raw_ostream& os, ast::Class& TheClass);
     void printAttr(llvm::raw_ostream& os, ast::AttrFeature& TheAttr);
     void printMethod(llvm::raw_ostream& os, ast::MethodFeature& TheMethod);
+    void printScope(llvm::raw_ostream& os, sema::SemaScope* scope);
     void printExpr(llvm::raw_ostream& os, ast::Expr& expr);
+
 
 };
 

@@ -2,6 +2,8 @@
 #include "gcool/Lexer/Lexer.h"
 #include "gcool/Parser/Parser.h"
 #include "gcool/Sema/Sema.h"
+#include "gcool/PrettyPrinter/ASTPrinter.h"
+#include "llvm/Support/raw_ostream.h"
 #include <vector>
 #include <iostream>
 
@@ -24,6 +26,8 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
     sema.checkAll();
 
     if (debugPrint) {
+        pretty::ASTPrinter Printer;
+        Printer.printAST(llvm::errs(), sema);
         for(auto e : sema.TheErrorList) {
             std::cerr << e.DiagKindName[e.TheDiagKind] << " : " << e.AdditionalMsg << "\n";
         }
@@ -195,6 +199,37 @@ TEST(SemaTest, NullTest) {
         
     };
     checkError(input, errorList, false);
+}
+
+
+TEST(SemaTest, ScopeAnnotTest) {
+    const char* input = 
+    R"(
+        class Main {
+            attr1 : Int <- let i : Int, f : Float in 10;
+            attr2 : Int;
+            main(i : Int, b : Bool) : Int {
+                let i : Int, f : Float in 
+                    let i : Int, f : Float in 10
+            };
+        };
+
+        class Main2 {
+            attr21 : Int;
+            attr22 : Int;
+            main2(i : Int, b : Bool, f : Float) : Int {
+                let i : Int, f : Float in 
+                    let i : Int, f : Float in 
+                        case i of
+                        i : Int => 10;
+                        o : Object => 10;
+                        esac
+            };
+        };
+    )";
+    ErrorKindList errorList = {
+    };
+    checkError(input, errorList, true);
 }
 
 TEST(SemaTest, SymbolExprTest) {

@@ -9,29 +9,6 @@ using namespace gcool;
 namespace gcool {
 namespace ir {
 
-class LocalVarTable {
-private:
-    LocalVarMap Map;
-public:
-    void addLocalVar(ast::Symbol s, int Depth, llvm::Value* val) {
-        Map.insert({std::make_tuple(s, Depth), val});
-    }
-
-    llvm::Value* getLocalVal(ast::Symbol s, int Depth) {
-        auto p = Map.find(std::make_tuple(s, Depth));
-        assert((p != Map.end()) && "get local var before add");
-        return p->second;
-    }
-
-    llvm::Value* getLocalValOrNull(ast::Symbol s, int Depth) {
-        auto p = Map.find(std::make_tuple(s, Depth));
-        if (p == Map.end())
-            return nullptr;
-        else
-            return p->second;
-    }
-};
-
 #define ASTCONTEXT IRGen.TheSema->TheASTContext
 #define SYMTBL IRGen.TheSema->TheASTContext->Symtbl
 #define IRBuilder IRGen.IRBuilder
@@ -42,7 +19,6 @@ class ExprIRGenVisitor : public ast::ExprVisitor {
 public:
     ir::LLVMIRGen& IRGen;
     llvm::Value* RetVal;
-    LocalVarTable LocalVar;
     ExprIRGenVisitor(ir::LLVMIRGen& iRGen) : IRGen(iRGen) {}
 public:
 void operator()(ast::Expr &expr, ast::ExprInt &rawExpr) {
@@ -94,14 +70,16 @@ void operator()(ast::Expr &expr, ast::ExprString &rawExpr) {
 }
 
 llvm::Value* allocLocalVar(sema::SemaScope* scope, ast::Symbol varName) {
-    auto var = IRBuilder.CreateAlloca(IRGen.FatPointerTy, nullptr, varName.getName());
-    LocalVar.addLocalVar(varName, scope->getDepth(), var);
-    return var;
+    // auto var = IRBuilder.CreateAlloca(IRGen.FatPointerTy, nullptr, varName.getName());
+    // LocalVar.addLocalVar(varName, scope->getDepth(), var);
+    // return var;
     // TODO: Sema Local Offset
+    return nullptr;
 }
 
 llvm::Value* getVarPointer(sema::SemaScope* scope, ast::Symbol varName) {
-    return LocalVar.getLocalVal(varName, scope->getDepth());
+    // return LocalVar.getLocalVal(varName, scope->getDepth());
+    return nullptr;
 }
 
 void operator()(ast::Expr &expr, ast::ExprSymbol &rawExpr) {

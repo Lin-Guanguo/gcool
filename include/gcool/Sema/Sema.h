@@ -57,7 +57,7 @@ public:
     void annotClassKind(ast::Class* c);
     bool annotAttrDecl(ast::Class* Class);
     bool annotMethodDecl(ast::Class* Class);
-    bool checkExpr(ast::Expr& e, sema::SemaScope* Scope, ast::Class* selfClass);
+    bool checkExpr(ast::Expr& e, sema::SemaScope* Scope, ast::Class* selfClass, int* LocalVarN);
 
     // return two type is Inherits or the same;
     // only after pass2
