@@ -36,13 +36,11 @@ public:
     Symbol getSelf() { return get("self"); }
     Symbol getSelfType() { return get("SelfType"); }
     Symbol getNull() { return get("null"); }
-    Symbol getNullType() { return get("NullType"); } // programer can't use this type (0 start)
-    Symbol getNewMethod() { return get("0new"); } // programer can't use this type (0 start)
-    Symbol getInitMethod() { return get("0init"); }
+    Symbol getNullType() { return get("NullType"); } 
+    Symbol getNewMethod() { return get("0new"); } // programer can't use this method (0 start)
+    Symbol getInitMethod() { return get("0init"); } // programer can't use this method (0 start)
     Symbol getMainClass() { return get("Main"); }
     Symbol getMainMethod() { return get("main"); }
-
-    Symbol getMallocMethod() { return get("0malloc"); }
     ~SymbolTable();
 };
 
