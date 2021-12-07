@@ -63,7 +63,11 @@ int main(int argc, char** argv)
             d : Int <- 10;
             b : Float <- 20.0;
             main() : Int {
-                (new Main4).hello3(null, 6) + (new Main4).hello3(3, 9)
+                (new SelfType).getc()
+            };
+
+            getc() : Int {
+                c
             };
         };
 
@@ -100,7 +104,7 @@ int main(int argc, char** argv)
         };
 
         class Main2 inherits Main {
-            c : Float <- 9.02;
+            c : Int <- 3;
         };
     )";
     ErrorKindList errorList = {

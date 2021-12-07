@@ -251,9 +251,18 @@ void operator()(ast::Expr &expr, ast::ExprLet &rawExpr) {
 }
  
 void operator()(ast::Expr &expr, ast::ExprNew &rawExpr) {
-    auto newMethod = IRGen.getMethod(rawExpr.Type, SYMTBL.getNewMethod());
-    RetVal = IRBuilder.CreateCall(newMethod, {}, SYMCONCAT(rawExpr.Type, ".val"));
-    // TODO: SelfType
+    if (rawExpr.Type != SYMTBL.getSelfType()) {
+        auto newMethod = IRGen.getMethod(rawExpr.Type, SYMTBL.getNewMethod());
+        RetVal = IRBuilder.CreateCall(newMethod, {}, SYMCONCAT(rawExpr.Type, ".val"));
+    } else {
+        auto vtable = IRBuilder.CreateExtractValue(Self, {0});
+        auto dynF = IRBuilder.CreateGEP(IRGen.VTableTy, vtable,{
+            CONSTINT32(0), CONSTINT32(1), CONSTINT32(0) });
+        auto staticFT = IRGen.getMethod(SYMTBL.getObject(), SYMTBL.getNewMethod())->getFunctionType();
+        dynF = IRBuilder.CreateBitCast(dynF, staticFT->getPointerTo()->getPointerTo());
+        dynF = IRBuilder.CreateLoad(staticFT->getPointerTo(), dynF);
+        RetVal = IRBuilder.CreateCall(staticFT, dynF, {});
+    }
 }
  
 void operator()(ast::Expr &expr, ast::ExprSelf &rawExpr) {

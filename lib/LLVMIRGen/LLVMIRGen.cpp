@@ -90,6 +90,7 @@ void ir::LLVMIRGen::pass2() {
             }
             curcp = curcp->Annotation->SuperClass;
         } while(curcp != nullptr);
+        // add generate new
         vmethodBuf[0] = llvm::ConstantExpr::getBitCast(newMethod, VMethodSlotTy);
         assert([&vmethodBuf](){
             for (auto& slot : vmethodBuf)
