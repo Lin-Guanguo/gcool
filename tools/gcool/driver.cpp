@@ -17,32 +17,54 @@ using namespace gcool;
 int main(int argc, char** argv) 
 {
     if (argc < 2) {
-        printf("gcool: Usage gcool [file.cl]+\n");
+        fprintf(stderr, "gcool: Usage gcool [file.cl]+\n");
         return -1;
     }
 
-
+    bool fileError = false;
     yyscan_t scanner;
     yylex_init(&scanner);
+    ast::ASTContext context;
+    Parser parser{scanner, &context};
     for (int i = 1; i < argc; ++i) {
         auto filename = argv[i];
-        printf("start compile %s\n", filename);
+        fprintf(stderr, "start compile %s\n", filename);
         auto file = fopen(filename, "r");
         if (file == NULL) {
-            printf("open file %s error\n", filename);
+            fprintf(stderr, "open file %s error\n", filename);
+            fileError = true;
             continue;
         }
         // lexer
         yyrestart(file, scanner);
 
         // parser
-        ast::ASTContext context;
-        Parser parser{scanner, &context};
         parser.parse();
-
-        sema::Sema sema(&context);
-        sema.checkAll();
-        
-
+        if (context.HasParserError) {
+            fileError = true;
+            fprintf(stderr, "Parse file %s error\n", filename);
+            continue;
+        }
     }
+    if (fileError)
+        return -1;
+
+    // sema
+    sema::Sema sema(&context);
+    sema.checkAll();
+    if (!sema.TheErrorList.empty()) {
+        fprintf(stderr, "Semantic analysis error\n");
+        for (auto& e : sema.TheErrorList) 
+            llvm::errs() << e << "\n";
+        return -1;
+    }
+
+    // print AST
+    pretty::ASTPrinter printer;
+    printer.printAST(llvm::errs(), sema);
+
+    // code gen
+    ir::LLVMIRGen irgen(&sema);
+    irgen.emitLLVMIR();
+    irgen.print(llvm::outs());
 }
