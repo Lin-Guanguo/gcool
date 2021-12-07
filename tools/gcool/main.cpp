@@ -52,7 +52,6 @@ void checkError(const char* input, const ErrorKindList& errorList, bool debugPri
     // }
 }
 
-// function with more than one args Segmentation fault
 
 int main(int argc, char** argv) 
 {
