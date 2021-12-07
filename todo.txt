@@ -1,2 +1,0 @@
-3 primitive io class
-4 user define operator. SYMBOL expr; expr SYMBOL expr
