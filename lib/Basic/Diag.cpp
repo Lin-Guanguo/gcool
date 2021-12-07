@@ -2,7 +2,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 llvm::raw_ostream& gcool::basic::operator<<(llvm::raw_ostream& os, const gcool::basic::Diag& d) {
-    os << gcool::basic::Diag::DiagKindMsg[d.TheDiagKind] << d.AdditionalMsg;
+    os << gcool::basic::Diag::DiagKindName[d.TheDiagKind] << ": " << d.AdditionalMsg;
     return os;
 }
 
