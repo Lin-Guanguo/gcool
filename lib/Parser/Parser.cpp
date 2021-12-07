@@ -1916,5 +1916,6 @@ namespace gcool {
 
 
 void gcool::Parser::error(const std::string& s) {
-    printf("error: %s", s.data());
+    printf("Parser error: %s\n", s.data());
+    context->HasParserError = true;
 }

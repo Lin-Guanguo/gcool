@@ -80,6 +80,7 @@ public:
     SymbolTable Symtbl;
     ExprAllocator ExprAlloc;
     sema::ASTAnnotation* Annotation = nullptr;
+    bool HasParserError = false;
 public:
 
 };
