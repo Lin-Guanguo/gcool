@@ -43,10 +43,10 @@ void ir::LLVMIRGen::emitNative() {
         IRBuilder.CreateRet(retval);
     }
 
-    // Int Float Bool new method
+    // Int Float Bool NullType Std new method
     ast::Symbol className[] =
-        {SYMTBL.getInt(), SYMTBL.getFloat(), SYMTBL.getBool()};
-    for (int i = 0; i < 3; ++i) { // Int_0new
+        {SYMTBL.getInt(), SYMTBL.getFloat(), SYMTBL.getBool(), SYMTBL.getNullType(), SYMTBL.getStd()};
+    for (int i = 0; i < 5; ++i) { // Int_0new
         auto func = getMethod(className[i], SYMTBL.getNewMethod());
         auto BB = llvm::BasicBlock::Create(Context, "entry", func);
         IRBuilder.SetInsertPoint(BB);
@@ -184,19 +184,25 @@ void ir::LLVMIRGen::emitNative() {
     // NullType
     auto NullTypeS = SYMTBL.getNullType();
     {
-        auto func = getMethod(NullTypeS, SYMTBL.getNewMethod());
-        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
-        IRBuilder.SetInsertPoint(BB);
-        auto retval = llvm::ConstantStruct::get(FatPointerTy, 
-            {getVTableConstant(NullTypeS), llvm::UndefValue::get(HeapObjRefTy)});
-        IRBuilder.CreateRet(retval);
-    } {
         auto func = getMethod(NullTypeS, SYMTBL.get("opisvoid"));
         auto BB = llvm::BasicBlock::Create(Context, "entry", func);
         IRBuilder.SetInsertPoint(BB);
         auto retval = llvm::ConstantStruct::get(FatPointerTy, {
             getVTableConstant(BoolS), 
             llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 1)), HeapObjRefTy)});
+        IRBuilder.CreateRet(retval);
+    }
+
+    // Std
+    auto StdS = SYMTBL.getStd();
+    // printInt printFloat printBool
+    {
+        auto func = getMethod(StdS, SYMTBL.get("printInt"));
+        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
+        IRBuilder.SetInsertPoint(BB);
+        auto retval = llvm::ConstantStruct::get(FatPointerTy, {
+            getVTableConstant(SYMTBL.getInt()), 
+            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 0)), HeapObjRefTy)});
         IRBuilder.CreateRet(retval);
     }
 

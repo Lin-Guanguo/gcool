@@ -206,7 +206,8 @@ void gcool::sema::Sema::annotClassKind(ast::Class* c) {
         || c->Name == SYMTBL.getFloat()
         || c->Name == SYMTBL.getBool()
         || c->Name == SYMTBL.getString()
-        || c->Name == SYMTBL.getNullType())
+        || c->Name == SYMTBL.getNullType()
+        || c->Name == SYMTBL.getStd())
         c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Primitive;
     else if (c->Name == SYMTBL.getSelfType())
         c->Annotation->TheClassKind = sema::ClassAnnotation::CK_Abstract;
@@ -412,6 +413,15 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
     // abstract class, make code simplifiy
     TheASTContext->Classes.push_back( 
         Class{SYMTBL.getSelfType(), Symbol::EmptySymbol, false} );
+    // Standard library 
+    TheASTContext->Classes.push_back( 
+        Class{SYMTBL.getStd(), 
+            {}, 
+            {MethodFeature{sym.get("printInt"), sym.getInt(), FormalList{FormalDecl{sym.get("val"), sym.getInt()}}, exprHolder},
+             MethodFeature{sym.get("printFloat"), sym.getInt(), FormalList{FormalDecl{sym.get("val"), sym.getFloat()}}, exprHolder},
+             MethodFeature{sym.get("printBool"), sym.getInt(), FormalList{FormalDecl{sym.get("val"), sym.getBool()}}, exprHolder}
+            },
+            SYMTBL.getObject(), false} );
 }
 
 void gcool::sema::Sema::addError(basic::Diag&& error) {

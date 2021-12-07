@@ -39,6 +39,7 @@ public:
     Symbol getNullType() { return get("NullType"); } 
     Symbol getNewMethod() { return get("0new"); } // programer can't use this method (0 start)
     Symbol getInitMethod() { return get("0init"); } // programer can't use this method (0 start)
+    Symbol getStd() { return get("Std"); }  // Standard library Class
     Symbol getMainClass() { return get("Main"); }
     Symbol getMainMethod() { return get("main"); }
     ~SymbolTable();
