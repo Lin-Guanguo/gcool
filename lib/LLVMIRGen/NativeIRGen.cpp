@@ -10,11 +10,38 @@ void ir::LLVMIRGen::emitNative() {
     ast::Symbol BoolS = SYMTBL.getBool();
 
     // builtinFunction
-    auto mallocft = llvm::FunctionType::get(
-        llvm::IntegerType::getInt8PtrTy(Context), 
-        {llvm::IntegerType::getInt64Ty(Context)}, false);
-    auto mallocFunc = llvm::Function::Create(mallocft, 
-        llvm::GlobalValue::LinkageTypes::ExternalLinkage, "gcool_malloc", Module);    
+    llvm::Function* mallocFunc;
+    {
+        auto mallocft = llvm::FunctionType::get(
+            llvm::IntegerType::getInt8PtrTy(Context), 
+            {llvm::IntegerType::getInt64Ty(Context)}, false);
+        mallocFunc = llvm::Function::Create(mallocft, 
+            llvm::GlobalValue::LinkageTypes::ExternalLinkage, "gcool_malloc", Module);
+    } {
+        auto printIntft = llvm::FunctionType::get(
+            llvm::Type::getVoidTy(Context),
+            {BuiltIntTy}, false);
+        llvm::Function::Create(printIntft, 
+            llvm::GlobalValue::LinkageTypes::ExternalLinkage, "gcool_printInt", Module);
+    } {
+        auto printFloatft = llvm::FunctionType::get(
+            llvm::Type::getVoidTy(Context),
+            {BuiltFloatTy}, false);
+        llvm::Function::Create(printFloatft, 
+            llvm::GlobalValue::LinkageTypes::ExternalLinkage, "gcool_printFloat", Module);
+    } {
+        auto printBoolft = llvm::FunctionType::get(
+            llvm::Type::getVoidTy(Context),
+            {BuiltIntTy}, false);
+        llvm::Function::Create(printBoolft, 
+            llvm::GlobalValue::LinkageTypes::ExternalLinkage, "gcool_printBool", Module);
+    } {
+        auto printEndLineft = llvm::FunctionType::get(
+            llvm::Type::getVoidTy(Context),
+            {}, false);
+        llvm::Function::Create(printEndLineft, 
+            llvm::GlobalValue::LinkageTypes::ExternalLinkage, "gcool_printEndLine", Module);
+    }
 
     // Obejct
     { // Object.0new
@@ -195,11 +222,33 @@ void ir::LLVMIRGen::emitNative() {
 
     // Std
     auto StdS = SYMTBL.getStd();
-    // printInt printFloat printBool
-    {
-        auto func = getMethod(StdS, SYMTBL.get("printInt"));
+    // printInt printFloat printBool 
+    const char* stdfunc[] = {
+        "printInt", "printFloat", "printBool"
+    };
+    BuiltinFunctionKind BuiltinFunc[] = {
+        BK_PrintInt, BK_PrintFloat, BK_PrintBool
+    };
+    for (int i = 0; i < 3; ++i ){
+        auto func = getMethod(StdS, SYMTBL.get(stdfunc[i]));
         auto BB = llvm::BasicBlock::Create(Context, "entry", func);
         IRBuilder.SetInsertPoint(BB);
+
+        auto arg = func->arg_begin();
+        auto v = IRBuilder.CreateExtractValue(++arg, {1});
+        v = IRBuilder.CreatePtrToInt(v, BuiltIntTy);
+        if (i == 1)
+            v = IRBuilder.CreateBitCast(v, BuiltFloatTy);
+        IRBuilder.CreateCall(getBuiltinFunction(BuiltinFunc[i]), {v});
+        auto retval = llvm::ConstantStruct::get(FatPointerTy, {
+            getVTableConstant(SYMTBL.getInt()), 
+            llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 0)), HeapObjRefTy)});
+        IRBuilder.CreateRet(retval);
+    } {
+        auto func = getMethod(StdS, SYMTBL.get("printEndLine"));
+        auto BB = llvm::BasicBlock::Create(Context, "entry", func);
+        IRBuilder.SetInsertPoint(BB);
+        IRBuilder.CreateCall(getBuiltinFunction(BK_PrintEndLine), {});
         auto retval = llvm::ConstantStruct::get(FatPointerTy, {
             getVTableConstant(SYMTBL.getInt()), 
             llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(Context, llvm::APInt(64, 0)), HeapObjRefTy)});

@@ -248,6 +248,10 @@ llvm::Function* ir::LLVMIRGen::getBuiltinFunction(BuiltinFunctionKind Bk) {
     switch (Bk)
     {
     case BK_Malloc: return Module.getFunction("gcool_malloc"); break;
+    case BK_PrintInt: return Module.getFunction("gcool_printInt"); break;
+    case BK_PrintFloat: return Module.getFunction("gcool_printFloat"); break;
+    case BK_PrintBool: return Module.getFunction("gcool_printBool"); break;
+    case BK_PrintEndLine: return Module.getFunction("gcool_printEndLine"); break;
     default: assert(0 && "get Undecl Builtin Funtion");
     }   
 }

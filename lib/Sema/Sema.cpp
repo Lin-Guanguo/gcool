@@ -419,7 +419,8 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
             {}, 
             {MethodFeature{sym.get("printInt"), sym.getInt(), FormalList{FormalDecl{sym.get("val"), sym.getInt()}}, exprHolder},
              MethodFeature{sym.get("printFloat"), sym.getInt(), FormalList{FormalDecl{sym.get("val"), sym.getFloat()}}, exprHolder},
-             MethodFeature{sym.get("printBool"), sym.getInt(), FormalList{FormalDecl{sym.get("val"), sym.getBool()}}, exprHolder}
+             MethodFeature{sym.get("printBool"), sym.getInt(), FormalList{FormalDecl{sym.get("val"), sym.getBool()}}, exprHolder},
+             MethodFeature{sym.get("printEndLine"), sym.getInt(), FormalList{}, exprHolder}
             },
             SYMTBL.getObject(), false} );
 }

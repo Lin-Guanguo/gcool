@@ -71,6 +71,10 @@ private:
     llvm::Function* getMethod(ast::Symbol classNameS, ast::Symbol methodNameS);
     enum BuiltinFunctionKind {
         BK_Malloc,
+        BK_PrintInt,
+        BK_PrintFloat,
+        BK_PrintBool,
+        BK_PrintEndLine,
     };
     llvm::Function* getBuiltinFunction(BuiltinFunctionKind Bk);
 public:
