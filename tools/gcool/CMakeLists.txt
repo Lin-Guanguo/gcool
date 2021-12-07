@@ -1,15 +1,15 @@
 add_gcool_tool(gcool
-    main.cpp
+    driver.cpp
     )
 
-target_link_llvm(gcool support)
+target_link_llvm(gcool core)
 
 target_link_libraries(gcool
     PRIVATE
     Basic
-    AST
-    Parser
     Lexer
+    Parser
+    AST
     Sema
     PrettyPrinter
     LLVMIRGen
