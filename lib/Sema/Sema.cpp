@@ -403,15 +403,15 @@ void gcool::sema::Sema::addBuiltinTypeAST() {
              MethodFeature{sym.get("oplt"), sym.getBool(), FormalList{FormalDecl{sym.get("right"), sym.getString()}}, exprHolder}
             },
             SYMTBL.getObject(), true} );
-    
-    // abstract class, make code simplifiy
-    TheASTContext->Classes.push_back( 
-        Class{SYMTBL.getSelfType(), Symbol::EmptySymbol, true} );
+    // NullType inherit from all Type
     TheASTContext->Classes.push_back( 
         Class{SYMTBL.getNullType(), 
             {},
             {MethodFeature{sym.get("opisvoid"), sym.getBool(), FormalList{}, exprHolder}},
         SYMTBL.getObject(), true} );
+    // abstract class, make code simplifiy
+    TheASTContext->Classes.push_back( 
+        Class{SYMTBL.getSelfType(), Symbol::EmptySymbol, false} );
 }
 
 void gcool::sema::Sema::addError(basic::Diag&& error) {
