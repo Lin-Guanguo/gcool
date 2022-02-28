@@ -28,3 +28,9 @@ set CMakeCache.txt GTEST_DIR
 ```bash
 ninja
 ```
+
+## test
+
+cd ./example/gcoolUsage
+make
+./program
