@@ -28,9 +28,9 @@ private:
     int Depth;
     int LocalVarN = 0;
 public:
-    SemaScope(ScopeKind scopeKind) 
+    SemaScope(ScopeKind scopeKind)
         : OuterScope (nullptr), TheScopeKind(scopeKind), Depth(0) {}
-    SemaScope(SemaScope* outer, ScopeKind scopeKind) 
+    SemaScope(SemaScope* outer, ScopeKind scopeKind)
         : TheScopeKind(scopeKind) { setOuter(outer); }
 
     void setOuter(SemaScope* outer);
@@ -100,7 +100,7 @@ public:
     ast::Class* SuperClass;
     int InheritDepth;
     int AttrOffsetEnd;
-    int MethodOffsetEnd; 
+    int MethodOffsetEnd;
     int InitLocalVarN = 0; // 初始化时需要的局部变量个数
 
     enum ClassKind {

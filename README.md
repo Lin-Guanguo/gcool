@@ -34,3 +34,9 @@ ninja
 cd ./example/gcoolUsage
 make
 ./program
+
+## Notes
+
+Expr 为智能指针类, 执行ExprBase
+
+

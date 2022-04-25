@@ -31,12 +31,22 @@ public:
 public:
     Expr(const Expr& e) = default;
     Expr(Expr&& e) = default;
-    Expr& operator=(Expr e) { TheExpr = e.TheExpr; return *this; }
-    
+
+    Expr& operator=(Expr e) {
+        // bison 构建过程需要赋值
+        TheExpr = e.TheExpr; return *this;
+    }
+
     bool operator==(Expr t) const;
     ExprBase& operator*();
     ExprBase* operator->();
-    void replace(Expr e) { TheExpr = e.TheExpr; }
+
+    void replace(Expr e) {
+        // Expr作为智能指针存在主要为这个方法服务, 为语法糖替换表达式
+        TheExpr = e.TheExpr;
+        Annotation = e.Annotation;
+    }
+
     void accept(ExprVisitor& visitor);
 };
 
